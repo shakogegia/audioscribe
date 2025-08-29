@@ -4,14 +4,14 @@ import { Progress } from "@/components/ui/progress";
 import { useState, useRef, useEffect } from "react";
 import { useMount } from "react-use";
 
-export function Download({ bookId, onComplete }: { bookId: string; onComplete: () => void }) {
+export function Downloader({ bookId, onComplete }: { bookId: string; onComplete: () => void }) {
   const [progress, setProgress] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [status, setStatus] = useState<string>("");
   const [currentFile, setCurrentFile] = useState<string>("");
   const eventSourceRef = useRef<EventSource | null>(null);
 
-  async function downloadBook() {
+  async function download() {
     if (isDownloading) return;
 
     setIsDownloading(true);
@@ -45,7 +45,7 @@ export function Download({ bookId, onComplete }: { bookId: string; onComplete: (
               const totalSize = data.totalSize || "Unknown";
               const fileProgress = data.currentFileProgress ? ` (${data.currentFileProgress}%)` : "";
               const fileDownloaded = data.currentFileDownloaded ? ` - ${data.currentFileDownloaded}` : "";
-              setStatus(`${downloadedSize} / ${totalSize} - File ${data.completedFiles + 1}/${data.totalFiles}`);
+              setStatus(`File ${data.completedFiles + 1}/${data.totalFiles} - ${totalSize} / ${downloadedSize}`);
               setCurrentFile((data.currentFile || "") + fileProgress + fileDownloaded);
               break;
             case "completed":
@@ -79,9 +79,7 @@ export function Download({ bookId, onComplete }: { bookId: string; onComplete: (
     }
   }
 
-  useMount(() => {
-    downloadBook();
-  });
+  useMount(() => download());
 
   // Cleanup EventSource on component unmount
   useEffect(() => {

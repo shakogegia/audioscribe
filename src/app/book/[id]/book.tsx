@@ -3,17 +3,19 @@ import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
 import { SearchResult } from "@/lib/api";
 import Image from "next/image";
-import { Bookmarks } from "./bookmarks";
-import { Download } from "./download";
 import { useState } from "react";
+import { Downloader } from "./downloader";
+import useBookmarksStore from "./store";
+import { Bookmark } from "./bookmark";
 
 export default function Book({ id, book }: { id: string; book: SearchResult }) {
   const [hasDownloaded, setHasDownloaded] = useState(false);
+  const setBookmarks = useBookmarksStore(state => state.setBookmarks);
+  const bookmarks = useBookmarksStore(state => state.bookmarks);
 
   function onDownloadComplete() {
-    setTimeout(() => {
-      setHasDownloaded(true);
-    }, 100);
+    setHasDownloaded(true);
+    setBookmarks(book.bookmarks);
   }
 
   return (
@@ -34,7 +36,7 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
 
       {!hasDownloaded && (
         <div className="max-w-xl mx-auto w-full">
-          <Download bookId={id} onComplete={onDownloadComplete} />
+          <Downloader bookId={id} onComplete={onDownloadComplete} />
         </div>
       )}
 
@@ -43,13 +45,20 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
           <h3 className="text-2xl font-semibold text-center">Bookmarks</h3>
 
           <div className="flex flex-col gap-2 max-w-xl mx-auto w-full">
-            {book.bookmarks.map(bookmark => (
-              <Bookmarks key={bookmark.createdAt} bookId={id} bookmark={bookmark} />
+            {bookmarks.map(bookmark => (
+              <Bookmark key={bookmark.createdAt} bookId={id} bookmark={bookmark} />
             ))}
           </div>
 
           <div className="flex justify-center">
-            <Button variant="default">Submit</Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                console.log(bookmarks);
+              }}
+            >
+              Save
+            </Button>
           </div>
         </div>
       )}

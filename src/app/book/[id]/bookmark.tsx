@@ -1,21 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronsUpDownIcon, ChevronsDownUpIcon, Pencil, Trash, WandSparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { formatTime } from "@/lib/format";
 import { AudioPlayer } from "@/components/audio-player";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { formatTime } from "@/lib/format";
 import type * as Audiobookshelf from "@/types/audiobookshelf";
-import { Download } from "./download";
+import { ChevronsDownUpIcon, ChevronsUpDownIcon, Trash, WandSparkles } from "lucide-react";
+import { useState } from "react";
+import useBookmarksStore from "./store";
 
 interface BookmarksProps {
   bookId: string;
   bookmark: Audiobookshelf.AudioBookmark;
 }
 
-export function Bookmarks({ bookId, bookmark }: BookmarksProps) {
+export function Bookmark({ bookId, bookmark }: BookmarksProps) {
   const [showPlayer, setShowPlayer] = useState(false);
+  const updateBookmark = useBookmarksStore(state => state.update);
 
   const handlePlayClick = () => {
     setShowPlayer(!showPlayer);
@@ -24,9 +25,16 @@ export function Bookmarks({ bookId, bookmark }: BookmarksProps) {
   return (
     <div className="flex flex-col gap-2 border rounded-md p-2 text-sm w-full">
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full">
           <Badge variant="outline">{formatTime(bookmark.time)}</Badge>
-          <input type="text" className="font-semibold outline-none" defaultValue={bookmark.title} />
+          <input
+            type="text"
+            className="font-semibold outline-none w-full"
+            value={bookmark.title}
+            onChange={e => {
+              updateBookmark({ ...bookmark, title: e.target.value });
+            }}
+          />
         </div>
 
         <div className="flex items-center gap-2">

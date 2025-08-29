@@ -79,7 +79,7 @@ export function AudioPlayer({ bookId, startTime = 0, className }: AudioPlayerPro
     <div className={twMerge("flex flex-col gap-4 p-4 bg-white dark:bg-neutral-800 rounded-lg border", className)}>
       <audio ref={audioRef} src={`/api/book/${bookId}/stream?time=${startTime}`} preload="metadata" />
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-1">
           <Button onClick={togglePlayPause} variant="outline" size="icon" className="w-10 h-10">
             {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
@@ -93,7 +93,7 @@ export function AudioPlayer({ bookId, startTime = 0, className }: AudioPlayerPro
           </Button>
         </div>
 
-        <div className="flex-1 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <span className="text-sm font-mono min-w-[3rem]">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
