@@ -76,7 +76,7 @@ export function AudioPlayer({ bookId, startTime = 0, className }: AudioPlayerPro
   };
 
   return (
-    <div className={twMerge("flex flex-col gap-4 p-4 bg-white dark:bg-neutral-800 rounded-lg border", className)}>
+    <div className={twMerge("flex flex-col gap-4", className)}>
       <audio ref={audioRef} src={`/api/book/${bookId}/stream?time=${startTime}`} preload="metadata" />
 
       <div className="flex items-center justify-between gap-4">

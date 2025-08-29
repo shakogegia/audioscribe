@@ -59,7 +59,7 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
 
       {showPlayer && (
         <div className="mt-2">
-          <AudioPlayer bookId={bookId} startTime={bookmark.time} className="p-2" />
+          <AudioPlayer bookId={bookId} startTime={bookmark.time} />
         </div>
       )}
     </div>
