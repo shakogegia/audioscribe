@@ -18,6 +18,10 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
     setBookmarks(book.bookmarks);
   }
 
+  function updateBookmarks() {
+    // PATCH http://abs.example.com/api/me/item/<ID>/bookmark
+  }
+
   return (
     <div className="w-full h-full flex flex-col items-center gap-8 py-10">
       <Hero
@@ -51,12 +55,7 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
           </div>
 
           <div className="flex justify-center">
-            <Button
-              variant="default"
-              onClick={() => {
-                console.log(bookmarks);
-              }}
-            >
+            <Button variant="default" onClick={updateBookmarks}>
               Save
             </Button>
           </div>

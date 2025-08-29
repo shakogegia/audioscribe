@@ -12,9 +12,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
+import { toast } from "sonner";
 
 export function SettingsDropdown() {
   const router = useRouter();
+
+  const { mutate } = useSWR("/api/cache/purge", fetcher, {
+    onSuccess: () => {
+      toast.success("Cache purged");
+    },
+  });
+
+  function purgeCache() {
+    mutate();
+  }
 
   return (
     <DropdownMenu>
@@ -25,10 +38,9 @@ export function SettingsDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => router.push("/setup/audiobookshelf")}>
-          Audiobookshelf Setup
-        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push("/setup/audiobookshelf")}>Audiobookshelf Setup</DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push("/setup/llm")}>LLM Setup</DropdownMenuItem>
+        <DropdownMenuItem onClick={purgeCache}>Purge Cache</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

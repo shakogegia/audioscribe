@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/context/theme-provider";
 import { Header } from "@/components/navigation/header";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default function RootLayout({
             <Header />
             <main className="flex-grow h-full">
               <NuqsAdapter>{children}</NuqsAdapter>
+              <Toaster />
             </main>
           </div>
         </ThemeProvider>
