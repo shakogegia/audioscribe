@@ -1,6 +1,7 @@
 import { Hero } from "@/components/hero";
 import { Badge } from "@/components/ui/badge";
 import { getBook } from "@/lib/audiobookshelf";
+import { formatTime } from "@/lib/format";
 import { Play } from "lucide-react";
 import Image from "next/image";
 
@@ -48,15 +49,4 @@ export default async function BookPage({ params }: { params: { id: string } }) {
       </div>
     </div>
   );
-}
-
-function formatTime(time: number) {
-  function pad(time: number) {
-    return time.toString().padStart(2, "0");
-  }
-
-  const hours = Math.floor(time / 3600);
-  const minutes = Math.floor((time % 3600) / 60);
-  const seconds = time % 60;
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 }

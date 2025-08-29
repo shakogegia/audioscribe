@@ -2,6 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SearchResult } from "@/lib/api";
+import { formatDuration } from "@/lib/format";
 import { BookOpenCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,11 +35,4 @@ export default function SearchResults({ books }: { books: SearchResult[] }) {
       </Link>
     </div>
   ));
-}
-
-function formatDuration(duration: number) {
-  const hours = Math.floor(duration / 3600);
-  const minutes = Math.floor((duration % 3600) / 60);
-  const seconds = duration % 60;
-  return `${hours}h ${minutes}m ${Math.round(seconds)}s`;
 }
