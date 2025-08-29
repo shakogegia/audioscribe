@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  audiobook-bookmark-wizard:
+    image: shakogegia/audiobook-bookmark-wizard:latest
+    container_name: audiobook-bookmark-wizard
+    ports:
+      - 3000:3000
+    restart: unless-stopped
