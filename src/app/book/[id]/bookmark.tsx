@@ -8,6 +8,8 @@ import type * as Audiobookshelf from "@/types/audiobookshelf";
 import { ChevronsDownUpIcon, ChevronsUpDownIcon, Trash, WandSparkles } from "lucide-react";
 import { useState } from "react";
 import useBookmarksStore from "./store";
+import axios from "axios";
+import { toast } from "sonner";
 
 interface BookmarksProps {
   bookId: string;
@@ -22,6 +24,11 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
     setShowPlayer(!showPlayer);
   };
 
+  async function deleteBookmark() {
+    await axios.delete(`/api/book/${bookId}/bookmark?time=${bookmark.time}`);
+    toast.success("Bookmark deleted");
+  }
+
   return (
     <div className="flex flex-col gap-2 border rounded-md p-2 text-sm w-full">
       <div className="flex items-center justify-between gap-4">
@@ -31,9 +38,7 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
             type="text"
             className="font-semibold outline-none w-full"
             value={bookmark.title}
-            onChange={e => {
-              updateBookmark({ ...bookmark, title: e.target.value });
-            }}
+            onChange={e => updateBookmark({ ...bookmark, title: e.target.value })}
           />
         </div>
 
@@ -42,7 +47,7 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
             <WandSparkles className="w-4 h-4" />
           </BookmarkAction>
 
-          <BookmarkAction>
+          <BookmarkAction onClick={deleteBookmark}>
             <Trash className="w-4 h-4" />
           </BookmarkAction>
 

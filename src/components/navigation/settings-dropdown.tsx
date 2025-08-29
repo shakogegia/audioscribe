@@ -1,8 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { Moon, Sun, Cog } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Cog } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,22 +9,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import axios from "axios";
 import { useRouter } from "next/navigation";
-import useSWR from "swr";
-import { fetcher } from "@/lib/fetcher";
 import { toast } from "sonner";
 
 export function SettingsDropdown() {
   const router = useRouter();
 
-  const { mutate } = useSWR("/api/cache/purge", fetcher, {
-    onSuccess: () => {
-      toast.success("Cache purged");
-    },
-  });
-
-  function purgeCache() {
-    mutate();
+  async function purgeCache() {
+    await axios.delete("/api/cache/purge");
+    toast.success("Cache purged");
   }
 
   return (

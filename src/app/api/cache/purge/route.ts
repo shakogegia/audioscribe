@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import os from "os";
 import path from "path";
 
-export async function GET() {
+export async function DELETE() {
   try {
     const tempFolder = path.join(os.tmpdir(), "audiobook-wizard");
     // async files inside temp folder

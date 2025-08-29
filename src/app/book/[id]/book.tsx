@@ -7,6 +7,10 @@ import { useState } from "react";
 import { Downloader } from "./downloader";
 import useBookmarksStore from "./store";
 import { Bookmark } from "./bookmark";
+import { fetcher } from "@/lib/fetcher";
+import useSWR from "swr";
+import { toast } from "sonner";
+import axios from "axios";
 
 export default function Book({ id, book }: { id: string; book: SearchResult }) {
   const [hasDownloaded, setHasDownloaded] = useState(false);
@@ -18,8 +22,9 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
     setBookmarks(book.bookmarks);
   }
 
-  function updateBookmarks() {
-    // PATCH http://abs.example.com/api/me/item/<ID>/bookmark
+  async function updateBookmarks() {
+    await axios.patch(`/api/book/${id}/bookmark`, { bookmarks });
+    toast.success("Bookmarks updated");
   }
 
   return (

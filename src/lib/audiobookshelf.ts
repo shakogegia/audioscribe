@@ -87,3 +87,17 @@ export async function getBookFiles(libraryItemId: string): Promise<AudioFile[]> 
     }))
     .sort((a, b) => a.index - b.index);
 }
+
+export async function updateBookmark(libraryItemId: string, bookmark: Audiobookshelf.AudioBookmark) {
+  const response = await api.patch(`/api/me/item/${libraryItemId}/bookmark`, bookmark);
+  return response.data;
+}
+
+export async function updateBookmarks(libraryItemId: string, bookmarks: Audiobookshelf.AudioBookmark[]) {
+  return Promise.all(bookmarks.map(bookmark => updateBookmark(libraryItemId, bookmark)));
+}
+
+export async function deleteBookmark(libraryItemId: string, time: number) {
+  const response = await api.delete(`/api/me/item/${libraryItemId}/bookmark/${time}`);
+  return response.data;
+}
