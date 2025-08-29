@@ -2,7 +2,7 @@ export function formatTime(time: number) {
   const hours = Math.floor(time / 3600);
   const minutes = Math.floor((time % 3600) / 60);
   const seconds = time % 60;
-  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return `${pad(hours)}:${pad(minutes)}:${pad(Math.round(seconds))}`;
 }
 
 export function formatDuration(duration: number) {

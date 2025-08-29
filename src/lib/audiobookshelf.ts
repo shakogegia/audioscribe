@@ -1,6 +1,6 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf";
 import axios from "axios";
-import { SearchResult } from "./api";
+import { AudioFile, SearchResult } from "./api";
 
 export const api = axios.create({
   baseURL: process.env.ABS_URL,
@@ -57,7 +57,6 @@ export async function getBookmarks(libraryItemId: string): Promise<Audiobookshel
 
 export async function getBook(libraryItemId: string): Promise<SearchResult> {
   const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`);
-
   return {
     id: response.data.id,
     title: response.data.media.metadata.title ?? "",
@@ -70,4 +69,21 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     publishedYear: response.data.media.metadata.publishedYear ?? "",
     coverPath: `${process.env.ABS_URL}/audiobookshelf/api/items/${libraryItemId}/cover?ts=1756297482038&raw=1`,
   };
+}
+
+export async function getBookFiles(libraryItemId: string): Promise<AudioFile[]> {
+  const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`);
+
+  return response.data.media.audioFiles
+    .map((file, index) => ({
+      ino: file.ino,
+      index: file.index,
+      duration: file.duration ?? 0,
+      start: index * (file.duration ?? 0),
+      path: `${file.ino}${file.metadata.ext}`,
+      downloadUrl: `${process.env.ABS_URL}/audiobookshelf/api/items/${libraryItemId}/file/${file.ino}/download?token=${process.env.ABS_API_KEY}`,
+      size: file.metadata.size,
+      fileName: file.metadata.filename,
+    }))
+    .sort((a, b) => a.index - b.index);
 }
