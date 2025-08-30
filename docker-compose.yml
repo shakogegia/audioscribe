@@ -7,3 +7,6 @@ services:
     ports:
       - 3000:3000
     restart: unless-stopped
+    volumes:
+      - ./app-data:/app/data # Persist config files
+      - ./temp-cache:/tmp/audiobook-wizard # Persist audio cache

@@ -68,8 +68,8 @@ export default function LLMSetupPage() {
   return (
     <div className="flex flex-col items-center gap-8 w-full min-h-full px-4">
       <Hero
-        title="ASR Setup"
-        description={["Configure ASR providers for audio transcription."]}
+        title="ASR Models"
+        description={["Whisper models are used to transcribe audio files."]}
         icon={<GradientIcon icon={<Captions className="w-10 h-10 text-white" />} />}
       />
 

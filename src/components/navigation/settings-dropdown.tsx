@@ -38,7 +38,8 @@ export function SettingsDropdown() {
           Audiobookshelf Settings
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push("/setup/llm")}>LLM Settings</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/setup/asr")}>ASR Settings</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push("/setup/asr")}>ASR Models</DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={purgeCache}>Purge Cache ({humanReadableSize})</DropdownMenuItem>
       </DropdownMenuContent>
