@@ -19,7 +19,7 @@ export default function AppProviders({ children }: Readonly<{ children: React.Re
           {children}
         </SWRConfig>
       </NuqsAdapter>
-      <Toaster position="bottom-center" theme={theme as "light" | "dark"} />
+      <Toaster position="bottom-center" theme={theme as "light" | "dark"} duration={1000} />
     </>
   );
 }

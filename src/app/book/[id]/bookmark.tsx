@@ -5,11 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/format";
 import type * as Audiobookshelf from "@/types/audiobookshelf";
-import { ChevronsDownUpIcon, ChevronsUpDownIcon, Trash, WandSparkles, Loader2, Captions } from "lucide-react";
+import { ChevronsDownUpIcon, ChevronsUpDownIcon, Trash, WandSparkles, Loader2, Captions, Wand } from "lucide-react";
 import { useState } from "react";
 import useBookmarksStore from "./store";
 import axios from "axios";
 import { toast } from "sonner";
+import { twMerge } from "tailwind-merge";
 
 interface BookmarksProps {
   bookId: string;
@@ -92,6 +93,11 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
     }
   }
 
+  async function suggestBookmark() {
+    await transcribeAudio();
+    await generateAISuggestions();
+  }
+
   function applySuggestion(suggestion: string) {
     updateBookmark({ ...bookmark, title: suggestion });
     setShowSuggestions(false);
@@ -127,6 +133,18 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
 
           <BookmarkAction onClick={transcribeAudio} title="Transcribe" disabled={isTranscribing}>
             {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Captions className="w-4 h-4" />}
+          </BookmarkAction>
+
+          <BookmarkAction
+            onClick={suggestBookmark}
+            title="Suggest bookmark"
+            disabled={isTranscribing || isGeneratingSuggestions}
+          >
+            {isTranscribing || isGeneratingSuggestions ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Wand className="w-4 h-4" />
+            )}
           </BookmarkAction>
 
           <BookmarkAction onClick={deleteBookmark} title="Delete bookmark">
@@ -186,7 +204,10 @@ function BookmarkAction({
     <Button
       variant="ghost"
       size="icon"
-      className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50"
+      className={twMerge(
+        "w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50",
+        "transition-all duration-200 ease-in-out [&:hover_svg]:scale-105"
+      )}
       onClick={onClick}
       disabled={disabled}
       title={title}

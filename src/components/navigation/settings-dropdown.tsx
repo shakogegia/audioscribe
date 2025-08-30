@@ -13,6 +13,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import useSWR from "swr";
+import Link from "next/link";
 
 export function SettingsDropdown() {
   const router = useRouter();
@@ -34,13 +35,22 @@ export function SettingsDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => router.push("/setup/audiobookshelf")}>
-          Audiobookshelf Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/setup/llm")}>LLM Settings</DropdownMenuItem>
+        <Link href="/setup/audiobookshelf">
+          <DropdownMenuItem>Audiobookshelf Settings</DropdownMenuItem>
+        </Link>
+
+        <Link href="/setup/llm">
+          <DropdownMenuItem>LLM Settings</DropdownMenuItem>
+        </Link>
+
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push("/setup/asr")}>ASR Models</DropdownMenuItem>
+
+        <Link href="/setup/asr">
+          <DropdownMenuItem>ASR Models</DropdownMenuItem>
+        </Link>
+
         <DropdownMenuSeparator />
+
         <DropdownMenuItem onClick={purgeCache}>Purge Cache ({humanReadableSize})</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -11,15 +11,19 @@ export const transcriptionCacheFolder = join(tempFolder, "transcription-cache");
  * Generate a unique cache key for a transcription request
  */
 export function generateCacheKey(request: TranscriptionRequest): string {
-  const keyData = {
-    provider: request.provider,
-    audioUrl: request.audioUrl,
-    startTime: request.startTime,
-    duration: request.duration,
-    offset: request.offset,
-  };
+  // Create a deterministic string representation of all key components
+  const keyComponents = [
+    `provider_type:${request.provider.type}`,
+    `provider_model:${request.provider.model}`,
+    `audioUrl:${request.audioUrl}`,
+    `startTime:${request.startTime}`,
+    `duration:${request.duration}`,
+    `offset:${request.offset}`,
+  ];
 
-  const keyString = JSON.stringify(keyData, Object.keys(keyData).sort());
+  // Sort components to ensure consistent ordering
+  const keyString = keyComponents.sort().join("|");
+
   return createHash("sha256").update(keyString).digest("hex");
 }
 

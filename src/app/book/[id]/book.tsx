@@ -3,7 +3,7 @@ import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
 import { SearchResult } from "@/types/api";
 import axios from "axios";
-import { Loader2Icon, Check, Bookmark as BookmarkIcon } from "lucide-react";
+import { Loader2Icon, Check, Bookmark as BookmarkIcon, SlidersHorizontal, WandSparkles } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -31,7 +31,7 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
   }
 
   return (
-    <div className="w-full h-full flex flex-col items-center gap-8 py-10 px-4">
+    <div className="w-full min-h-full flex flex-col items-center gap-8 py-10 px-4">
       <Hero
         title={book.title}
         description={[book.authors.join(", ")]}
@@ -53,13 +53,27 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
       )}
 
       {hasDownloaded && (
-        <div className="flex flex-col gap-4 w-full">
-          <div className="flex justify-center items-center gap-2">
-            <BookmarkIcon className="w-6 h-6" />
-            <h3 className="text-xl font-medium text-center">Bookmarks</h3>
+        <div className="flex flex-col gap-4 w-full max-w-xl mx-auto">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex justify-center items-center gap-2">
+              <BookmarkIcon className="w-6 h-6" />
+              <h3 className="text-xl font-medium text-center">Bookmarks</h3>
+            </div>
+
+            <div className="flex justify-center items-center gap-2">
+              <Button variant="outline" size="icon">
+                <WandSparkles className="h-[1.2rem] w-[1.2rem]" />
+                <span className="sr-only">AI Suggestions</span>
+              </Button>
+
+              <Button variant="outline" size="icon">
+                <SlidersHorizontal className="h-[1.2rem] w-[1.2rem]" />
+                <span className="sr-only">Adjust</span>
+              </Button>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2 max-w-xl mx-auto w-full">
+          <div className="flex flex-col gap-2 w-full">
             {bookmarks.map(bookmark => (
               <Bookmark key={bookmark.createdAt} bookId={id} bookmark={bookmark} />
             ))}
