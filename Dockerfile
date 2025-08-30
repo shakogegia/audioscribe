@@ -52,6 +52,10 @@ RUN chmod -R 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/ && \
 	chmod -R 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build && \
 	chown -R root:root /app/node_modules/nodejs-whisper/cpp/whisper.cpp/
 
+RUN git config --global --add safe.directory /app/node_modules/nodejs-whisper/cpp/whisper.cpp
+# Full write permissions for the entire whisper.cpp tree
+RUN chmod -R 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/
+
 # Debug: Verify permissions after setting them
 RUN ls -la /app/node_modules/nodejs-whisper/cpp/whisper.cpp/ && \
 	ls -la /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build/
@@ -70,14 +74,15 @@ RUN rm -rf /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build && \
 	chmod 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build && \
 	chown root:root /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build
 
-# Configure and build whisper.cpp with proper permissions
+# Build with proper CMake flags
 RUN cd /app/node_modules/nodejs-whisper/cpp/whisper.cpp && \
-	cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CCACHE=OFF -DBUILD_TESTING=OFF && \
+	cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CCACHE=OFF && \
 	cmake --build build --config Release && \
 	chmod +x build/bin/whisper-cli
 
 # Fix permissions for nodejs-whisper models directory so any user can write
 RUN chmod -R 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/models/ || true
+RUN chmod -R 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/
 
 # Create directories with proper permissions for any user
 # Note: /app/data is NOT created here - let the app create it at runtime with correct ownership
