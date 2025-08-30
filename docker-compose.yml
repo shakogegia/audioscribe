@@ -4,6 +4,7 @@ services:
   audiobook-bookmark-wizard:
     image: shakogegia/audiobook-bookmark-wizard:latest
     container_name: audiobook-bookmark-wizard
+    user: nextjs
     ports:
       - 3000:3000
     restart: unless-stopped

@@ -44,6 +44,10 @@ RUN chown nextjs:nodejs .next
 RUN mkdir -p /tmp/audiobook-wizard
 RUN chown nextjs:nodejs /tmp/audiobook-wizard
 
+# Create data directory for config and other data files
+RUN mkdir -p /app/data
+RUN chown nextjs:nodejs /app/data
+
 # Copy the build output (standalone includes all necessary node_modules)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
