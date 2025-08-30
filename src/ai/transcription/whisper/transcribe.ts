@@ -1,6 +1,7 @@
 import type { TranscriptionResult } from "@/ai/transcription/types/transription";
 import { WhisperModel } from "@/ai/transcription/types/transription";
 import { tempFolder } from "@/lib/utils";
+import { transcriptionCacheFolder } from "@/ai/transcription/cache/cache";
 import { exec } from "child_process";
 import { promises as fs } from "fs";
 import path, { join } from "path";
@@ -91,8 +92,18 @@ export async function transcribe(
       }
     }
 
-    // Clean up temp files
-    await Promise.all([fs.unlink(tempAudioPath).catch(() => {}), fs.unlink(outputPath).catch(() => {})]);
+    // Clean up temp files (but preserve cache files)
+    const cleanupPromises = [];
+
+    // Only clean up temp audio file
+    cleanupPromises.push(fs.unlink(tempAudioPath).catch(() => {}));
+
+    // Only clean up output file if it's not in the cache directory
+    if (!outputPath.startsWith(transcriptionCacheFolder)) {
+      cleanupPromises.push(fs.unlink(outputPath).catch(() => {}));
+    }
+
+    await Promise.all(cleanupPromises);
 
     return {
       text: transcriptionText,
@@ -100,8 +111,18 @@ export async function transcribe(
       segments: segments.length > 0 ? segments : undefined,
     };
   } catch (error) {
-    // Clean up temp files on error
-    await Promise.all([fs.unlink(tempAudioPath).catch(() => {}), fs.unlink(outputPath).catch(() => {})]);
+    // Clean up temp files on error (but preserve cache files)
+    const cleanupPromises = [];
+
+    // Only clean up temp audio file
+    cleanupPromises.push(fs.unlink(tempAudioPath).catch(() => {}));
+
+    // Only clean up output file if it's not in the cache directory
+    if (!outputPath.startsWith(transcriptionCacheFolder)) {
+      cleanupPromises.push(fs.unlink(outputPath).catch(() => {}));
+    }
+
+    await Promise.all(cleanupPromises);
 
     throw new Error(`Whisper transcription failed: ${error}`);
   }
