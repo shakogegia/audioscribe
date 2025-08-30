@@ -13,6 +13,20 @@ if (!audioFilePath || !outputPath) {
 async function transcribe() {
   try {
     console.info(`[Whisper Worker] Starting transcription of: ${audioFilePath}`);
+    console.info(`[Whisper Worker] Model: ${modelName}`);
+
+    // Check if audio file exists
+    if (!fs.existsSync(audioFilePath)) {
+      throw new Error(`Audio file not found: ${audioFilePath}`);
+    }
+
+    // Check audio file size
+    const audioStats = fs.statSync(audioFilePath);
+    console.info(`[Whisper Worker] Audio file size: ${audioStats.size} bytes`);
+
+    if (audioStats.size === 0) {
+      throw new Error(`Audio file is empty: ${audioFilePath}`);
+    }
 
     const result = await nodewhisper(audioFilePath, {
       modelName: modelName,

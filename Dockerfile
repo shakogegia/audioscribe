@@ -3,7 +3,7 @@ FROM node:20-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat ffmpeg build-base python3 make g++
 WORKDIR /app
 
 # Copy package files
@@ -28,16 +28,62 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
+# Install runtime dependencies for FFmpeg and nodejs-whisper
+RUN apk add --no-cache libc6-compat ffmpeg build-base python3 make g++ wget cmake git
+
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy static files
 COPY --from=builder /app/public ./public
 
+# Copy package files
+COPY package.json package-lock.json* ./
+# Install all dependencies (including dev dependencies for building)
+RUN npm ci
+
+# Build whisper-cli binary in the nodejs-whisper directory where it expects it
+# Debug: Check current user and permissions
+RUN whoami && id && ls -la /app/node_modules/nodejs-whisper/cpp/
+
+# First ensure the entire whisper.cpp directory tree has proper permissions for CMake
+RUN chmod -R 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/ && \
+	mkdir -p /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build && \
+	chmod -R 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build && \
+	chown -R root:root /app/node_modules/nodejs-whisper/cpp/whisper.cpp/
+
+# Debug: Verify permissions after setting them
+RUN ls -la /app/node_modules/nodejs-whisper/cpp/whisper.cpp/ && \
+	ls -la /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build/
+
+# Initialize a git repository to avoid git warnings during CMake configuration
+RUN cd /app/node_modules/nodejs-whisper/cpp/whisper.cpp && \
+	git init . && \
+	git config user.email "docker@build.local" && \
+	git config user.name "Docker Build" && \
+	git add . && \
+	git commit -m "Initial commit for build" || true
+
+# Create a clean build directory and ensure it's writable
+RUN rm -rf /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build && \
+	mkdir -p /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build && \
+	chmod 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build && \
+	chown root:root /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build
+
+# Configure and build whisper.cpp with proper permissions
+RUN cd /app/node_modules/nodejs-whisper/cpp/whisper.cpp && \
+	cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CCACHE=OFF -DBUILD_TESTING=OFF && \
+	cmake --build build --config Release && \
+	chmod +x build/bin/whisper-cli
+
+# Fix permissions for nodejs-whisper models directory so any user can write
+RUN chmod -R 777 /app/node_modules/nodejs-whisper/cpp/whisper.cpp/models/ || true
+
 # Create directories with proper permissions for any user
 # Note: /app/data is NOT created here - let the app create it at runtime with correct ownership
-RUN mkdir -p .next /tmp/audiobook-wizard && \
-	chmod 777 .next /tmp/audiobook-wizard
+RUN mkdir -p .next /app/.next /app/.next/cache /tmp/audiobook-wizard && \
+	chmod 777 .next /app/.next /app/.next/cache /tmp/audiobook-wizard
+
 
 # Copy the build output (standalone includes all necessary node_modules)
 COPY --from=builder /app/.next/standalone ./
