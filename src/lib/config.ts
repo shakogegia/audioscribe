@@ -37,7 +37,7 @@ export async function save(config: AppConfig) {
   }
 }
 
-export async function load(): Promise<AppConfig | null> {
+export async function load(): Promise<AppConfig> {
   try {
     const configExists = await fs
       .access(configPath)
@@ -45,13 +45,15 @@ export async function load(): Promise<AppConfig | null> {
       .catch(() => false);
 
     if (!configExists) {
+      console.log("Config file doesn't exist, returning default config");
       return defaultConfig;
     }
 
     const config = await fs.readFile(configPath, "utf8");
     const parsedConfig = JSON.parse(config);
     return { ...defaultConfig, ...parsedConfig };
-  } catch {
-    return null;
+  } catch (error) {
+    console.error("Failed to load config, returning default config:", error);
+    return defaultConfig;
   }
 }

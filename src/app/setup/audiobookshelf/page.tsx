@@ -1,11 +1,14 @@
 "use server";
 import { AppConfig, load, save } from "@/lib/config";
 import AudiobookshelfPage from "./audiobookshelf";
+import { revalidatePath } from "next/cache";
 
 // Move updateConfig to a server action and export it
 export async function updateConfig(config: AppConfig) {
   "use server";
   await save(config);
+  // Revalidate the page to clear any cached config
+  revalidatePath("/setup/audiobookshelf");
 }
 
 export default async function AudiobookshelfSetupPage() {

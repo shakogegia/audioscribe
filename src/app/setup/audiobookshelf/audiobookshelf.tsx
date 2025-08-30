@@ -29,7 +29,7 @@ const formSchema = z.object({
 });
 
 type Props = {
-  config: AppConfig | null;
+  config: AppConfig;
   updateConfig: (config: AppConfig) => void;
 };
 
@@ -37,8 +37,8 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      url: config?.audiobookshelf.url ?? "",
-      apiKey: config?.audiobookshelf.apiKey ?? "",
+      url: config.audiobookshelf.url ?? "",
+      apiKey: config.audiobookshelf.apiKey ?? "",
     },
   });
 
@@ -46,13 +46,7 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
     toast.loading("Saving configuration...", { id: "save-config" });
     await updateConfig({
       ...config,
-      audiobookshelf: { url: values.url ?? "", apiKey: values.apiKey ?? "" },
-      aiProviders: config?.aiProviders ?? {
-        openai: { enabled: false, apiKey: null },
-        google: { enabled: false, apiKey: null },
-        claude: { enabled: false, apiKey: null },
-        ollama: { enabled: false, baseUrl: null },
-      },
+      audiobookshelf: { url: values.url, apiKey: values.apiKey },
     });
     toast.success("Configuration saved", { id: "save-config" });
   }
