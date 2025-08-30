@@ -8,7 +8,7 @@ import { SearchResult } from "@/types/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
 import z from "zod";
@@ -19,7 +19,7 @@ const formSchema = z.object({
   query: z.string().optional(),
 });
 
-export default function SearchPage() {
+function SearchPageContent() {
   const [searchQuery, setSearchQuery] = useQueryState("q");
   const [libraryId] = useState<string>("47c4480b-cece-40db-8c15-7b3049686814"); // Default library ID
 
@@ -92,5 +92,29 @@ export default function SearchPage() {
         {data && data.length > 0 && <SearchResults books={data} />}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center gap-8 w-full min-h-full py-10">
+          <Hero
+            title="Audiobook Search"
+            description={["Search for audiobooks in your library.", "Use book titles to search."]}
+            icon={
+              <GradientIcon gradient="from-blue-600 to-pink-400" icon={<Search className="w-10 h-10 text-white" />} />
+            }
+          />
+          <SearchStatus>
+            <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            <span>Loading search...</span>
+          </SearchStatus>
+        </div>
+      }
+    >
+      <SearchPageContent />
+    </Suspense>
   );
 }

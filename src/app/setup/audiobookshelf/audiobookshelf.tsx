@@ -1,4 +1,5 @@
 "use client";
+import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,16 +12,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Image from "next/image";
+import { AppConfig } from "@/lib/config";
 import { Check, ExternalLink } from "lucide-react";
-import { Hero } from "@/components/hero";
-import { AppConfig, load } from "@/lib/config";
+import Image from "next/image";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -44,7 +44,16 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     toast.loading("Saving configuration...", { id: "save-config" });
-    await updateConfig({ ...config, audiobookshelf: { url: values.url, apiKey: values.apiKey } });
+    await updateConfig({
+      ...config,
+      audiobookshelf: { url: values.url ?? "", apiKey: values.apiKey ?? "" },
+      aiProviders: config?.aiProviders ?? {
+        openai: { enabled: false, apiKey: null },
+        google: { enabled: false, apiKey: null },
+        claude: { enabled: false, apiKey: null },
+        ollama: { enabled: false, baseUrl: null },
+      },
+    });
     toast.success("Configuration saved", { id: "save-config" });
   }
   return (

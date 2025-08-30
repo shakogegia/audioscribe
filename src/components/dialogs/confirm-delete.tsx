@@ -10,7 +10,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-export function ConfirmDelete({ children }: { children: React.ReactNode }) {
+export function ConfirmDelete({}: { children: React.ReactNode }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger>Open</AlertDialogTrigger>

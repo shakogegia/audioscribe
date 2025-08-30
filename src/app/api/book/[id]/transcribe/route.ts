@@ -4,7 +4,7 @@ import { tempFolder } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: bookId } = await params;
     const body = await request.json();

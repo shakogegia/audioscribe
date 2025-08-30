@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const url = new URL(request.url);
   const isStream = url.searchParams.get("stream") === "true";

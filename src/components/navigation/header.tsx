@@ -1,8 +1,8 @@
-import { House, Search } from "lucide-react";
-import { SettingsDropdown } from "./settings-dropdown";
-import { ThemeSwitcher } from "./theme-switcher";
+import { House } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { SettingsDropdown } from "./settings-dropdown";
+import { ThemeSwitcher } from "./theme-switcher";
 
 export function Header() {
   return (

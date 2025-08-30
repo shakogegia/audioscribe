@@ -4,7 +4,7 @@ import path from "path";
 import os from "os";
 import fs from "fs";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type * as Audiobookshelf from "@/types/audiobookshelf";
 import { deleteBookmark, updateBookmarks } from "@/lib/audiobookshelf";
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const body = (await request.json()) as { bookmarks: Audiobookshelf.AudioBookmark[] };
@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const { searchParams } = new URL(request.url);
