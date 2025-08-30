@@ -44,3 +44,4 @@ Dockerfile
 
 # Config
 config.json
+data/
