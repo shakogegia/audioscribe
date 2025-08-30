@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SearchResult } from "@/lib/api";
-import { fetcher } from "@/lib/fetcher";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Search } from "lucide-react";
 import { useQueryState } from "nuqs";
@@ -30,8 +29,7 @@ export default function SearchPage() {
   });
 
   const { data, error, isLoading } = useSWR<SearchResult[]>(
-    searchQuery ? `/api/search?q=${encodeURIComponent(searchQuery)}&libraryId=${libraryId}&limit=20` : null,
-    fetcher
+    searchQuery ? `/api/search?q=${encodeURIComponent(searchQuery)}&libraryId=${libraryId}&limit=20` : null
   );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -45,7 +43,7 @@ export default function SearchPage() {
       <Hero
         title="Audiobook Search"
         description={["Search for audiobooks in your library.", "Use book titles to search."]}
-        icon={<GradientIcon gradient="from-blue-200 to-pink-300" icon={<Search className="w-10 h-10 text-white" />} />}
+        icon={<GradientIcon gradient="from-blue-600 to-pink-400" icon={<Search className="w-10 h-10 text-white" />} />}
       />
 
       {/* Search */}
@@ -71,7 +69,7 @@ export default function SearchPage() {
       </Form>
 
       {/* Results */}
-      <div className="flex flex-col gap-4 w-full max-w-4xl">
+      <div className="flex flex-col gap-4 w-full max-w-4xl px-4">
         {isLoading && searchQuery && (
           <SearchStatus>
             <Loader2 className="w-4 h-4 animate-spin mr-2" />

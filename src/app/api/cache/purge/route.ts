@@ -1,12 +1,10 @@
+import { tempFolder } from "@/lib/utils";
 import fs from "fs";
 import { NextResponse } from "next/server";
-import os from "os";
 import path from "path";
 
 export async function DELETE() {
   try {
-    const tempFolder = path.join(os.tmpdir(), "audiobook-wizard");
-    // async files inside temp folder
     const files = await fs.promises.readdir(tempFolder);
     for (const file of files) {
       await fs.promises.unlink(path.join(tempFolder, file));

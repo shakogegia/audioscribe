@@ -16,7 +16,7 @@ import { Hero } from "@/components/hero";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center gap-8 w-full h-full">
+    <div className="flex flex-col items-center gap-8 w-full h-full px-4">
       <Hero
         title="Audiobookshelf Setup"
         description={["Configure access to your Audiobookshelf server."]}
@@ -36,8 +36,8 @@ export default function Home() {
         <CardHeader>
           <CardTitle>Audiobookshelf Server</CardTitle>
           <CardDescription>
-            Enter your Audiobookshelf URL and API key. The key must act on behalf of a user with the
-            following permissions: Can Download, Can Update.
+            Enter your Audiobookshelf URL and API key. The key must act on behalf of a user with the following
+            permissions: Can Download, Can Update.
           </CardDescription>
           <CardAction>
             <Button variant="link">
@@ -51,13 +51,7 @@ export default function Home() {
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="url">Server URL</Label>
-                <Input
-                  id="url"
-                  type="text"
-                  name="url"
-                  placeholder="https://audiobookshelf.example.com"
-                  required
-                />
+                <Input id="url" type="text" name="url" placeholder="https://audiobookshelf.example.com" required />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">

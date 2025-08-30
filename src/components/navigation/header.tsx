@@ -14,11 +14,6 @@ export function Header() {
             <House className="w-4 h-4" />
           </Button>
         </Link>
-        <Link href="/search">
-          <Button variant="outline" size="icon">
-            <Search className="w-4 h-4" />
-          </Button>
-        </Link>
         <ThemeSwitcher />
         <SettingsDropdown />
       </div>
