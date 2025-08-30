@@ -128,7 +128,7 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
                           </div>
                         </FormLabel>
                         <FormControl>
-                          <Input id="apiKey" type="text" required placeholder="Enter API Key" {...field} />
+                          <Input id="apiKey" type="password" required placeholder="Enter API Key" {...field} />
                         </FormControl>
                         {/* <FormDescription>This is your public display name.</FormDescription> */}
                         <FormMessage />

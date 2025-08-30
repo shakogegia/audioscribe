@@ -41,7 +41,7 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
       setIsGeneratingSuggestions(true);
       toast.loading("Generating AI suggestions...", { id: `ai-suggestions-${bookmark.time}` });
 
-      const response = await axios.post(`/api/book/${bookId}/ai-suggest`, {
+      const response = await axios.post(`/api/book/${bookId}/ai/suggest/bookmarks`, {
         startTime: bookmark.time,
         transcription: transcription,
         timestamp: bookmark.fileStartTime,

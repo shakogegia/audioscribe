@@ -6,7 +6,7 @@ export interface AppConfig {
   aiProviders: {
     openai: { enabled: boolean; apiKey: string | null };
     google: { enabled: boolean; apiKey: string | null };
-    claude: { enabled: boolean; apiKey: string | null };
+    anthropic: { enabled: boolean; apiKey: string | null };
     ollama: { enabled: boolean; baseUrl: string | null };
   };
 }
@@ -16,7 +16,7 @@ export const defaultConfig: AppConfig = {
   aiProviders: {
     openai: { enabled: false, apiKey: null },
     google: { enabled: false, apiKey: null },
-    claude: { enabled: false, apiKey: null },
+    anthropic: { enabled: false, apiKey: null },
     ollama: { enabled: false, baseUrl: null },
   },
 };

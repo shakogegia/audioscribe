@@ -12,7 +12,7 @@ const useLLMStore = create<LLMState>(set => ({
     aiProviders: {
       openai: { enabled: false, apiKey: null },
       google: { enabled: false, apiKey: null },
-      claude: { enabled: false, apiKey: null },
+      anthropic: { enabled: false, apiKey: null },
       ollama: { enabled: false, baseUrl: null },
     },
   },
