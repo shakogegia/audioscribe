@@ -40,6 +40,10 @@ COPY --from=builder /app/public ./public
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
+# Create temp directory for audiobook files
+RUN mkdir -p /tmp/audiobook-wizard
+RUN chown nextjs:nodejs /tmp/audiobook-wizard
+
 # Copy the build output (standalone includes all necessary node_modules)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
