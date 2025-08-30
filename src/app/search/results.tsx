@@ -1,7 +1,7 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SearchResult } from "@/lib/api";
+import { SearchResult } from "@/types/api";
 import { formatDuration } from "@/lib/format";
 import { BookOpenCheck } from "lucide-react";
 import Image from "next/image";

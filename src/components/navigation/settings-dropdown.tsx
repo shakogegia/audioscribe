@@ -16,7 +16,7 @@ import useSWR from "swr";
 
 export function SettingsDropdown() {
   const router = useRouter();
-  const { data: { humanReadableSize } = {} } = useSWR("/api/cache/size");
+  const { data: { humanReadableSize } = {} } = useSWR("/api/cache/size", { refreshInterval: 10000 });
 
   async function purgeCache() {
     toast.loading("Purging cache...", { id: "purge-cache" });

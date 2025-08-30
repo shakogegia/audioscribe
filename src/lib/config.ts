@@ -2,16 +2,22 @@ import fs from "fs/promises";
 import { join } from "path";
 
 export interface AppConfig {
-  audiobookshelf: {
-    url: string;
-    apiKey: string;
+  audiobookshelf: { url: string | null; apiKey: string | null };
+  aiProviders: {
+    openai: { enabled: boolean; apiKey: string | null };
+    google: { enabled: boolean; apiKey: string | null };
+    claude: { enabled: boolean; apiKey: string | null };
+    ollama: { enabled: boolean; baseUrl: string | null };
   };
 }
 
-const defaultConfig: AppConfig = {
-  audiobookshelf: {
-    url: "",
-    apiKey: "",
+export const defaultConfig: AppConfig = {
+  audiobookshelf: { url: null, apiKey: null },
+  aiProviders: {
+    openai: { enabled: false, apiKey: null },
+    google: { enabled: false, apiKey: null },
+    claude: { enabled: false, apiKey: null },
+    ollama: { enabled: false, baseUrl: null },
   },
 };
 

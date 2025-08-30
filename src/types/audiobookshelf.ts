@@ -224,5 +224,6 @@ export interface AudioBookmark {
   libraryItemId: string;
   title: string;
   time: number;
+  fileStartTime: number;
   createdAt: number;
 }

@@ -1,4 +1,4 @@
-import { SearchResult } from "@/lib/api";
+import { SearchResult } from "@/types/api";
 import { searchBook } from "@/lib/audiobookshelf";
 import { NextRequest, NextResponse } from "next/server";
 

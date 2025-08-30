@@ -9,10 +9,11 @@ import { twMerge } from "tailwind-merge";
 interface AudioPlayerProps {
   bookId: string;
   startTime?: number;
+  fileStartTime?: number;
   className?: string;
 }
 
-export function AudioPlayer({ bookId, startTime = 0, className }: AudioPlayerProps) {
+export function AudioPlayer({ bookId, startTime = 0, fileStartTime = 0, className }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(startTime);
   const [duration, setDuration] = useState(0);
@@ -36,13 +37,20 @@ export function AudioPlayer({ bookId, startTime = 0, className }: AudioPlayerPro
     };
   }, []);
 
+  // useEffect(() => {
+  //   const audio = audioRef.current;
+  //   if (audio && startTime > 0) {
+  //     audio.currentTime = startTime;
+  //     setCurrentTime(startTime);
+  //   }
+  // }, [startTime]);
   useEffect(() => {
     const audio = audioRef.current;
-    if (audio && startTime > 0) {
-      audio.currentTime = startTime;
-      setCurrentTime(startTime);
+    if (audio && fileStartTime > 0) {
+      audio.currentTime = fileStartTime;
+      setCurrentTime(fileStartTime);
     }
-  }, [startTime]);
+  }, [fileStartTime]);
 
   const togglePlayPause = async () => {
     const audio = audioRef.current;

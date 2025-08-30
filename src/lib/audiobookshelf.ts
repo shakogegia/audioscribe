@@ -1,20 +1,25 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf";
 import axios from "axios";
-import { AudioFile, SearchResult } from "./api";
-
-export const api = axios.create({
-  baseURL: process.env.ABS_URL,
-  headers: {
-    Authorization: `Bearer ${process.env.ABS_API_KEY}`,
-  },
-});
+import { AudioFile, SearchResult } from "../types/api";
+import { load } from "./config";
 
 type Library = {
   id: string;
   name: string;
 };
 
+export const getApi = async () => {
+  const config = await load();
+  return axios.create({
+    baseURL: config?.audiobookshelf.url ?? "",
+    headers: {
+      Authorization: `Bearer ${config?.audiobookshelf.apiKey}`,
+    },
+  });
+};
+
 export async function getAllLibraries(): Promise<Library[]> {
+  const api = await getApi();
   const response = await api.get<{ libraries: Audiobookshelf.Library[] }>("/api/libraries");
   return response.data.libraries.map(library => ({
     id: library.id,
@@ -23,6 +28,7 @@ export async function getAllLibraries(): Promise<Library[]> {
 }
 
 export async function searchBook(libraryId: string, query: string): Promise<SearchResult[]> {
+  const api = await getApi();
   const response = await api.get<{ book: { libraryItem: Audiobookshelf.LibraryItem }[] }>(
     `/api/libraries/${libraryId}/search`,
     {
@@ -33,6 +39,8 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
     }
   );
 
+  const config = await load();
+
   return Promise.all(
     response.data.book.map(async ({ libraryItem }) => ({
       id: libraryItem.id,
@@ -40,8 +48,9 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
       authors: libraryItem.media.metadata.authors.map(author => author.name),
       series: libraryItem.media.metadata.series.map(series => series.name),
       duration: libraryItem.media.duration ?? 0,
-      // coverPath: libraryItem.media.coverPath ?? "",
-      coverPath: `${process.env.ABS_URL}/audiobookshelf/api/items/${libraryItem.id}/cover?ts=1756297482038&raw=1`,
+      coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${
+        libraryItem.id
+      }/cover?ts=${Date.now()}&raw=1`,
       narrators: libraryItem.media.metadata.narrators,
       publishedYear: libraryItem.media.metadata.publishedYear ?? "",
       libraryId: libraryId,
@@ -51,12 +60,38 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
 }
 
 export async function getBookmarks(libraryItemId: string): Promise<Audiobookshelf.AudioBookmark[]> {
+  const api = await getApi();
   const response = await api.get<Audiobookshelf.User>(`/api/me`);
-  return response.data.bookmarks.filter(bookmark => bookmark.libraryItemId === libraryItemId);
+
+  const files = await getBookFiles(libraryItemId);
+
+  return response.data.bookmarks
+    .filter(bookmark => bookmark.libraryItemId === libraryItemId)
+    .map(bookmark => {
+      // Find which audio file contains this bookmark time
+      const containingFile = files.find(file => {
+        const fileStart = file.start;
+        const fileEnd = file.start + file.duration;
+        return bookmark.time >= fileStart && bookmark.time < fileEnd;
+      });
+
+      // If no containing file found, use the last file (edge case)
+      const targetFile = containingFile || files[files.length - 1];
+
+      // Convert book time to file time
+      const fileStartTime = targetFile ? bookmark.time - targetFile.start : 0;
+
+      return {
+        ...bookmark,
+        fileStartTime: Math.max(0, fileStartTime), // Ensure non-negative
+      };
+    });
 }
 
 export async function getBook(libraryItemId: string): Promise<SearchResult> {
+  const api = await getApi();
   const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`);
+  const config = await load();
   return {
     id: response.data.id,
     title: response.data.media.metadata.title ?? "",
@@ -67,28 +102,39 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     libraryId: response.data.libraryId,
     bookmarks: await getBookmarks(libraryItemId),
     publishedYear: response.data.media.metadata.publishedYear ?? "",
-    coverPath: `${process.env.ABS_URL}/audiobookshelf/api/items/${libraryItemId}/cover?ts=1756297482038&raw=1`,
+    coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/cover?ts=${Date.now()}&raw=1`,
   };
 }
 
 export async function getBookFiles(libraryItemId: string): Promise<AudioFile[]> {
+  const api = await getApi();
   const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`);
 
-  return response.data.media.audioFiles
-    .map((file, index) => ({
+  const sortedFiles = response.data.media.audioFiles.sort((a, b) => a.index - b.index);
+
+  let cumulativeStart = 0;
+
+  const config = await load();
+
+  return sortedFiles.map(file => {
+    const audioFile = {
       ino: file.ino,
       index: file.index,
       duration: file.duration ?? 0,
-      start: index * (file.duration ?? 0),
+      start: cumulativeStart,
       path: `${file.ino}${file.metadata.ext}`,
-      downloadUrl: `${process.env.ABS_URL}/audiobookshelf/api/items/${libraryItemId}/file/${file.ino}/download?token=${process.env.ABS_API_KEY}`,
+      downloadUrl: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/file/${file.ino}/download?token=${config?.audiobookshelf.apiKey}`,
       size: file.metadata.size,
       fileName: file.metadata.filename,
-    }))
-    .sort((a, b) => a.index - b.index);
+    };
+
+    cumulativeStart += audioFile.duration;
+    return audioFile;
+  });
 }
 
 export async function updateBookmark(libraryItemId: string, bookmark: Audiobookshelf.AudioBookmark) {
+  const api = await getApi();
   const response = await api.patch(`/api/me/item/${libraryItemId}/bookmark`, bookmark);
   return response.data;
 }
@@ -98,6 +144,7 @@ export async function updateBookmarks(libraryItemId: string, bookmarks: Audioboo
 }
 
 export async function deleteBookmark(libraryItemId: string, time: number) {
+  const api = await getApi();
   const response = await api.delete(`/api/me/item/${libraryItemId}/bookmark/${time}`);
   return response.data;
 }

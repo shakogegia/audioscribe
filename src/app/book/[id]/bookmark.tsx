@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/format";
 import type * as Audiobookshelf from "@/types/audiobookshelf";
-import { ChevronsDownUpIcon, ChevronsUpDownIcon, Trash, WandSparkles } from "lucide-react";
+import { ChevronsDownUpIcon, ChevronsUpDownIcon, Trash, WandSparkles, Loader2, Captions } from "lucide-react";
 import { useState } from "react";
 import useBookmarksStore from "./store";
 import axios from "axios";
@@ -18,7 +18,12 @@ interface BookmarksProps {
 
 export function Bookmark({ bookId, bookmark }: BookmarksProps) {
   const [showPlayer, setShowPlayer] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const updateBookmark = useBookmarksStore(state => state.update);
+  const [transcription, setTranscription] = useState<string | null>(null);
 
   const handlePlayClick = () => {
     setShowPlayer(!showPlayer);
@@ -29,6 +34,71 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
     toast.success("Bookmark deleted");
   }
 
+  async function generateAISuggestions() {
+    if (isGeneratingSuggestions) return;
+
+    try {
+      setIsGeneratingSuggestions(true);
+      toast.loading("Generating AI suggestions...", { id: `ai-suggestions-${bookmark.time}` });
+
+      const response = await axios.post(`/api/book/${bookId}/ai-suggest`, {
+        startTime: bookmark.time,
+        transcription: transcription,
+        timestamp: bookmark.fileStartTime,
+      });
+
+      const suggestions = response.data.suggestions || [];
+      setAiSuggestions(suggestions);
+      setShowSuggestions(true);
+
+      toast.success(`Generated ${suggestions.length} suggestions`, { id: `ai-suggestions-${bookmark.time}` });
+    } catch (error: unknown) {
+      console.error("Failed to generate AI suggestions:", error);
+
+      let errorMessage = "Failed to generate suggestions";
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response?: { data?: { error?: string } } };
+        if (axiosError.response?.data?.error) {
+          errorMessage = axiosError.response.data.error;
+        }
+      }
+
+      toast.error(errorMessage);
+    } finally {
+      setIsGeneratingSuggestions(false);
+    }
+  }
+
+  async function transcribeAudio() {
+    if (isTranscribing) return;
+
+    try {
+      setIsTranscribing(true);
+      toast.loading("Transcribing audio...", { id: `transcribe-${bookmark.time}` });
+
+      const response = await axios.post<{ transcription: { text: string } }>(`/api/book/${bookId}/transcribe`, {
+        startTime: bookmark.time,
+        // duration: 30,
+        // offset: 15,
+      });
+
+      setTranscription(response.data.transcription.text);
+      toast.success("Transcribed audio", { id: `transcribe-${bookmark.time}` });
+    } catch (error: unknown) {
+      console.error("Failed to transcribe audio:", error);
+      toast.error("Failed to transcribe audio", { id: `transcribe-${bookmark.time}` });
+    } finally {
+      setIsTranscribing(false);
+    }
+  }
+
+  function applySuggestion(suggestion: string) {
+    updateBookmark({ ...bookmark, title: suggestion });
+    setShowSuggestions(false);
+    setAiSuggestions([]);
+    toast.success("Applied AI suggestion", { id: `ai-suggestions-${bookmark.time}` });
+  }
+
   return (
     <div className="flex flex-col gap-2 border rounded-md p-2 text-sm w-full">
       <div className="flex items-center justify-between gap-4">
@@ -36,43 +106,90 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
           <Badge variant="outline">{formatTime(bookmark.time)}</Badge>
           <input
             type="text"
-            className="font-semibold outline-none w-full"
+            className="font-semibold outline-none w-full hover:underline"
             value={bookmark.title}
             onChange={e => updateBookmark({ ...bookmark, title: e.target.value })}
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <BookmarkAction>
-            <WandSparkles className="w-4 h-4" />
+          <BookmarkAction
+            onClick={generateAISuggestions}
+            disabled={isGeneratingSuggestions || !transcription}
+            title="Generate AI suggestions"
+          >
+            {isGeneratingSuggestions ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <WandSparkles className="w-4 h-4" />
+            )}
           </BookmarkAction>
 
-          <BookmarkAction onClick={deleteBookmark}>
+          <BookmarkAction onClick={transcribeAudio} title="Transcribe" disabled={isTranscribing}>
+            {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Captions className="w-4 h-4" />}
+          </BookmarkAction>
+
+          <BookmarkAction onClick={deleteBookmark} title="Delete bookmark">
             <Trash className="w-4 h-4" />
           </BookmarkAction>
 
-          <BookmarkAction onClick={handlePlayClick}>
+          <BookmarkAction onClick={handlePlayClick} title="Toggle audio player">
             {showPlayer ? <ChevronsDownUpIcon className="w-4 h-4" /> : <ChevronsUpDownIcon className="w-4 h-4" />}
           </BookmarkAction>
         </div>
       </div>
 
+      {showSuggestions && aiSuggestions.length > 0 && (
+        <div className="mt-2 space-y-2">
+          <div className="text-xs font-medium text-muted-foreground">AI Suggestions:</div>
+          <div className="grid gap-1">
+            {aiSuggestions.map((suggestion, index) => (
+              <button
+                key={index}
+                onClick={() => applySuggestion(suggestion)}
+                className="text-left text-sm p-2 rounded border hover:bg-muted transition-colors"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowSuggestions(false)}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
+            Hide suggestions
+          </button>
+        </div>
+      )}
+
       {showPlayer && (
         <div className="mt-2">
-          <AudioPlayer bookId={bookId} startTime={bookmark.time} />
+          <AudioPlayer bookId={bookId} startTime={bookmark.time} fileStartTime={bookmark.fileStartTime} />
         </div>
       )}
     </div>
   );
 }
 
-function BookmarkAction({ onClick, children }: { onClick?: VoidFunction; children: React.ReactNode }) {
+function BookmarkAction({
+  onClick,
+  children,
+  disabled,
+  title,
+}: {
+  onClick?: VoidFunction;
+  children: React.ReactNode;
+  disabled?: boolean;
+  title?: string;
+}) {
   return (
     <Button
       variant="ghost"
       size="icon"
-      className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700"
+      className="w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50"
       onClick={onClick}
+      disabled={disabled}
+      title={title}
     >
       {children}
     </Button>
