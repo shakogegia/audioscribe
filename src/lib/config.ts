@@ -21,10 +21,20 @@ export const defaultConfig: AppConfig = {
   },
 };
 
-const configPath = join(process.cwd(), "config.json");
+const configPath = join(process.cwd(), "data", "config.json");
 
 export async function save(config: AppConfig) {
-  await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+  try {
+    // Ensure data directory exists
+    const dataDir = join(process.cwd(), "data");
+    await fs.mkdir(dataDir, { recursive: true });
+
+    // Save config file
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf8");
+  } catch (error) {
+    console.error("Failed to save config:", error);
+    throw error;
+  }
 }
 
 export async function load(): Promise<AppConfig | null> {
