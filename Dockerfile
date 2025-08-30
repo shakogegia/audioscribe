@@ -8,7 +8,9 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+
+# Install all dependencies (including dev dependencies for building)
+RUN npm ci
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -38,7 +40,7 @@ COPY --from=builder /app/public ./public
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
-# Copy the build output and node_modules
+# Copy the build output (standalone includes all necessary node_modules)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 

@@ -41,3 +41,6 @@ README.md
 # Docker
 Dockerfile
 .dockerignore
+
+# Config
+config.json
