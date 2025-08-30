@@ -31,28 +31,17 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
+# Copy static files
 COPY --from=builder /app/public ./public
 
-# Set the correct permission for prerender cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Create temp directory for audiobook files
-RUN mkdir -p /tmp/audiobook-wizard
-RUN chown nextjs:nodejs /tmp/audiobook-wizard
-
-# Create data directory for config and other data files
-RUN mkdir -p /app/data
-RUN chown nextjs:nodejs /app/data
+# Create directories with proper permissions for any user
+# Note: /app/data is NOT created here - let the app create it at runtime with correct ownership
+RUN mkdir -p .next /tmp/audiobook-wizard && \
+	chmod 777 .next /tmp/audiobook-wizard
 
 # Copy the build output (standalone includes all necessary node_modules)
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
