@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Transcribe the audio segment
     const transcription = await transcribeAudioSegment({
-      provider: { type: "whisper", model: "medium.en" },
+      provider: { type: "whisper", model: "tiny.en" },
       audioUrl: path.join(tempFolder, file.path),
       startTime: startTime - file.start,
       duration,
