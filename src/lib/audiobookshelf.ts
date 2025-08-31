@@ -100,6 +100,7 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     duration: response.data.media.duration ?? 0,
     narrators: response.data.media.metadata.narrators,
     libraryId: response.data.libraryId,
+    chapters: response.data.media.chapters,
     bookmarks: await getBookmarks(libraryItemId),
     publishedYear: response.data.media.metadata.publishedYear ?? "",
     coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/cover?ts=${Date.now()}&raw=1`,

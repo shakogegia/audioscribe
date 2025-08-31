@@ -3,11 +3,12 @@
 import { AudioFile, SearchResult } from "@/types/api";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/format";
-import { Bookmark, FastForward, Pause, Play, Rewind } from "lucide-react";
+import { Bookmark, Captions, CaptionsOff, FastForward, Pause, Play, Rewind, TableOfContents } from "lucide-react";
 import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef, Ref } from "react";
 import { twMerge } from "tailwind-merge";
 import useBookmarksStore from "@/app/book/[id]/stores/bookmarks";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { BookCaptions } from "./book-captions";
 
 interface BookPlayerProps {
   book: SearchResult;
@@ -25,6 +26,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
   const [currentFileIndex, setCurrentFileIndex] = useState(0);
   const [fileCurrentTime, setFileCurrentTime] = useState(0);
   const [pendingSeekTime, setPendingSeekTime] = useState<number | null>(null);
+  const [showCaptions, setShowCaptions] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // add bookmarks store
@@ -211,25 +213,48 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
       <div className="w-full flex items-start gap-2">
         <div className="w-full flex flex-col gap-1">
           <div
-            className="w-full h-2 bg-neutral-200 dark:bg-neutral-800 rounded-sm cursor-pointer hover:bg-neutral-300 transition-colors relative"
+            className="w-full h-2 bg-neutral-200 dark:bg-neutral-800 cursor-pointer hover:bg-neutral-300 transition-colors relative"
             onClick={handleProgressClick}
           >
             <div
-              className="h-full bg-black dark:bg-white transition-all duration-100 rounded-tl-sm rounded-bl-sm "
+              className="h-full bg-black dark:bg-white transition-all duration-100"
               style={{ width: `${(totalCurrentTime / totalDuration) * 100}%` }}
             />
 
             {book.bookmarks.map(bookmark => (
               <div
                 key={bookmark.time}
-                className="h-2 w-px bg-black dark:bg-white absolute -top-2"
+                className="h-2 w-px bg-amber-500 absolute -top-2 transition-all hover:scale-150 hover:-top-2.5 group"
                 style={{ left: `${(bookmark.time / totalDuration) * 100}%` }}
               >
                 <Tooltip key={bookmark.time}>
                   <TooltipTrigger asChild>
-                    <div className="h-full w-px block" onClick={() => play(bookmark.time)}></div>
+                    <div className="h-full w-[9px] -ml-[4px] block" onClick={() => play(bookmark.time)}></div>
                   </TooltipTrigger>
-                  <TooltipContent>{bookmark.title}</TooltipContent>
+                  <TooltipContent>
+                    <div className="flex items-center gap-1">
+                      <Bookmark className="w-4 h-4" /> {formatTime(bookmark.time)} - {bookmark.title}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            ))}
+
+            {book.chapters.map(chapter => (
+              <div
+                key={chapter.start}
+                className="h-2 w-px bg-black dark:bg-neutral-200 absolute -top-2 transition-all hover:scale-150 hover:-top-2.5 group"
+                style={{ left: `${(chapter.start / totalDuration) * 100}%` }}
+              >
+                <Tooltip key={chapter.start}>
+                  <TooltipTrigger asChild>
+                    <div className="h-full w-[9px] -ml-[4px] block" onClick={() => play(chapter.start)}></div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="flex items-center gap-1">
+                      <TableOfContents className="w-4 h-4" /> {formatTime(chapter.start)} - {chapter.title}
+                    </div>
+                  </TooltipContent>
                 </Tooltip>
               </div>
             ))}
@@ -249,6 +274,8 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
         )}
       </div>
 
+      {showCaptions && <BookCaptions book={book} files={files} time={totalCurrentTime} />}
+
       {controls === "full" && (
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-1">
@@ -264,6 +291,9 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
             </Button>
           </div>
           <div className="flex items-center gap-1">
+            <Button variant="outline" size="icon" className="w-10" onClick={() => setShowCaptions(!showCaptions)}>
+              {showCaptions ? <CaptionsOff className="w-5 h-5" /> : <Captions className="w-5 h-5" />}
+            </Button>
             <Button variant="outline" size="icon" className="w-10" onClick={addBookmarkAtCurrentTime}>
               <Bookmark className="w-5 h-5" />
             </Button>

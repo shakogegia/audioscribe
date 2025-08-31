@@ -32,7 +32,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
   }
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center gap-8 py-10 px-4">
+    <div className="w-full min-h-full flex flex-col items-center gap-8 my-10 px-4">
       <Hero
         title={book.title}
         description={[book.authors.join(", ")]}

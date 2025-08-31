@@ -12,6 +12,7 @@ export interface SearchResult {
   coverPath?: string;
   duration: number;
   libraryId: string;
+  chapters: Audiobookshelf.Chapter[];
   bookmarks: Audiobookshelf.AudioBookmark[];
 }
 

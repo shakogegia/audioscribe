@@ -6,7 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Input } from "@/components/ui/input";
 import { SearchResult } from "@/types/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Search } from "lucide-react";
+import { LibraryBig, Loader2, Search } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -39,11 +39,11 @@ function SearchPageContent() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full min-h-full py-10">
+    <div className="flex flex-col items-center gap-8 w-full min-h-full my-10">
       <Hero
-        title="Audiobook Search"
+        title="Library"
         description={["Search for audiobooks in your library.", "Use book titles to search."]}
-        icon={<GradientIcon gradient="from-blue-600 to-pink-400" icon={<Search className="w-10 h-10 text-white" />} />}
+        icon={<LibraryBig className="w-10 h-10 text-neutral-600 dark:text-white" />}
       />
 
       {/* Search */}
