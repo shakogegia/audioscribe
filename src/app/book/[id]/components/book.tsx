@@ -11,6 +11,7 @@ import { AiChat } from "./ai-chat";
 import Bookmarks from "./bookmarks";
 import { Downloader } from "./downloader";
 import { Transcript } from "./transcript";
+import Chapters from "./chapters";
 
 interface BookProps {
   id: string;
@@ -57,11 +58,21 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
             <Tabs defaultValue="bookmarks">
               <TabsList className="self-center">
                 <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
+                <TabsTrigger value="chapters">Chapters</TabsTrigger>
                 <TabsTrigger value="chat">Chat</TabsTrigger>
                 <TabsTrigger value="transcript">Transcript</TabsTrigger>
               </TabsList>
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <Bookmarks id={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
+              </TabsContent>
+              <TabsContent value="chapters" forceMount className={twMerge("data-[state=inactive]:hidden")}>
+                <Chapters
+                  id={id}
+                  book={book}
+                  files={files}
+                  play={time => bookPlayerRef.current?.play(time)}
+                  getCurrentTime={() => bookPlayerRef.current?.getCurrentTime()}
+                />
               </TabsContent>
               <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <AiChat bookId={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />

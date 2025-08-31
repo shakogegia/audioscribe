@@ -19,6 +19,7 @@ interface BookPlayerProps {
 
 export interface BookPlayerRef {
   play: (time?: number) => void;
+  getCurrentTime: () => number;
 }
 
 function BookPlayerComponent({ book, files, className, controls }: BookPlayerProps, ref: Ref<BookPlayerRef>) {
@@ -32,7 +33,11 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
   // add bookmarks store
   const addBookmark = useBookmarksStore(state => state.add);
 
-  useImperativeHandle(ref, () => ({ play }));
+  useImperativeHandle(ref, () => ({ play, getCurrentTime }));
+
+  function getCurrentTime() {
+    return totalCurrentTime;
+  }
 
   function play(time?: number) {
     if (time) {
