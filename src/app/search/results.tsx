@@ -28,7 +28,7 @@ export default function SearchResults({ books }: { books: SearchResult[] }) {
         </div>
       </div>
       <Link href={`/book/${book.id}`}>
-        <Button variant="outline" disabled={book.bookmarks.length === 0}>
+        <Button variant="outline">
           <BookOpenCheck className="w-4 h-4" />
           Open
         </Button>

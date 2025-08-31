@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatTime } from "@/lib/format";
 import { AudioFile, SearchResult } from "@/types/api";
-import { Bookmark as BookmarkIcon, BookmarkPlus, Check, Loader2Icon } from "lucide-react";
+import { Bookmark as BookmarkIcon, BookmarkPlus, Check, Loader2Icon, Trash } from "lucide-react";
 import { useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 type ChaptersProps = {
   id: string;
@@ -65,6 +66,12 @@ export default function Chapters({ play, getCurrentTime, book }: ChaptersProps) 
                   className="font-normal outline-none w-full hover:underline"
                   defaultValue={chapter.title}
                 />
+
+                <div className="flex items-center gap-2">
+                  <BookmarkAction title="Delete chapter">
+                    <Trash className="w-4 h-4" />
+                  </BookmarkAction>
+                </div>
               </div>
             </div>
           </div>
@@ -86,5 +93,33 @@ export default function Chapters({ play, getCurrentTime, book }: ChaptersProps) 
         </div>
       )}
     </div>
+  );
+}
+
+function BookmarkAction({
+  onClick,
+  children,
+  disabled,
+  title,
+}: {
+  onClick?: VoidFunction;
+  children: React.ReactNode;
+  disabled?: boolean;
+  title?: string;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={twMerge(
+        "w-8 h-8 bg-neutral-100 dark:bg-neutral-800 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-700 disabled:opacity-50",
+        "transition-all duration-200 ease-in-out [&:hover_svg]:scale-105"
+      )}
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+    >
+      {children}
+    </Button>
   );
 }

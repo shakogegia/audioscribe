@@ -210,6 +210,11 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
     );
   }
 
+  /**
+   * Skip starting/zero (Opening) chapter
+   */
+  const chapters = book.chapters.filter(chapter => chapter.start > 0);
+
   return (
     <div className={twMerge("flex flex-col gap-2", className)}>
       <audio ref={audioRef} preload="metadata" />
@@ -245,7 +250,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
               </div>
             ))}
 
-            {book.chapters.map(chapter => (
+            {chapters.map(chapter => (
               <div
                 key={chapter.start}
                 className="h-2 w-px bg-black dark:bg-neutral-200 absolute -top-2 transition-all hover:scale-150 hover:-top-2.5 group"

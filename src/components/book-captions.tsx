@@ -65,7 +65,7 @@ export function BookCaptions({ book, files, time }: BookCaptionsProps) {
   useMount(() => transcribeFullBook());
 
   return (
-    <div className="flex items-center justify-center gap-1 -mt-4">
+    <div className="flex items-center justify-center gap-1 -mt-4 mb-0.5">
       {isTranscribing && (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <Loader2Icon className="w-3 h-3 animate-spin" /> Transcribing...
