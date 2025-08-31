@@ -1,45 +1,33 @@
 "use client";
 import { BookPlayer, BookPlayerRef } from "@/components/book-player";
 import { Hero } from "@/components/hero";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AudioFile, SearchResult } from "@/types/api";
-import axios from "axios";
-import {
-  Bookmark as BookmarkIcon,
-  Check,
-  Loader2Icon,
-  MessageCircle,
-  SlidersHorizontal,
-  WandSparkles,
-} from "lucide-react";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { toast } from "sonner";
+import { twMerge } from "tailwind-merge";
 import useBookmarksStore from "../stores/bookmarks";
-import { AiChatDialog } from "./ai-chat-dialog";
-import { AiConfigDialog } from "./ai-config-dialog";
-import { Bookmark } from "./bookmark";
+import { AiChat } from "./ai-chat";
+import Bookmarks from "./bookmarks";
 import { Downloader } from "./downloader";
 
-export default function Book({ id, book, files }: { id: string; book: SearchResult; files: AudioFile[] }) {
+interface BookProps {
+  id: string;
+  book: SearchResult;
+  files: AudioFile[];
+  revalidate: (id: string) => void;
+}
+
+export default function Book({ id, book, files, revalidate }: BookProps) {
   const bookPlayerRef = useRef<BookPlayerRef>(null);
 
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const setBookmarks = useBookmarksStore(state => state.setBookmarks);
-  const bookmarks = useBookmarksStore(state => state.bookmarks);
-  const [isSaving, setIsSaving] = useState(false);
 
-  function onDownloadComplete() {
+  async function onDownloadComplete() {
+    await revalidate(id);
     setHasDownloaded(true);
     setBookmarks(book.bookmarks);
-  }
-
-  async function updateBookmarks() {
-    setIsSaving(true);
-    toast.loading("Saving bookmarks...", { id: "save-bookmarks" });
-    await axios.patch(`/api/book/${id}/bookmark`, { bookmarks });
-    toast.success("Bookmarks updated", { id: "save-bookmarks" });
-    setIsSaving(false);
   }
 
   return (
@@ -58,73 +46,30 @@ export default function Book({ id, book, files }: { id: string; book: SearchResu
         }
       />
 
-      <div className="w-full max-w-xl">
-        <BookPlayer book={book} files={files} ref={bookPlayerRef} controls="full" />
+      <div className="w-full max-w-xl mx-auto flex flex-col gap-8">
+        {!hasDownloaded && <Downloader bookId={id} onComplete={onDownloadComplete} />}
+
+        {hasDownloaded && (
+          <>
+            <BookPlayer book={book} files={files} ref={bookPlayerRef} controls="full" />
+
+            <Tabs defaultValue="bookmarks">
+              <TabsList className="self-center">
+                <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
+                <TabsTrigger value="chat">AI Chat</TabsTrigger>
+              </TabsList>
+              <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
+                <div className="w-full">
+                  <Bookmarks id={id} book={book} files={files} play={() => bookPlayerRef.current?.play()} />
+                </div>
+              </TabsContent>
+              <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
+                <AiChat bookId={id} book={book} files={files} />
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
       </div>
-
-      {!hasDownloaded && (
-        <div className="max-w-xl mx-auto w-full">
-          <Downloader bookId={id} onComplete={onDownloadComplete} />
-        </div>
-      )}
-
-      {hasDownloaded && (
-        <div className="flex flex-col gap-4 w-full max-w-xl mx-auto">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex justify-center items-center gap-2">
-              <BookmarkIcon className="w-6 h-6" />
-              <h3 className="text-xl font-medium text-center">Bookmarks</h3>
-            </div>
-
-            <div className="flex justify-center items-center gap-2">
-              <AiChatDialog bookId={id} book={book} files={files}>
-                <Button variant="outline" size="icon">
-                  <MessageCircle className="h-[1.2rem] w-[1.2rem]" />
-                  <span className="sr-only">AI Chatbot</span>
-                </Button>
-              </AiChatDialog>
-
-              <Button variant="outline" size="icon">
-                <WandSparkles className="h-[1.2rem] w-[1.2rem]" />
-                <span className="sr-only">AI Suggestions</span>
-              </Button>
-
-              <AiConfigDialog>
-                <Button variant="outline" size="icon">
-                  <SlidersHorizontal className="h-[1.2rem] w-[1.2rem]" />
-                  <span className="sr-only">Adjust</span>
-                </Button>
-              </AiConfigDialog>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2 w-full">
-            {bookmarks.map(bookmark => (
-              <Bookmark
-                key={bookmark.createdAt}
-                bookId={id}
-                bookmark={bookmark}
-                play={() => bookPlayerRef.current?.play(bookmark.time)}
-              />
-            ))}
-
-            {bookmarks.length === 0 && (
-              <div className="flex justify-center items-center h-full">
-                <p className="text-sm text-muted-foreground">No bookmarks found</p>
-              </div>
-            )}
-          </div>
-
-          {bookmarks.length > 0 && (
-            <div className="flex justify-center">
-              <Button variant="default" onClick={updateBookmarks} disabled={isSaving}>
-                {isSaving ? <Loader2Icon className="animate-spin" /> : <Check />}
-                Save
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

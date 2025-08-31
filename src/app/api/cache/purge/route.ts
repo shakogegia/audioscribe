@@ -3,14 +3,59 @@ import fs from "fs";
 import { NextResponse } from "next/server";
 import path from "path";
 
+async function deleteRecursively(
+  itemPath: string,
+  itemName: string
+): Promise<{ item: string; status: string; reason?: string }> {
+  try {
+    // Check if item can be accessed
+    await fs.promises.access(itemPath, fs.constants.F_OK);
+
+    const stats = await fs.promises.stat(itemPath);
+
+    if (stats.isDirectory()) {
+      // Check if directory is writable
+      await fs.promises.access(itemPath, fs.constants.W_OK);
+
+      // Recursively delete directory contents
+      await fs.promises.rm(itemPath, { recursive: true, force: true });
+      return { item: itemName, status: "deleted (directory)" };
+    } else {
+      // Check if file is writable
+      await fs.promises.access(itemPath, fs.constants.W_OK);
+
+      // Delete file
+      await fs.promises.unlink(itemPath);
+      return { item: itemName, status: "deleted (file)" };
+    }
+  } catch (accessError) {
+    console.warn(`Cannot delete ${itemName}:`, accessError);
+    return {
+      item: itemName,
+      status: "skipped",
+      reason: "permission denied or item not accessible",
+    };
+  }
+}
+
 export async function DELETE() {
   try {
-    const files = await fs.promises.readdir(tempFolder);
-    for (const file of files) {
-      await fs.promises.unlink(path.join(tempFolder, file));
+    const items = await fs.promises.readdir(tempFolder);
+    const results = [];
+
+    for (const item of items) {
+      const itemPath = path.join(tempFolder, item);
+      const result = await deleteRecursively(itemPath, item);
+      results.push(result);
     }
 
-    return NextResponse.json({ message: "Cache purged" }, { status: 200 });
+    return NextResponse.json(
+      {
+        message: "Cache purge completed",
+        results,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
