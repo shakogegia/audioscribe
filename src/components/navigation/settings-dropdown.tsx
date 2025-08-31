@@ -17,7 +17,7 @@ import Link from "next/link";
 
 export function SettingsDropdown() {
   const router = useRouter();
-  const { data: { humanReadableSize } = {} } = useSWR("/api/cache/size", { refreshInterval: 10000 });
+  const { data: { humanReadableSize } = {}, mutate } = useSWR("/api/cache/size", { refreshInterval: 0 });
 
   async function purgeCache() {
     toast.loading("Purging cache...", { id: "purge-cache" });
@@ -26,8 +26,14 @@ export function SettingsDropdown() {
     toast.success("Cache purged", { id: "purge-cache" });
   }
 
+  function onOpenChange(open: boolean) {
+    if (open) {
+      mutate();
+    }
+  }
+
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={onOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="icon">
           <Cog className="h-[1.2rem] w-[1.2rem]" />

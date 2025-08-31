@@ -13,10 +13,10 @@ type BookmarksProps = {
   id: string;
   book: SearchResult;
   files: AudioFile[];
-  play: (time?: number) => void;
+  play?: (time?: number) => void;
 };
 
-export default function Bookmarks({ id, book, files, play }: BookmarksProps) {
+export default function Bookmarks({ id, play }: BookmarksProps) {
   const bookmarks = useBookmarksStore(state => state.bookmarks);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -32,8 +32,8 @@ export default function Bookmarks({ id, book, files, play }: BookmarksProps) {
     <div className="flex flex-col gap-4 w-full">
       <div className="flex items-center justify-between gap-2">
         <div className="flex justify-center items-center gap-2">
-          <BookmarkIcon className="w-6 h-6" />
-          <h3 className="text-xl font-medium text-center">Bookmarks</h3>
+          <BookmarkIcon className="w-4 h-4" />
+          <h3 className="text-sm text-center">List</h3>
         </div>
 
         <div className="flex justify-center items-center gap-2">

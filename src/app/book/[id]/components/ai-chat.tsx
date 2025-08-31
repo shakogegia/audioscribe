@@ -15,9 +15,10 @@ interface AiChatProps {
   bookId: string;
   book: SearchResult;
   files: AudioFile[];
+  play?: (time?: number) => void;
 }
 
-export function AiChat({ bookId }: AiChatProps) {
+export function AiChat({ bookId, play }: AiChatProps) {
   const { aiConfig } = useAiConfig();
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -52,7 +53,6 @@ export function AiChat({ bookId }: AiChatProps) {
         message,
         config: aiConfig,
       });
-      console.log("🚀 ~ sendMessage ~ response:", response);
       setAnalysis(response.data.analysis);
       setIsGenerating(false);
     } catch (error) {
@@ -61,6 +61,15 @@ export function AiChat({ bookId }: AiChatProps) {
     } finally {
       setIsGenerating(false);
     }
+  }
+
+  function onTimeClick(time: string) {
+    const timeToSeconds = time.split(":");
+    const hours = parseInt(timeToSeconds[0]);
+    const minutes = parseInt(timeToSeconds[1]);
+    const seconds = parseInt(timeToSeconds[2]);
+    const timeInSeconds = hours * 3600 + minutes * 60 + seconds;
+    play?.(timeInSeconds);
   }
 
   return (
@@ -79,7 +88,9 @@ export function AiChat({ bookId }: AiChatProps) {
                   <Loader2Icon className="w-4 h-4 animate-spin" /> Generating analysis...
                 </div>
               )}
-              {!isGenerating && analysis && <Markdown className="max-h-[300px] overflow-y-auto" text={analysis} />}
+              {!isGenerating && analysis && (
+                <Markdown className="max-h-[300px] overflow-y-auto" text={analysis} onTimeClick={onTimeClick} />
+              )}
             </div>
           </div>
         </div>
@@ -90,7 +101,7 @@ export function AiChat({ bookId }: AiChatProps) {
             placeholder="Ask your question here..."
             value={message}
             onChange={e => setMessage(e.target.value)}
-            disabled={isGenerating}
+            disabled={isGenerating || isTranscribing || !transcriptions.length}
             required
             name="message"
           />

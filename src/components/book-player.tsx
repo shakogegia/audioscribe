@@ -234,7 +234,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
               </div>
             ))}
           </div>
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground font-mono">
             <span>{formatTime(totalCurrentTime)}</span>
             <span>{formatTime(totalDuration)}</span>
           </div>
