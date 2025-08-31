@@ -9,7 +9,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Bookmark } from "./bookmark";
 import { Downloader } from "./downloader";
-import useBookmarksStore from "./store";
+import useBookmarksStore from "../stores/bookmarks";
+import { AiConfigDialog } from "./ai-config-dialog";
 
 export default function Book({ id, book }: { id: string; book: SearchResult }) {
   const [hasDownloaded, setHasDownloaded] = useState(false);
@@ -66,10 +67,12 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
                 <span className="sr-only">AI Suggestions</span>
               </Button>
 
-              <Button variant="outline" size="icon">
-                <SlidersHorizontal className="h-[1.2rem] w-[1.2rem]" />
-                <span className="sr-only">Adjust</span>
-              </Button>
+              <AiConfigDialog>
+                <Button variant="outline" size="icon">
+                  <SlidersHorizontal className="h-[1.2rem] w-[1.2rem]" />
+                  <span className="sr-only">Adjust</span>
+                </Button>
+              </AiConfigDialog>
             </div>
           </div>
 

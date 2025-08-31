@@ -5,12 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/lib/format";
 import type * as Audiobookshelf from "@/types/audiobookshelf";
-import { ChevronsDownUpIcon, ChevronsUpDownIcon, Trash, WandSparkles, Loader2, Captions, Wand } from "lucide-react";
-import { useState } from "react";
-import useBookmarksStore from "./store";
 import axios from "axios";
+import { Captions, ChevronsDownUpIcon, ChevronsUpDownIcon, Loader2, Trash, Wand, WandSparkles } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
+import useBookmarksStore from "../stores/bookmarks";
+import { useAiConfig } from "../hooks/use-ai-config";
 
 interface BookmarksProps {
   bookId: string;
@@ -25,6 +26,7 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const updateBookmark = useBookmarksStore(state => state.update);
   const [transcription, setTranscription] = useState<string | null>(null);
+  const { aiConfig } = useAiConfig();
 
   const handlePlayClick = () => {
     setShowPlayer(!showPlayer);
@@ -46,6 +48,7 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
         startTime: bookmark.time,
         transcription: transcription,
         timestamp: bookmark.fileStartTime,
+        config: aiConfig,
       });
 
       const suggestions = response.data.suggestions || [];
@@ -81,6 +84,7 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
         startTime: bookmark.time,
         // duration: 30,
         // offset: 15,
+        config: aiConfig,
       });
 
       setTranscription(response.data.transcription.text);

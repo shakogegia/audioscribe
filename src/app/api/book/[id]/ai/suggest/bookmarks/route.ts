@@ -1,19 +1,31 @@
 import { generateBookmarkSuggestions } from "@/ai/prompts/bookmark";
 import { provider as googleProvider } from "@/ai/providers/google";
+import { WhisperModel } from "@/ai/transcription/types/transription";
 import { getBook } from "@/lib/audiobookshelf";
 import { formatTime } from "@/lib/format";
 import { NextRequest, NextResponse } from "next/server";
 
+interface BookmarkSuggestionsRequestBody {
+  transcription: string;
+  offset?: number;
+  config: {
+    transcriptionModel: WhisperModel;
+    aiProvider: string;
+    aiModel: string;
+  };
+}
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: bookId } = await params;
-    const body = await request.json();
+    const body: BookmarkSuggestionsRequestBody = await request.json();
 
-    const { transcription, offset = 15 } = body;
+    const { transcription, offset = 15, config } = body;
 
     const book = await getBook(bookId);
 
-    const provider = await googleProvider();
+    console.log("🚀 ~ POST ~ config:", config);
+    const provider = await googleProvider(config.aiModel);
 
     const { suggestions } = await generateBookmarkSuggestions(provider, {
       transcription: transcription,
