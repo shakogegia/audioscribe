@@ -27,11 +27,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // Process files with parallel limit
     const transcriptions = await processWithLimit(
       files,
-      file =>
-        transcribeFullAudioFile({
+      async file => {
+        const transcription = await transcribeFullAudioFile({
           provider: { type: "whisper", model: config.transcriptionModel },
           audioUrl: path.join(tempFolder, file.path),
-        }),
+        });
+        return {
+          ...file,
+          ...transcription,
+        };
+      },
       parallelLimit
     );
 

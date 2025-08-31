@@ -39,7 +39,7 @@ export function Markdown({ text, onTimeClick, className = "" }: MarkdownProps) {
       // Replace timestamps in the HTML content with clickable spans
       const processedHtml = htmlContent.replace(/(\(?(\d{1,2}:\d{2}:\d{2})\)?)/g, (match, fullMatch, timeOnly) => {
         return `<span class="${twMerge(
-          "timestamp-button font-semibold cursor-pointer",
+          "timestamp-button font-mono font-medium cursor-pointer",
           "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
         )}" data-time="${timeOnly}">${fullMatch}</span>`;
       });

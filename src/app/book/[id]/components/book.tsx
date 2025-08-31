@@ -61,13 +61,13 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
                 <TabsTrigger value="transcript">Transcript</TabsTrigger>
               </TabsList>
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <Bookmarks id={id} book={book} files={files} play={bookPlayerRef.current?.play} />
+                <Bookmarks id={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
               </TabsContent>
               <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <AiChat bookId={id} book={book} files={files} play={bookPlayerRef.current?.play} />
+                <AiChat bookId={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
               </TabsContent>
               <TabsContent value="transcript" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <Transcript bookId={id} book={book} files={files} play={bookPlayerRef.current?.play} />
+                <Transcript bookId={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
               </TabsContent>
             </Tabs>
           </>

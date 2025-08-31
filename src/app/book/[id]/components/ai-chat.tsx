@@ -117,7 +117,7 @@ export function AiChat({ bookId, play }: AiChatProps) {
             Send
           </Button>
 
-          <Button type="button" onClick={transcribeFullBook} disabled={isTranscribing}>
+          <Button variant="secondary" type="button" onClick={transcribeFullBook} disabled={isTranscribing}>
             {isTranscribing ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <Captions className="w-4 h-4" />}
             Transcribe Full Book
           </Button>
