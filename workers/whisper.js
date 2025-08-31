@@ -55,6 +55,9 @@ async function transcribe() {
   } catch (error) {
     console.error(`[Whisper Worker] Transcription failed:`, error);
 
+    // send message to parent process
+    process.send({ success: false, error: error.message });
+
     // Write error to output file
     fs.writeFileSync(
       outputPath,

@@ -32,16 +32,21 @@ export async function transcribe(
     await new Promise<void>((resolve, reject) => {
       const worker = exec(`node ${workerPath} ${modelName} ${tempAudioPath} ${outputPath}`);
 
+      worker.on("message", message => {
+        console.info("[Transcription] Worker message:", message);
+      });
+
+      worker.on("error", error => {
+        console.error("[Transcription] Worker error:", error);
+        reject(new Error(`Worker error: ${error.message}`));
+      });
+
       worker.on("exit", code => {
         if (code === 0) {
           resolve();
         } else {
           reject(new Error(`Worker exited with code ${code}`));
         }
-      });
-
-      worker.on("error", error => {
-        reject(new Error(`Worker error: ${error.message}`));
       });
     });
 
@@ -92,38 +97,19 @@ export async function transcribe(
       }
     }
 
-    // Clean up temp files (but preserve cache files)
-    const cleanupPromises = [];
-
-    // Only clean up temp audio file
-    cleanupPromises.push(fs.unlink(tempAudioPath).catch(() => {}));
-
-    // Only clean up output file if it's not in the cache directory
-    if (!outputPath.startsWith(transcriptionCacheFolder)) {
-      cleanupPromises.push(fs.unlink(outputPath).catch(() => {}));
-    }
-
-    await Promise.all(cleanupPromises);
-
     return {
       text: transcriptionText,
       confidence: 0.85, // nodewhisper doesn't provide confidence scores
       segments: segments.length > 0 ? segments : undefined,
     };
   } catch (error) {
-    // Clean up temp files on error (but preserve cache files)
-    const cleanupPromises = [];
-
-    // Only clean up temp audio file
-    cleanupPromises.push(fs.unlink(tempAudioPath).catch(() => {}));
-
-    // Only clean up output file if it's not in the cache directory
-    if (!outputPath.startsWith(transcriptionCacheFolder)) {
-      cleanupPromises.push(fs.unlink(outputPath).catch(() => {}));
-    }
-
-    await Promise.all(cleanupPromises);
-
     throw new Error(`Whisper transcription failed: ${error}`);
+  } finally {
+    // Clean up temp files
+    await Promise.all([
+      fs.unlink(tempAudioPath).catch(() => {}),
+      fs.unlink(outputPath).catch(() => {}),
+      fs.unlink(`${tempAudioPath}.json`).catch(() => {}),
+    ]);
   }
 }
