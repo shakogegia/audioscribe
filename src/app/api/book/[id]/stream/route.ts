@@ -3,6 +3,8 @@ import { getBookFiles } from "@/lib/audiobookshelf";
 import path from "path";
 import os from "os";
 import fs from "fs";
+import { tempFolder } from "@/lib/utils";
+import { getAudioFileByTime } from "@/lib/helpers";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -12,15 +14,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const time = Number(searchParams.get("time"));
 
-    const files = await getBookFiles(id);
-    const file = files.find(file => file.start <= time && file.start + file.duration >= time);
+    const file = await getAudioFileByTime(id, time);
 
-    if (!file) {
-      return NextResponse.json({ error: "File not found" }, { status: 404 });
-    }
-
-    // local file = temp folder + file.path
-    const localFile = path.join(os.tmpdir(), "audiobook-wizard", file.path);
+    const localFile = path.join(tempFolder, file.path);
 
     // Check if file exists locally
     if (!fs.existsSync(localFile)) {

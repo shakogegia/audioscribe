@@ -1,14 +1,13 @@
-import { generateBookmarkSuggestions } from "@/ai/prompts/bookmark";
+import { generateBookAnalysis } from "@/ai/prompts/book";
 import { provider } from "@/ai/providers";
 import { WhisperModel } from "@/ai/transcription/types/transription";
 import { AiModel, AiProvider } from "@/ai/types/ai";
 import { getBook } from "@/lib/audiobookshelf";
-import { formatTime } from "@/lib/format";
 import { NextRequest, NextResponse } from "next/server";
 
-interface BookmarkSuggestionsRequestBody {
-  transcription: string;
-  offset?: number;
+interface AiChatRequestBody {
+  message: string;
+  transcriptions: { text: string }[];
   config: {
     transcriptionModel: WhisperModel;
     aiProvider: AiProvider;
@@ -19,24 +18,24 @@ interface BookmarkSuggestionsRequestBody {
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: bookId } = await params;
-    const body: BookmarkSuggestionsRequestBody = await request.json();
+    const body: AiChatRequestBody = await request.json();
 
-    const { transcription, offset = 15, config } = body;
+    const { transcriptions, message, config } = body;
 
     const book = await getBook(bookId);
 
     const ai = await provider(config.aiProvider, config.aiModel);
 
-    const { suggestions } = await generateBookmarkSuggestions(ai, {
-      transcription: transcription,
+    const { analysis } = await generateBookAnalysis(ai, {
+      message: message,
+      transcriptions: transcriptions,
       context: {
         bookTitle: book?.title ?? "",
         authors: book?.authors ?? [],
-        time: formatTime(Number(offset)),
       },
     });
 
-    return NextResponse.json({ suggestions: suggestions });
+    return NextResponse.json({ analysis: analysis });
   } catch (error) {
     console.error("AI suggestion error:", error);
 

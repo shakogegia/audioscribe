@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs";
 import os from "os";
+import { tempFolder } from "@/lib/utils";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -12,7 +13,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const files = await getBookFiles(id);
 
-    const tempFolder = path.join(os.tmpdir(), "audiobook-wizard");
     await fs.promises.mkdir(tempFolder, { recursive: true });
 
     let isAlreadyDownloaded = false;

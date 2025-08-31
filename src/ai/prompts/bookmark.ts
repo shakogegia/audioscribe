@@ -1,6 +1,6 @@
 import { LanguageModel } from "ai";
-import { generate } from "../helpers/generate";
-import { createPrompt } from "../helpers/prompt";
+import { generate } from "@/ai/helpers/generate";
+import { createPrompt } from "@/ai/helpers/prompt";
 
 export interface BookmarkSuggestionRequest {
   transcription: string;

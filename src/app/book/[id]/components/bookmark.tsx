@@ -16,9 +16,10 @@ import { useAiConfig } from "../hooks/use-ai-config";
 interface BookmarksProps {
   bookId: string;
   bookmark: Audiobookshelf.AudioBookmark;
+  play?: (time?: number) => void;
 }
 
-export function Bookmark({ bookId, bookmark }: BookmarksProps) {
+export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
   const [showPlayer, setShowPlayer] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
@@ -80,7 +81,7 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
       setIsTranscribing(true);
       toast.loading("Transcribing audio...", { id: `transcribe-${bookmark.time}` });
 
-      const response = await axios.post<{ transcription: { text: string } }>(`/api/book/${bookId}/transcribe`, {
+      const response = await axios.post<{ transcription: { text: string } }>(`/api/book/${bookId}/transcribe/segment`, {
         startTime: bookmark.time,
         // duration: 30,
         // offset: 15,
@@ -113,7 +114,10 @@ export function Bookmark({ bookId, bookmark }: BookmarksProps) {
     <div className="flex flex-col gap-2 border rounded-md p-2 text-sm w-full">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2 w-full">
-          <Badge variant="outline">{formatTime(bookmark.time)}</Badge>
+          <Badge className="cursor-pointer" variant="outline" onClick={() => play?.(bookmark.time)}>
+            {formatTime(bookmark.time)}
+          </Badge>
+
           <input
             type="text"
             className="font-semibold outline-none w-full hover:underline"

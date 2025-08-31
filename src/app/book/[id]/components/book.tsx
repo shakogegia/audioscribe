@@ -1,18 +1,29 @@
 "use client";
+import { BookPlayer, BookPlayerRef } from "@/components/book-player";
 import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
-import { SearchResult } from "@/types/api";
+import { AudioFile, SearchResult } from "@/types/api";
 import axios from "axios";
-import { Loader2Icon, Check, Bookmark as BookmarkIcon, SlidersHorizontal, WandSparkles } from "lucide-react";
+import {
+  Bookmark as BookmarkIcon,
+  Check,
+  Loader2Icon,
+  MessageCircle,
+  SlidersHorizontal,
+  WandSparkles,
+} from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
+import useBookmarksStore from "../stores/bookmarks";
+import { AiChatDialog } from "./ai-chat-dialog";
+import { AiConfigDialog } from "./ai-config-dialog";
 import { Bookmark } from "./bookmark";
 import { Downloader } from "./downloader";
-import useBookmarksStore from "../stores/bookmarks";
-import { AiConfigDialog } from "./ai-config-dialog";
 
-export default function Book({ id, book }: { id: string; book: SearchResult }) {
+export default function Book({ id, book, files }: { id: string; book: SearchResult; files: AudioFile[] }) {
+  const bookPlayerRef = useRef<BookPlayerRef>(null);
+
   const [hasDownloaded, setHasDownloaded] = useState(false);
   const setBookmarks = useBookmarksStore(state => state.setBookmarks);
   const bookmarks = useBookmarksStore(state => state.bookmarks);
@@ -47,6 +58,10 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
         }
       />
 
+      <div className="w-full max-w-xl">
+        <BookPlayer book={book} files={files} ref={bookPlayerRef} controls="full" />
+      </div>
+
       {!hasDownloaded && (
         <div className="max-w-xl mx-auto w-full">
           <Downloader bookId={id} onComplete={onDownloadComplete} />
@@ -62,6 +77,13 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
             </div>
 
             <div className="flex justify-center items-center gap-2">
+              <AiChatDialog bookId={id} book={book} files={files}>
+                <Button variant="outline" size="icon">
+                  <MessageCircle className="h-[1.2rem] w-[1.2rem]" />
+                  <span className="sr-only">AI Chatbot</span>
+                </Button>
+              </AiChatDialog>
+
               <Button variant="outline" size="icon">
                 <WandSparkles className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">AI Suggestions</span>
@@ -78,7 +100,12 @@ export default function Book({ id, book }: { id: string; book: SearchResult }) {
 
           <div className="flex flex-col gap-2 w-full">
             {bookmarks.map(bookmark => (
-              <Bookmark key={bookmark.createdAt} bookId={id} bookmark={bookmark} />
+              <Bookmark
+                key={bookmark.createdAt}
+                bookId={id}
+                bookmark={bookmark}
+                play={() => bookPlayerRef.current?.play(bookmark.time)}
+              />
             ))}
 
             {bookmarks.length === 0 && (

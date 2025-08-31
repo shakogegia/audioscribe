@@ -126,7 +126,7 @@ const aiProviders = [
   {
     name: "Ollama",
     value: "ollama",
-    models: [],
+    models: ["llama3.2:3b", "mistral:7b", "llama2:13b"],
   },
 ];
 

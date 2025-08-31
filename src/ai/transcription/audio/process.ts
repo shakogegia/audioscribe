@@ -2,13 +2,16 @@ import { tempFolder } from "@/lib/utils";
 import ffmpeg from "fluent-ffmpeg";
 import { promises as fs } from "fs";
 import { join } from "path";
+import { v4 as uuidv4 } from "uuid";
+
+const cleanUpTempFiles = true;
 
 /**
  * Preprocess audio for better transcription quality
  */
 export async function preprocessAudio(audioBuffer: Buffer): Promise<Buffer> {
-  const tempInputPath = join(tempFolder, `preprocess_input_${Date.now()}.wav`);
-  const tempOutputPath = join(tempFolder, `preprocess_output_${Date.now()}.wav`);
+  const tempInputPath = join(tempFolder, `preprocess_input_${uuidv4()}.wav`);
+  const tempOutputPath = join(tempFolder, `preprocess_output_${uuidv4()}.wav`);
 
   try {
     // Write input buffer to temp file
@@ -38,7 +41,9 @@ export async function preprocessAudio(audioBuffer: Buffer): Promise<Buffer> {
     const processedBuffer = await fs.readFile(tempOutputPath);
 
     // Clean up temp files
-    await Promise.all([fs.unlink(tempInputPath).catch(() => {}), fs.unlink(tempOutputPath).catch(() => {})]);
+    if (cleanUpTempFiles) {
+      await Promise.all([fs.unlink(tempInputPath).catch(() => {}), fs.unlink(tempOutputPath).catch(() => {})]);
+    }
 
     return processedBuffer;
   } catch (error) {
