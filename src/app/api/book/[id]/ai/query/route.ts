@@ -20,8 +20,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params;
     const body: AiChatRequestBody = await request.json();
 
-    return NextResponse.json({ analysis: "test at 00:12:34 asnd asnd asnd" });
-
     const { transcriptions, message, config } = body;
 
     const book = await getBook(bookId);
