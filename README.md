@@ -6,8 +6,6 @@ A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps
 
 ## Features
 
-### Bookmarking
-
 - **AI Suggestions**: Generate meaningful bookmark titles using LLM's
 - **Transcription**: Transcribe audiobook
 - **Captions**: View generated captions for your audiobooks
