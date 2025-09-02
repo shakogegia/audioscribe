@@ -1,7 +1,6 @@
-import { House } from "lucide-react";
+import { Cog, House } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
-import { SettingsDropdown } from "./settings-dropdown";
 import { ThemeSwitcher } from "./theme-switcher";
 
 export function Header() {
@@ -15,7 +14,11 @@ export function Header() {
           </Button>
         </Link>
         <ThemeSwitcher />
-        <SettingsDropdown />
+        <Link href="/setup/audiobookshelf">
+          <Button variant="outline" size="icon">
+            <Cog className="w-4 h-4" />
+          </Button>
+        </Link>
       </div>
     </header>
   );

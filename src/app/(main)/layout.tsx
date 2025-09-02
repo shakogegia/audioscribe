@@ -18,5 +18,5 @@ export default async function MainLayout({ children, }: Props) {
 		return redirect("/setup/llm");
 	}
 
-  return <div>halllo{children}</div>;
+  return children;
 }
