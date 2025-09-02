@@ -7,7 +7,9 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "chroma": "chroma run --path ./data/chromadb"
+    "chroma": "chroma run --path ./data/chromadb",
+    "script:vectorize": "ts-node --project workers/tsconfig.json workers/vectorize.ts",
+    "script:transcribe": "ts-node --project workers/tsconfig.json workers/transcribe.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.9",
@@ -37,6 +39,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "commander": "^14.0.0",
+    "dotenv": "^17.2.1",
     "fluent-ffmpeg": "^2.1.3",
     "handlebars": "^4.7.8",
     "lucide-react": "^0.542.0",
@@ -69,6 +72,8 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "tw-animate-css": "^1.3.7",
     "typescript": "^5"
   }

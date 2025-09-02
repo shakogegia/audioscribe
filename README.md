@@ -32,6 +32,8 @@ A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps
 brew install ffmpeg
 ```
 
+cmake
+
 #### Ollama
 ```sh
  # Embedder
