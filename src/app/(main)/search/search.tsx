@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SearchResult } from "@/types/api";
-import { Library } from "@/types/audiobookshelf";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileAudio, Loader2, Search as SearchIcon } from "lucide-react";
 import { useQueryState } from "nuqs";
@@ -24,6 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+
+type Library = {
+  id: string;
+  name: string;
+};
 
 const formSchema = z.object({
   query: z.string(),

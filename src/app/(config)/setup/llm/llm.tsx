@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { AppConfig } from "@/lib/config";
-import { Brain, Check, ExternalLink } from "lucide-react";
+import { Brain, ExternalLink } from "lucide-react";
+import { useMount } from "react-use";
 import { toast } from "sonner";
 import useLLMStore from "./store";
-import { useMount } from "react-use";
 
 type Props = {
   config: AppConfig | null;
@@ -38,7 +38,7 @@ export default function LLMSetup({ config, updateConfig }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full min-h-full px-4">
+    <div className="flex flex-col items-center gap-8 w-full min-h-full px-4 mb-10">
       <Hero
         title="AI Provider Setup"
         description={[
@@ -49,64 +49,148 @@ export default function LLMSetup({ config, updateConfig }: Props) {
       />
 
       <div className="w-full max-w-2xl space-y-6">
-        <Card className="w-full">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>OpenAI</CardTitle>
-                <CardDescription>Requires an OpenAI account with prepaid API credits.</CardDescription>
-              </div>
-            </div>
-            <CardAction>
-              <Switch
-                checked={llmConfig.aiProviders.openai.enabled}
-                onCheckedChange={enabled =>
-                  update({
-                    ...llmConfig,
-                    aiProviders: {
-                      ...llmConfig.aiProviders,
-                      openai: { ...llmConfig.aiProviders.openai, enabled },
-                    },
-                  })
-                }
-              />
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="openai-api-key">API Key</Label>
-                <a
-                  href={"https://platform.openai.com/api-keys"}
-                  target="_blank"
-                  className="ml-auto inline-flex items-center gap-1 text-sm underline-offset-4 hover:underline"
-                >
-                  Get API Key <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
-              <Input
-                id="openai-api-key"
-                type="password"
-                placeholder="Enter API Key"
-                value={llmConfig.aiProviders.openai.apiKey || ""}
-                onChange={e =>
-                  updateConfig({
-                    ...llmConfig,
-                    aiProviders: {
-                      ...llmConfig.aiProviders,
-                      openai: { ...llmConfig.aiProviders.openai, apiKey: e.target.value },
-                    },
-                  })
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <AiCard
+          title="Gemini"
+          description="Requires a Google AI API key (free or paid tier)."
+          enabled={llmConfig.aiProviders.google.enabled}
+          onCheckedChange={enabled =>
+            update({ ...llmConfig, aiProviders: { ...llmConfig.aiProviders, google: { ...llmConfig.aiProviders.google, enabled } } })
+          }
+          fields={[
+            {
+              label: "API Key",
+              hidden: true,
+              placeholder: "Enter API Key",
+              value: llmConfig.aiProviders.google.apiKey || "",
+              onChange: apiKey => {
+                update({
+                  ...llmConfig,
+                  aiProviders: {
+                    ...llmConfig.aiProviders,
+                    google: { ...llmConfig.aiProviders.google, apiKey },
+                  },
+                })
+              },
+              help: { href: "https://aistudio.google.com/apikey", text: "Get API Key" },
+            },
+          ]}
+        />
+
+        <AiCard
+          title="OpenAI"
+          description="Requires an OpenAI account with prepaid API credits."
+          enabled={llmConfig.aiProviders.openai.enabled}
+          onCheckedChange={enabled =>
+            update({ ...llmConfig, aiProviders: { ...llmConfig.aiProviders, openai: { ...llmConfig.aiProviders.openai, enabled } } })
+          }
+          fields={[
+            {
+              label: "API Key",
+              hidden: true,
+              placeholder: "Enter API Key",
+              value: llmConfig.aiProviders.openai.apiKey || "",
+              onChange: apiKey => {
+                update({
+                  ...llmConfig,
+                  aiProviders: {
+                    ...llmConfig.aiProviders,
+                    openai: { ...llmConfig.aiProviders.openai, apiKey },
+                  },
+                })
+              },
+              help: { href: "https://platform.openai.com/api-keys", text: "Get API Key" },
+            },
+          ]}
+        />
+
+
+        <AiCard
+          title="Ollama"
+          description="Free and private access to local LLMs when you self-host Ollama. Be aware that small models may not produce usable results."
+          enabled={llmConfig.aiProviders.ollama.enabled}
+          onCheckedChange={enabled =>
+            update({ ...llmConfig, aiProviders: { ...llmConfig.aiProviders, ollama: { ...llmConfig.aiProviders.ollama, enabled } } })
+          }
+          fields={[
+            {
+              label: "Base URL",
+              placeholder: "http://localhost:11434",
+              value: llmConfig.aiProviders.ollama.baseUrl || "",
+              onChange: baseUrl => {
+                update({
+                  ...llmConfig,
+                  aiProviders: {
+                    ...llmConfig.aiProviders,
+                    ollama: { ...llmConfig.aiProviders.ollama, baseUrl },
+                  },
+                })
+              },
+            },
+          ]}
+        />
 
         <Button className="w-full" onClick={save}>
           Save Configuration
         </Button>
       </div>
     </div>
+  );
+}
+
+type AiCardProps = {
+  title: string;
+  description: string;
+  enabled: boolean;
+  onCheckedChange: (enabled: boolean) => void;
+  fields: {
+    label: string;
+    value: string;
+    hidden?: boolean;
+    onChange: (value: string) => void;
+    help?: { href: string; text: string };
+    placeholder?: string;
+  }[];
+};
+function AiCard({ title, description, enabled, onCheckedChange, fields }: AiCardProps) {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </div>
+        </div>
+        <CardAction>
+          <Switch
+            checked={enabled}
+            onCheckedChange={onCheckedChange}
+          />
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        {fields.map(field => (
+          <div className="grid gap-2" key={field.label}>
+            <div className="flex items-center">
+              <Label htmlFor="openai-api-key">{field.label}</Label>
+              {field.help && <a
+                href={field.help.href}
+                target="_blank"
+                className="ml-auto inline-flex items-center gap-1 text-sm underline-offset-4 hover:underline"
+              >
+                {field.help.text} <ExternalLink className="w-3 h-3" />
+              </a>}
+            </div>
+            <Input
+              id="openai-api-key"
+              type={field.hidden ? "password" : "text"}
+              placeholder={field.placeholder}
+              defaultValue={field.value || ""}
+              onChange={e => field.onChange(e.target.value)}
+            />
+          </div>
+        ))}
+      </CardContent>
+    </Card>
   );
 }
