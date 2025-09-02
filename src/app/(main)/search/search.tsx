@@ -5,28 +5,38 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { SearchResult } from "@/types/api";
+import { Library } from "@/types/audiobookshelf";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileAudio, Loader2, Search as SearchIcon } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { useForm } from "react-hook-form";
 import useSWR from "swr";
 import z from "zod";
 import SearchResults from "./results";
 import SearchStatus from "./status";
-import { AppConfig } from "@/lib/config";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const formSchema = z.object({
-  query: z.string().optional(),
+  query: z.string(),
+  libraryId: z.string(),
 });
 
-function SearchPageContent({ config }: { config: AppConfig }) {
+function SearchPageContent({ libraries }: { libraries: Library[] }) {
   const [searchQuery, setSearchQuery] = useQueryState("q");
-  const [libraryId] = useState<string>(() => config.audiobookshelf.libraryId!);
+  const [libraryId, setLibraryId] = useQueryState("libraryId");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { query: searchQuery ?? "" },
+    defaultValues: { query: searchQuery ?? "", libraryId: libraryId ?? "" },
   });
 
   const { data, error, isLoading } = useSWR<SearchResult[]>(
@@ -36,6 +46,9 @@ function SearchPageContent({ config }: { config: AppConfig }) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (values.query) {
       setSearchQuery(values.query);
+    }
+    if (values.libraryId) {
+      setLibraryId(values.libraryId);
     }
   }
 
@@ -49,7 +62,35 @@ function SearchPageContent({ config }: { config: AppConfig }) {
 
       {/* Search */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full max-w-sm items-center gap-2">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full max-w-xl items-center gap-2">
+
+        <FormField
+            control={form.control}
+            name="libraryId"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a library" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Libraries</SelectLabel>
+                        {libraries.map(library => (
+                          <SelectItem key={library.id} value={library.id}>
+                            {library.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          
           <FormField
             control={form.control}
             name="query"
@@ -58,10 +99,10 @@ function SearchPageContent({ config }: { config: AppConfig }) {
                 <FormControl>
                   <Input type="text" placeholder="Example: Red Rising" {...field} />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
+
           <Button type="submit" variant="outline">
             <SearchIcon className="w-4 h-4" />
             Search
@@ -96,7 +137,7 @@ function SearchPageContent({ config }: { config: AppConfig }) {
   );
 }
 
-export function Search({ config }: { config: AppConfig }) {
+export function Search({ libraries }: { libraries: Library[] }) {
   return (
     <Suspense
       fallback={
@@ -115,7 +156,7 @@ export function Search({ config }: { config: AppConfig }) {
         </div>
       }
     >
-      <SearchPageContent config={config} />
+      <SearchPageContent libraries={libraries} />
     </Suspense>
   );
 }

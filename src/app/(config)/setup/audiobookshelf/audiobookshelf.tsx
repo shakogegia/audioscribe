@@ -3,17 +3,16 @@ import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AppConfig } from "@/lib/config";
-import { Check, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import Image from "next/image";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +25,6 @@ import { toast } from "sonner";
 const formSchema = z.object({
   url: z.string().min(1, { message: "URL is required." }),
   apiKey: z.string().min(1, { message: "API Key is required." }),
-  libraryId: z.string().min(1, { message: "Library ID is required." }),
 });
 
 type Props = {
@@ -40,7 +38,6 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
     defaultValues: {
       url: config.audiobookshelf.url ?? "",
       apiKey: config.audiobookshelf.apiKey ?? "",
-      libraryId: config.audiobookshelf.libraryId ?? "",
     },
   });
 
@@ -48,7 +45,7 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
     toast.loading("Saving configuration...", { id: "save-config" });
     await updateConfig({
       ...config,
-      audiobookshelf: { url: values.url, apiKey: values.apiKey, libraryId: values.libraryId },
+      audiobookshelf: { url: values.url, apiKey: values.apiKey },
     });
     toast.success("Configuration saved", { id: "save-config" });
   }
@@ -129,26 +126,6 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
                           <Input id="apiKey" type="password" required placeholder="Enter API Key" {...field} />
                         </FormControl>
                         {/* <FormDescription>This is your public display name.</FormDescription> */}
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid gap-2">
-                  <FormField
-                    control={form.control}
-                    name="libraryId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          <div className="flex items-center w-full">
-                            <Label htmlFor="libraryId">Library</Label>
-                          </div>
-                        </FormLabel>
-                        <FormControl>
-                          <Input id="libraryId" type="text" required placeholder="Enter Audiobookshelf Library ID" {...field} />
-                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
