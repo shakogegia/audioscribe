@@ -1,4 +1,4 @@
-# Audiobook Bookmark Wizard
+# AudioScribe
 
 A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps to manage audiobook bookmarks with AI bookmark suggestions and transcription.
 
