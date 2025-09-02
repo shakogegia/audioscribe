@@ -48,6 +48,8 @@ ollama pull llama3.2:3b
 clone git@github.com:shakogegia/audioscribe.git
 cd audioscribe
 npm install
+
+# set env variables
 cp .env.example .env
 ```
 

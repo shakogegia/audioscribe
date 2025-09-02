@@ -21,21 +21,7 @@ export const defaultConfig: AppConfig = {
   },
 };
 
-const configPath = join(process.cwd(), "data", "config.json");
-
-export async function save(config: AppConfig) {
-  try {
-    // Ensure data directory exists
-    const dataDir = join(process.cwd(), "data");
-    await fs.mkdir(dataDir, { recursive: true });
-
-    // Save config file
-    await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf8");
-  } catch (error) {
-    console.error("Failed to save config:", error);
-    throw error;
-  }
-}
+const configPath = join(process.env.DATA_DIR!, "config.json");
 
 export async function load(): Promise<AppConfig> {
   try {
@@ -55,5 +41,19 @@ export async function load(): Promise<AppConfig> {
   } catch (error) {
     console.error("Failed to load config, returning default config:", error);
     return defaultConfig;
+  }
+}
+
+export async function save(config: AppConfig) {
+  try {
+    // Ensure data directory exists
+    const dataDir = join(process.cwd(), "data");
+    await fs.mkdir(dataDir, { recursive: true });
+
+    // Save config file
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf8");
+  } catch (error) {
+    console.error("Failed to save config:", error);
+    throw error;
   }
 }
