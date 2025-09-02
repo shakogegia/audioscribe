@@ -1,6 +1,6 @@
 # AudioScribe
 
-A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps to manage audiobook bookmarks with AI bookmark suggestions and transcription.
+A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps to enhance audiobook experience with AI bookmark title suggestions, transcription, chat and more.
 
 ![Bookmark Editing](demo/screenshots/edit.png)
 
@@ -8,19 +8,20 @@ A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps
 
 ### Bookmarking
 
-- **AI Suggestions**: Generate intelligent, meaningful bookmark titles using LLM's
+- **AI Suggestions**: Generate meaningful bookmark titles using LLM's
+- **Transcription**: Transcribe audiobook
+- **Captions**: View generated captions for your audiobooks
 - **Multiple AI Providers**: Support for OpenAI, Google Gemini, Claude, and local Ollama models
 - **Manual Bookmarking**: Easily rename and manage your own bookmarks
 
 ### Transcription
 
-- Audio transcription is powered by Whisper model
+- Audio transcription is powered by OpenAI's Whisper model
 
 ## Prerequisites
 
-- Docker and Docker Compose installed
 - An Audiobookshelf server with API access
-- API keys for AI providers
+- API keys for AI providers (Ollama, Gemini, OpenAI)
 
 ### Installation
 
