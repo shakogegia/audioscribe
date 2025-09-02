@@ -27,7 +27,7 @@ A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps
 <details>
 <summary>Local</summary>
 
-#### Install Dependencies
+#### Dependencies
 
 ```sh
 brew install ffmpeg
@@ -41,13 +41,24 @@ ollama pull all-minilm:latest
 ollama pull llama3.2:3b 
 ```
 
-#### Run
+#### Install
 
 ```sh
 clone git@github.com:shakogegia/audioscribe.git
 cd audioscribe
 npm install
 cp .env.example .env
+```
+
+#### Run
+
+```sh
+npm run dev
+
+# or 
+npm run build
+npm run start
+
 ```
 </details>
 
