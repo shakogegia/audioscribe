@@ -4,7 +4,7 @@ import {
 	TabsList,
 	TabsTrigger
 } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 type Props = Readonly<{
   children: React.ReactNode;
@@ -12,6 +12,7 @@ type Props = Readonly<{
 
 export default function SetupLayout({ children, }: Props) {
 	const router = useRouter();
+	const pathname = usePathname();
 
 	function onValueChange(value: string) {
 		router.push(value);
@@ -19,8 +20,8 @@ export default function SetupLayout({ children, }: Props) {
 
   return (
 		<div className="w-full flex flex-col gap-10">
-      <div className="w-fit mx-auto">
-				<Tabs defaultValue="/setup/audiobookshelf" onValueChange={onValueChange}>
+			<div className="w-fit mx-auto">
+				<Tabs defaultValue={pathname} onValueChange={onValueChange}>
 					<TabsList>
 						<TabsTrigger value="/setup/audiobookshelf">Audiobookshelf</TabsTrigger>
 						<TabsTrigger value="/setup/llm">LLM Providers</TabsTrigger>

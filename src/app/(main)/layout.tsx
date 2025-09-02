@@ -9,7 +9,8 @@ type Props = Readonly<{
 export default async function MainLayout({ children, }: Props) {
 	const config = await load();
 	
-	if (!config.audiobookshelf.url || !config.audiobookshelf.apiKey) {
+	const isAudiobookshelfConfigured = Object.values(config.audiobookshelf).every(value => value !== null);
+	if (!isAudiobookshelfConfigured) {
 		return redirect("/setup/audiobookshelf");
 	}
 

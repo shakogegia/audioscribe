@@ -9,6 +9,7 @@ export async function updateConfig(config: AppConfig) {
   await save(config);
   // Revalidate the page to clear any cached config
   revalidatePath("/setup/audiobookshelf");
+  revalidatePath("/search");
 }
 
 export default async function AudiobookshelfSetupPage() {
