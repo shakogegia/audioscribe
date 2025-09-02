@@ -82,7 +82,7 @@ export function AiConfigDialog({ children }: { children: React.ReactNode }) {
         <DialogTrigger asChild>{children}</DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>AI Config</DialogTitle>
+            <DialogTitle>Config</DialogTitle>
             <DialogDescription>Adjust AI configuration</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
@@ -145,7 +145,7 @@ export function AiConfigDialog({ children }: { children: React.ReactNode }) {
           </div>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" variant="secondary">Close</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
