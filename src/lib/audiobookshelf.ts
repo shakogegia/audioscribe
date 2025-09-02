@@ -19,12 +19,17 @@ export const getApi = async () => {
 };
 
 export async function getAllLibraries(): Promise<Library[]> {
-  const api = await getApi();
-  const response = await api.get<{ libraries: Audiobookshelf.Library[] }>("/api/libraries");
-  return response.data.libraries.map(library => ({
-    id: library.id,
-    name: library.name,
-  }));
+  try {
+    const api = await getApi();
+    const response = await api.get<{ libraries: Audiobookshelf.Library[] }>("/api/libraries");
+    return response.data.libraries.map(library => ({
+      id: library.id,
+      name: library.name,
+    }));
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
 
 export async function searchBook(libraryId: string, query: string): Promise<SearchResult[]> {

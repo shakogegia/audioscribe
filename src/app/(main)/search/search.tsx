@@ -57,7 +57,7 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full my-10">
+    <div className="flex flex-col items-center gap-8 w-full my-10 px-4">
       <Hero
         title="AudioScribe"
         description={["Add intelligent bookmarks and transcriptions", "to enhance your audiobook experience."]}
@@ -66,7 +66,7 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
 
       {/* Search */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex w-full max-w-xl items-center gap-2">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col sm:flex-row w-full max-w-xl items-center gap-2">
 
         <FormField
             control={form.control}
@@ -115,7 +115,7 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
       </Form>
 
       {/* Results */}
-      <div className="flex flex-col gap-4 w-full max-w-4xl px-4">
+      <div className="flex flex-col gap-4 w-full max-w-4xl">
         {isLoading && searchQuery && (
           <SearchStatus>
             <Loader2 className="w-4 h-4 animate-spin mr-2" />
