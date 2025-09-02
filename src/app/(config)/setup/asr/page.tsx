@@ -5,64 +5,8 @@ import { Hero } from "@/components/hero";
 import { Captions } from "lucide-react";
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { whisperModels } from "@/utils/constants";
 
-const models = [
-  {
-    name: "tiny",
-    disk: "75 MB",
-    memory: "~390 MB",
-  },
-  {
-    name: "tiny.en",
-    disk: "75 MB",
-    memory: "~390 MB",
-  },
-  {
-    name: "base",
-    disk: "142 MB",
-    memory: "~500 MB",
-  },
-  {
-    name: "base.en",
-    disk: "142 MB",
-    memory: "~500 MB",
-  },
-  {
-    name: "small",
-    disk: "466 MB",
-    memory: "~1.0 GB",
-  },
-  {
-    name: "small.en",
-    disk: "466 MB",
-    memory: "~1.0 GB",
-  },
-  {
-    name: "medium",
-    disk: "1.5 GB",
-    memory: "~2.6 GB",
-  },
-  {
-    name: "medium.en",
-    disk: "1.5 GB",
-    memory: "~2.6 GB",
-  },
-  {
-    name: "large-v1",
-    disk: "2.9 GB",
-    memory: "~4.7 GB",
-  },
-  {
-    name: "large",
-    disk: "2.9 GB",
-    memory: "~4.7 GB",
-  },
-  {
-    name: "large-v3-turbo",
-    disk: "1.5 GB",
-    memory: "~2.6 GB",
-  },
-];
 
 export default function LLMSetupPage() {
   return (
@@ -84,7 +28,7 @@ export default function LLMSetupPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {models.map(model => (
+            {whisperModels.map(model => (
               <TableRow key={model.name}>
                 <TableCell className="font-medium">{model.name}</TableCell>
                 <TableCell className="text-right">{model.disk}</TableCell>
