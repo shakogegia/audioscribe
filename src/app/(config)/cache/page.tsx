@@ -11,12 +11,12 @@ import {
 	CardTitle
 } from "@/components/ui/card";
 import axios from "axios";
-import { DatabaseZap } from "lucide-react";
+import { DatabaseZap, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import useSWR from "swr";
 
 export default function CachePage() {
-	const { data: { humanReadableSize } = {}, mutate } = useSWR("/api/cache/size");
+	const { isLoading, data: { humanReadableSize } = {}, mutate } = useSWR("/api/cache/size");
 
 	async function purgeCache() {
     toast.loading("Purging cache...", { id: "purge-cache" });
@@ -40,7 +40,7 @@ export default function CachePage() {
 				<CardHeader>
 					<CardTitle>Cache</CardTitle>
 					<CardDescription>
-						Cache size: {humanReadableSize || "0 MB"}
+						Cache size: {isLoading ? <Loader2 className="w-4 h-4 animate-spin inline-block" /> : humanReadableSize || "0 MB"}
 					</CardDescription>
 				</CardHeader>
 				<CardFooter className="flex-col gap-2">

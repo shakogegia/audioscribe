@@ -6,7 +6,7 @@ import { formatTime } from "@/lib/format";
 import { Bookmark, Captions, CaptionsOff, FastForward, Pause, Play, Rewind, TableOfContents } from "lucide-react";
 import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef, Ref } from "react";
 import { twMerge } from "tailwind-merge";
-import useBookmarksStore from "@/app/book/[id]/stores/bookmarks";
+// import useBookmarksStore from "@/app/book/[id]/stores/bookmarks";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { BookCaptions } from "./book-captions";
 
@@ -31,7 +31,10 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // add bookmarks store
-  const addBookmark = useBookmarksStore(state => state.add);
+  // const addBookmark = useBookmarksStore(state => state.add); // TODO: fix this
+  const addBookmark = () => {
+    console.log("addBookmark");
+  };
 
   useImperativeHandle(ref, () => ({ play, getCurrentTime }));
 
