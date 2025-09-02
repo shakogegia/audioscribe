@@ -22,7 +22,37 @@ A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps
 - An Audiobookshelf server with API access
 - API keys for AI providers
 
-### Installation (Docker)
+### Installation
+
+<details>
+<summary>Local</summary>
+
+#### Install Dependencies
+
+```sh
+brew install ffmpeg
+```
+
+#### Ollama
+```sh
+ # Embedder
+ollama pull all-minilm:latest
+
+ollama pull llama3.2:3b 
+```
+
+#### Run
+
+```sh
+clone git@github.com:shakogegia/audioscribe.git
+cd audioscribe
+npm install
+cp .env.example .env
+```
+</details>
+
+<details>
+<summary>Docker</summary>
 
 The included `docker-compose.yml` provides a complete setup:
 
@@ -41,13 +71,18 @@ services:
       - ./app-data:/app/data # Persist config files
       - ./temp-cache:/tmp/audiobook-wizard # Persist audio cache
 ```
+</details>
 
-## Screenshots
+## Demo
+
+<details>
+<summary>Screenshots</summary>
 
 ![Book Search](demo/screenshots/search.png)
 ![Book Management](demo/screenshots/book.png)
 ![ASR Transcription](demo/screenshots/asr.png)
 ![Audiobookshelf](demo/screenshots/audiobookshelf.png)
+</details>
 
 ## License
 
