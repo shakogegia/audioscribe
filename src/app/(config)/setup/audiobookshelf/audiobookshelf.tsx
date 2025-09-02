@@ -78,12 +78,6 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
                 Enter your Audiobookshelf URL and API key. The key must act on behalf of a user with the following
                 permissions: Can Download, Can Update.
               </CardDescription>
-              <CardAction>
-                <Button variant="link">
-                  <Check className="w-4 h-4" />
-                  Configured
-                </Button>
-              </CardAction>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-6">
@@ -121,8 +115,9 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
                         <FormLabel>
                           <div className="flex items-center w-full">
                             <Label htmlFor="apiKey">API Key</Label>
+                            {/* /audiobookshelf/config/api-keys */}
                             <a
-                              href="https://www.audiobookshelf.org/guides/api-keys/"
+                              href={form.getValues("url") ? `${form.getValues("url")}/audiobookshelf/config/api-keys` : "https://www.audiobookshelf.org/guides/api-keys/"}
                               target="_blank"
                               className="ml-auto inline-flex items-center gap-1 text-sm font-normal underline-offset-4 hover:underline"
                             >
@@ -148,7 +143,7 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
                       <FormItem>
                         <FormLabel>
                           <div className="flex items-center w-full">
-                            <Label htmlFor="libraryId">Library ID</Label>
+                            <Label htmlFor="libraryId">Library</Label>
                           </div>
                         </FormLabel>
                         <FormControl>
