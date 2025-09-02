@@ -1,10 +1,10 @@
 "use client";
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 import GradientIcon from "@/components/gradient-icon";
 import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
-	CardContent,
 	CardDescription,
 	CardFooter,
 	CardHeader,
@@ -44,9 +44,11 @@ export default function CachePage() {
 					</CardDescription>
 				</CardHeader>
 				<CardFooter className="flex-col gap-2">
-					<Button onClick={purgeCache} className="w-full">
-						Purge Cache
-					</Button>
+					<ConfirmDialog title="Purge Cache" description="Are you sure you want to purge the cache? This action cannot be undone." onConfirm={purgeCache}>
+						<Button className="w-full">
+							Purge Cache
+						</Button>
+					</ConfirmDialog>
 				</CardFooter>
 			</Card>
 		</div>
