@@ -53,34 +53,25 @@ export default function LLMSetup({ config, updateConfig }: Props) {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={llmConfig.aiProviders.openai.enabled}
-                      onCheckedChange={enabled =>
-                        update({
-                          ...llmConfig,
-                          aiProviders: {
-                            ...llmConfig.aiProviders,
-                            openai: { ...llmConfig.aiProviders.openai, enabled },
-                          },
-                        })
-                      }
-                    />
-                    <div>OpenAI</div>
-                  </div>
-                </CardTitle>
+                <CardTitle>OpenAI</CardTitle>
                 <CardDescription>Requires an OpenAI account with prepaid API credits.</CardDescription>
               </div>
             </div>
             <CardAction>
-              <Button variant="link" size="sm">
-                <Check className="w-4 h-4" />
-                Configured
-              </Button>
+              <Switch
+                checked={llmConfig.aiProviders.openai.enabled}
+                onCheckedChange={enabled =>
+                  update({
+                    ...llmConfig,
+                    aiProviders: {
+                      ...llmConfig.aiProviders,
+                      openai: { ...llmConfig.aiProviders.openai, enabled },
+                    },
+                  })
+                }
+              />
             </CardAction>
           </CardHeader>
-
           <CardContent>
             <div className="grid gap-2">
               <div className="flex items-center">
