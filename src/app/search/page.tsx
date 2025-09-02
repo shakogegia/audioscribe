@@ -41,8 +41,8 @@ function SearchPageContent() {
   return (
     <div className="flex flex-col items-center gap-8 w-full min-h-full my-10">
       <Hero
-        title="Library"
-        description={["Search for audiobooks in your library.", "Use book titles to search."]}
+        title="AudioScribe"
+        description={["Add intelligent bookmarks and transcriptions", "to enhance your audiobook experience."]}
         icon={<LibraryBig className="w-10 h-10 text-neutral-600 dark:text-white" />}
       />
 

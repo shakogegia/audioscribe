@@ -1,7 +1,7 @@
 export type AiProvider = "ollama" | "google";
 export type AiModel = OllamaModel | GeminiModel;
 
-export type OllamaModel = "llama3.2:3b" | "mistral:7b" | "llama2:13b";
+export type OllamaModel = "llama3.2:3b" | "mistral:7b" | "llama2:13b" | "qwen2.5:7b";
 
 export type GeminiModel =
   | "gemini-1.5-flash"

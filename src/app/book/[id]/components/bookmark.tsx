@@ -48,6 +48,14 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
       const response = await axios.post(`/api/book/${bookId}/ai/suggest/bookmarks`, {
         startTime: bookmark.time,
         transcription: transcription,
+        // ?.replace(/(\d{1,2}:\d{2}:\d{2})\.\d{1,3}/g, "$1") // remove milliseconds
+        // .replace(/\[\d{2}:\d{2}:\d{2}\s*-->\s*\d{2}:\d{2}:\d{2}\]/g, "") // remove timestamps
+        // .replace(/\s+/g, " ")
+        // .replace(/\n/g, "")
+        // .replace(/\\n/g, " ")
+        // .replace(/^[ \t]+|[ \t]+$/g, "")
+        // .replace(/[\n\r]/g, " ")
+        // .replace(/\\n/g, " "),
         timestamp: bookmark.fileStartTime,
         config: aiConfig,
       });

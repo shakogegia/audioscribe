@@ -43,8 +43,10 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
     if (time) {
       seekToTime(time);
     }
-    audioRef.current?.play();
     setIsPlaying(true);
+    if (audioRef.current && audioRef.current.paused) {
+      audioRef.current.play();
+    }
   }
 
   // Calculate total book duration and current total progress
@@ -146,7 +148,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
         setIsPlaying(false);
       } else {
         await audio.play();
-        setIsPlaying(true);
+        setIsPlaying(true)
       }
     } catch (error) {
       console.error("Error playing audio:", error);

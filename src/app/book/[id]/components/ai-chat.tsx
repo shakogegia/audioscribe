@@ -20,36 +20,16 @@ interface AiChatProps {
 
 export function AiChat({ bookId, play }: AiChatProps) {
   const { aiConfig } = useAiConfig();
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [transcriptions, setTranscriptions] = useState<{ text: string }[]>([]);
 
   const [message, setMessage] = useState("");
   const [analysis, setAnalysis] = useState("");
-
-  async function transcribeFullBook() {
-    toast.loading("Transcribing full book...", { id: "transcribe-full-book" });
-    try {
-      setIsTranscribing(true);
-      const response = await axios.post(`/api/book/${bookId}/transcribe/full`, {
-        config: aiConfig,
-      });
-      setTranscriptions(response.data.transcriptions);
-      toast.success("Transcribed full book", { id: "transcribe-full-book" });
-    } catch (error) {
-      console.error("Failed to transcribe full book:", error);
-      toast.error("Failed to transcribe full book", { id: "transcribe-full-book" });
-    } finally {
-      setIsTranscribing(false);
-    }
-  }
 
   async function sendMessage() {
     try {
       setAnalysis("");
       setIsGenerating(true);
-      const response = await axios.post(`/api/book/${bookId}/ai/query`, {
-        transcriptions,
+      const response = await axios.post(`/api/book/${bookId}/ai/chat`, {
         message,
         config: aiConfig,
       });
@@ -64,7 +44,7 @@ export function AiChat({ bookId, play }: AiChatProps) {
   }
 
   function onTimeClick(time: string) {
-    const timeToSeconds = time.split(":");
+    const timeToSeconds = time.split(".")[0].split(":");
     const hours = parseInt(timeToSeconds[0]);
     const minutes = parseInt(timeToSeconds[1]);
     const seconds = parseInt(timeToSeconds[2]);
@@ -101,25 +81,16 @@ export function AiChat({ bookId, play }: AiChatProps) {
             placeholder="Ask your question here..."
             value={message}
             onChange={e => setMessage(e.target.value)}
-            disabled={isGenerating || isTranscribing || !transcriptions.length}
+            disabled={isGenerating}
             required
             name="message"
           />
         </div>
 
-        <div className="flex justify-between gap-2">
-          <Button
-            onClick={sendMessage}
-            type="submit"
-            disabled={isTranscribing || isGenerating || !message || !transcriptions.length}
-          >
+        <div className="flex gap-2">
+          <Button variant="default" onClick={sendMessage} type="submit" disabled={isGenerating || !message}>
             {isGenerating ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             Send
-          </Button>
-
-          <Button variant="secondary" type="button" onClick={transcribeFullBook} disabled={isTranscribing}>
-            {isTranscribing ? <Loader2Icon className="w-4 h-4 animate-spin" /> : <Captions className="w-4 h-4" />}
-            Transcribe Full Book
           </Button>
         </div>
       </div>

@@ -91,6 +91,6 @@ export function Transcript({ bookId, play, files }: TranscriptProps) {
   );
 }
 
-function parseTranscription(text: string): string {
+function  parseTranscription(text: string): string {
   return text.replace(/\[?(\d{2}:\d{2}:\d{2})\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3}\]?/g, "$1").replace(/\n/g, "  \n");
 }
