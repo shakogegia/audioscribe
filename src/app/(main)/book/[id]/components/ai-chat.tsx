@@ -9,7 +9,7 @@ import axios from "axios";
 import { Captions, Loader2Icon, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useAiConfig } from "../hooks/use-ai-config";
+import { useAiConfig } from "@/hooks/use-ai-config";
 
 interface AiChatProps {
   bookId: string;

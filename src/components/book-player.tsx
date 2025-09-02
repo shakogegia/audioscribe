@@ -9,6 +9,7 @@ import { twMerge } from "tailwind-merge";
 // import useBookmarksStore from "@/app/book/[id]/stores/bookmarks";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { BookCaptions } from "./book-captions";
+import useBookmarksStore from "@/stores/bookmarks";
 
 interface BookPlayerProps {
   book: SearchResult;
@@ -31,10 +32,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // add bookmarks store
-  // const addBookmark = useBookmarksStore(state => state.add); // TODO: fix this
-  const addBookmark = () => {
-    console.log("addBookmark");
-  };
+  const addBookmark = useBookmarksStore(state => state.add);
 
   useImperativeHandle(ref, () => ({ play, getCurrentTime }));
 

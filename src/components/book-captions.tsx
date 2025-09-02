@@ -3,11 +3,11 @@
 import { AudioFile, SearchResult } from "@/types/api";
 import { Loader2Icon } from "lucide-react";
 import { useState, useMemo } from "react";
-// import { useAiConfig } from "../(main)/book/[id]/hooks/use-ai-config";
 import { toast } from "sonner";
 import axios from "axios";
 import { useMount } from "react-use";
 import { findTranscriptLine } from "@/lib/caption";
+import { useAiConfig } from "@/hooks/use-ai-config";
 
 interface BookCaptionsProps {
   book: SearchResult;
@@ -22,12 +22,7 @@ export interface BookPlayerRef {
 export function BookCaptions({ book, files, time }: BookCaptionsProps) {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcriptions, setTranscriptions] = useState<{ text: string; index: number }[]>([]);
-  // const { aiConfig } = useAiConfig(); // TODO: fix this
-  const aiConfig = {
-    transcriptionModel: "large-v3-turbo",
-    aiProvider: "google",
-    aiModel: "gemini-2.5-pro",
-  };
+  const { aiConfig } = useAiConfig();
 
   const currentFile = useMemo(() => {
     const file = files.find(file => time >= file.start && time < file.start + file.duration);

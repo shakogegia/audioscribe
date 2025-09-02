@@ -10,8 +10,8 @@ import { Captions, ChevronsDownUpIcon, ChevronsUpDownIcon, Loader2, Trash, Wand,
 import { useState } from "react";
 import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
-import useBookmarksStore from "../stores/bookmarks";
-import { useAiConfig } from "../hooks/use-ai-config";
+import useBookmarksStore from "@/stores/bookmarks";
+import { useAiConfig } from "@/hooks/use-ai-config";
 
 interface BookmarksProps {
   bookId: string;

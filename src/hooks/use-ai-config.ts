@@ -1,4 +1,4 @@
-import useAiStore from "../stores/ai";
+import useAiStore from "@/stores/ai";
 
 export function useAiConfig() {
   const { transcriptionModel, aiProvider, aiModel } = useAiStore();

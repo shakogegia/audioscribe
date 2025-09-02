@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useAiStore from "../stores/ai";
+import useAiStore from "@/stores/ai";
 
 const whisperModels = [
   {

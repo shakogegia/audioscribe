@@ -6,7 +6,7 @@ import { AudioFile, SearchResult } from "@/types/api";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import useBookmarksStore from "../stores/bookmarks";
+import useBookmarksStore from "../../../../../stores/bookmarks";
 import { AiChat } from "./ai-chat";
 import Bookmarks from "./bookmarks";
 import { Downloader } from "./downloader";

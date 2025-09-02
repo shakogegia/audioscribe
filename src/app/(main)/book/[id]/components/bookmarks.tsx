@@ -2,11 +2,10 @@
 import { Button } from "@/components/ui/button";
 import { AudioFile, SearchResult } from "@/types/api";
 import axios from "axios";
-import { Bookmark as BookmarkIcon, Check, Loader2Icon, SlidersHorizontal, WandSparkles } from "lucide-react";
+import { Bookmark as BookmarkIcon, Check, Loader2Icon, WandSparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import useBookmarksStore from "../stores/bookmarks";
-import { AiConfigDialog } from "./ai-config-dialog";
+import useBookmarksStore from "../../../../../stores/bookmarks";
 import { Bookmark } from "./bookmark";
 
 type BookmarksProps = {
@@ -41,13 +40,6 @@ export default function Bookmarks({ id, play }: BookmarksProps) {
             <WandSparkles className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">AI Suggestions</span>
           </Button>
-
-          <AiConfigDialog>
-            <Button variant="outline" size="icon">
-              <SlidersHorizontal className="h-[1.2rem] w-[1.2rem]" />
-              <span className="sr-only">Adjust</span>
-            </Button>
-          </AiConfigDialog>
         </div>
       </div>
 

@@ -1,17 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
 import { Markdown } from "@/components/markdown";
-import { Textarea } from "@/components/ui/textarea";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useAiConfig } from "@/hooks/use-ai-config";
 import { AudioFile, SearchResult } from "@/types/api";
 import axios from "axios";
-import { Captions, Files, Loader2Icon, Send } from "lucide-react";
+import { Captions, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useAiConfig } from "../hooks/use-ai-config";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface TranscriptProps {
   bookId: string;
