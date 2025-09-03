@@ -1,49 +1,50 @@
-"use client";
+"use client"
 
-import { AudioPlayer } from "@/components/audio-player";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { formatTime } from "@/lib/format";
-import type * as Audiobookshelf from "@/types/audiobookshelf";
-import axios from "axios";
-import { Captions, ChevronsDownUpIcon, ChevronsUpDownIcon, Loader2, Trash, Wand, WandSparkles } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { twMerge } from "tailwind-merge";
-import useBookmarksStore from "@/stores/bookmarks";
-import { useAiConfig } from "@/hooks/use-ai-config";
+import { AudioPlayer } from "@/components/audio-player"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { formatTime } from "@/lib/format"
+import type * as Audiobookshelf from "@/types/audiobookshelf"
+import axios from "axios"
+import { Captions, ChevronsDownUpIcon, ChevronsUpDownIcon, Loader2, Trash, Wand, WandSparkles } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+import { twMerge } from "tailwind-merge"
+import useBookmarksStore from "@/stores/bookmarks"
+import { useAiConfig } from "@/hooks/use-ai-config"
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 
 interface BookmarksProps {
-  bookId: string;
-  bookmark: Audiobookshelf.AudioBookmark;
-  play?: (time?: number) => void;
+  bookId: string
+  bookmark: Audiobookshelf.AudioBookmark
+  play?: (time?: number) => void
 }
 
 export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
-  const [showPlayer, setShowPlayer] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const updateBookmark = useBookmarksStore(state => state.update);
-  const [transcription, setTranscription] = useState<string | null>(null);
-  const { aiConfig } = useAiConfig();
+  const [showPlayer, setShowPlayer] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const updateBookmark = useBookmarksStore(state => state.update)
+  const [transcription, setTranscription] = useState<string | null>(null)
+  const { aiConfig } = useAiConfig()
+  const removeBookmark = useBookmarksStore(state => state.remove)
 
   const handlePlayClick = () => {
-    setShowPlayer(!showPlayer);
-  };
+    setShowPlayer(!showPlayer)
+  }
 
   async function deleteBookmark() {
-    await axios.delete(`/api/book/${bookId}/bookmark?time=${bookmark.time}`);
-    toast.success("Bookmark deleted");
+    removeBookmark(bookmark)
   }
 
   async function generateAISuggestions() {
-    if (isGeneratingSuggestions) return;
+    if (isGeneratingSuggestions) return
 
     try {
-      setIsGeneratingSuggestions(true);
-      toast.loading("Generating AI suggestions...", { id: `ai-suggestions-${bookmark.time}` });
+      setIsGeneratingSuggestions(true)
+      toast.loading("Generating AI suggestions...", { id: `ai-suggestions-${bookmark.time}` })
 
       const response = await axios.post(`/api/book/${bookId}/ai/suggest/bookmarks`, {
         startTime: bookmark.time,
@@ -58,64 +59,64 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
         // .replace(/\\n/g, " "),
         timestamp: bookmark.fileStartTime,
         config: aiConfig,
-      });
+      })
 
-      const suggestions = response.data.suggestions || [];
-      setAiSuggestions(suggestions);
-      setShowSuggestions(true);
+      const suggestions = response.data.suggestions || []
+      setAiSuggestions(suggestions)
+      setShowSuggestions(true)
 
-      toast.success(`Generated ${suggestions.length} suggestions`, { id: `ai-suggestions-${bookmark.time}` });
+      toast.success(`Generated ${suggestions.length} suggestions`, { id: `ai-suggestions-${bookmark.time}` })
     } catch (error: unknown) {
-      console.error("Failed to generate AI suggestions:", error);
+      console.error("Failed to generate AI suggestions:", error)
 
-      let errorMessage = "Failed to generate suggestions";
+      let errorMessage = "Failed to generate suggestions"
       if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response?: { data?: { error?: string } } };
+        const axiosError = error as { response?: { data?: { error?: string } } }
         if (axiosError.response?.data?.error) {
-          errorMessage = axiosError.response.data.error;
+          errorMessage = axiosError.response.data.error
         }
       }
 
-      toast.error(errorMessage);
+      toast.error(errorMessage)
     } finally {
-      setIsGeneratingSuggestions(false);
+      setIsGeneratingSuggestions(false)
     }
   }
 
   async function transcribeAudio() {
-    if (isTranscribing) return;
+    if (isTranscribing) return
 
     try {
-      setIsTranscribing(true);
-      toast.loading("Transcribing audio...", { id: `transcribe-${bookmark.time}` });
+      setIsTranscribing(true)
+      toast.loading("Transcribing audio...", { id: `transcribe-${bookmark.time}` })
 
       const response = await axios.post<{ transcription: { text: string } }>(`/api/book/${bookId}/transcribe/segment`, {
         startTime: bookmark.time,
         // duration: 30,
         // offset: 15,
         config: aiConfig,
-      });
+      })
 
-      setTranscription(response.data.transcription.text);
-      toast.success("Transcribed audio", { id: `transcribe-${bookmark.time}` });
+      setTranscription(response.data.transcription.text)
+      toast.success("Transcribed audio", { id: `transcribe-${bookmark.time}` })
     } catch (error: unknown) {
-      console.error("Failed to transcribe audio:", error);
-      toast.error("Failed to transcribe audio", { id: `transcribe-${bookmark.time}` });
+      console.error("Failed to transcribe audio:", error)
+      toast.error("Failed to transcribe audio", { id: `transcribe-${bookmark.time}` })
     } finally {
-      setIsTranscribing(false);
+      setIsTranscribing(false)
     }
   }
 
   async function suggestBookmark() {
-    await transcribeAudio();
-    await generateAISuggestions();
+    await transcribeAudio()
+    await generateAISuggestions()
   }
 
   function applySuggestion(suggestion: string) {
-    updateBookmark({ ...bookmark, title: suggestion });
-    setShowSuggestions(false);
-    setAiSuggestions([]);
-    toast.success("Applied AI suggestion", { id: `ai-suggestions-${bookmark.time}` });
+    updateBookmark({ ...bookmark, title: suggestion })
+    setShowSuggestions(false)
+    setAiSuggestions([])
+    toast.success("Applied AI suggestion", { id: `ai-suggestions-${bookmark.time}` })
   }
 
   return (
@@ -163,9 +164,15 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
             )}
           </BookmarkAction>
 
-          <BookmarkAction onClick={deleteBookmark} title="Delete bookmark">
-            <Trash className="w-4 h-4" />
-          </BookmarkAction>
+          <ConfirmDialog
+            title="Delete bookmark"
+            description="Are you sure you want to delete this bookmark?"
+            onConfirm={deleteBookmark}
+          >
+            <BookmarkAction title="Delete bookmark">
+              <Trash className="w-4 h-4" />
+            </BookmarkAction>
+          </ConfirmDialog>
 
           <BookmarkAction onClick={handlePlayClick} title="Toggle audio player">
             {showPlayer ? <ChevronsDownUpIcon className="w-4 h-4" /> : <ChevronsUpDownIcon className="w-4 h-4" />}
@@ -202,7 +209,7 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function BookmarkAction({
@@ -211,10 +218,10 @@ function BookmarkAction({
   disabled,
   title,
 }: {
-  onClick?: VoidFunction;
-  children: React.ReactNode;
-  disabled?: boolean;
-  title?: string;
+  onClick?: VoidFunction
+  children: React.ReactNode
+  disabled?: boolean
+  title?: string
 }) {
   return (
     <Button
@@ -230,5 +237,5 @@ function BookmarkAction({
     >
       {children}
     </Button>
-  );
+  )
 }

@@ -1,39 +1,39 @@
-import type * as Audiobookshelf from "@/types/audiobookshelf";
-import axios from "axios";
-import { AudioFile, SearchResult } from "../types/api";
-import { load } from "./config";
+import type * as Audiobookshelf from "@/types/audiobookshelf"
+import axios from "axios"
+import { AudioFile, SearchResult } from "../types/api"
+import { load } from "./config"
 
 type Library = {
-  id: string;
-  name: string;
-};
+  id: string
+  name: string
+}
 
 export const getApi = async () => {
-  const config = await load();
+  const config = await load()
   return axios.create({
     baseURL: config?.audiobookshelf.url ?? "",
     headers: {
       Authorization: `Bearer ${config?.audiobookshelf.apiKey}`,
     },
-  });
-};
+  })
+}
 
 export async function getAllLibraries(): Promise<Library[]> {
   try {
-    const api = await getApi();
-    const response = await api.get<{ libraries: Audiobookshelf.Library[] }>("/api/libraries");
+    const api = await getApi()
+    const response = await api.get<{ libraries: Audiobookshelf.Library[] }>("/api/libraries")
     return response.data.libraries.map(library => ({
       id: library.id,
       name: library.name,
-    }));
+    }))
   } catch (error) {
-    console.error(error);
-    return [];
+    console.error(error)
+    return []
   }
 }
 
 export async function searchBook(libraryId: string, query: string): Promise<SearchResult[]> {
-  const api = await getApi();
+  const api = await getApi()
   const response = await api.get<{ book: { libraryItem: Audiobookshelf.LibraryItem }[] }>(
     `/api/libraries/${libraryId}/search`,
     {
@@ -42,9 +42,9 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
         q: query,
       },
     }
-  );
+  )
 
-  const config = await load();
+  const config = await load()
 
   return Promise.all(
     response.data.book.map(async ({ libraryItem }) => ({
@@ -60,43 +60,44 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
       publishedYear: libraryItem.media.metadata.publishedYear ?? "",
       libraryId: libraryId,
       bookmarks: await getBookmarks(libraryItem.id),
+      chapters: libraryItem.media.chapters,
     }))
-  );
+  )
 }
 
 export async function getBookmarks(libraryItemId: string): Promise<Audiobookshelf.AudioBookmark[]> {
-  const api = await getApi();
-  const response = await api.get<Audiobookshelf.User>(`/api/me`);
+  const api = await getApi()
+  const response = await api.get<Audiobookshelf.User>(`/api/me`)
 
-  const files = await getBookFiles(libraryItemId);
+  const files = await getBookFiles(libraryItemId)
 
   return response.data.bookmarks
     .filter(bookmark => bookmark.libraryItemId === libraryItemId)
     .map(bookmark => {
       // Find which audio file contains this bookmark time
       const containingFile = files.find(file => {
-        const fileStart = file.start;
-        const fileEnd = file.start + file.duration;
-        return bookmark.time >= fileStart && bookmark.time < fileEnd;
-      });
+        const fileStart = file.start
+        const fileEnd = file.start + file.duration
+        return bookmark.time >= fileStart && bookmark.time < fileEnd
+      })
 
       // If no containing file found, use the last file (edge case)
-      const targetFile = containingFile || files[files.length - 1];
+      const targetFile = containingFile || files[files.length - 1]
 
       // Convert book time to file time
-      const fileStartTime = targetFile ? bookmark.time - targetFile.start : 0;
+      const fileStartTime = targetFile ? bookmark.time - targetFile.start : 0
 
       return {
         ...bookmark,
         fileStartTime: Math.max(0, fileStartTime), // Ensure non-negative
-      };
-    });
+      }
+    })
 }
 
 export async function getBook(libraryItemId: string): Promise<SearchResult> {
-  const api = await getApi();
-  const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`);
-  const config = await load();
+  const api = await getApi()
+  const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`)
+  const config = await load()
   return {
     id: response.data.id,
     title: response.data.media.metadata.title ?? "",
@@ -109,18 +110,18 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     bookmarks: await getBookmarks(libraryItemId),
     publishedYear: response.data.media.metadata.publishedYear ?? "",
     coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/cover?ts=${Date.now()}&raw=1`,
-  };
+  }
 }
 
 export async function getBookFiles(libraryItemId: string): Promise<AudioFile[]> {
-  const api = await getApi();
-  const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`);
+  const api = await getApi()
+  const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`)
 
-  const sortedFiles = response.data.media.audioFiles.sort((a, b) => a.index - b.index);
+  const sortedFiles = response.data.media.audioFiles.sort((a, b) => a.index - b.index)
 
-  let cumulativeStart = 0;
+  let cumulativeStart = 0
 
-  const config = await load();
+  const config = await load()
 
   return sortedFiles.map(file => {
     const audioFile = {
@@ -132,25 +133,41 @@ export async function getBookFiles(libraryItemId: string): Promise<AudioFile[]> 
       downloadUrl: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/file/${file.ino}/download?token=${config?.audiobookshelf.apiKey}`,
       size: file.metadata.size,
       fileName: file.metadata.filename,
-    };
+    }
 
-    cumulativeStart += audioFile.duration;
-    return audioFile;
-  });
+    cumulativeStart += audioFile.duration
+    return audioFile
+  })
 }
 
 export async function updateBookmark(libraryItemId: string, bookmark: Audiobookshelf.AudioBookmark) {
-  const api = await getApi();
-  const response = await api.patch(`/api/me/item/${libraryItemId}/bookmark`, bookmark);
-  return response.data;
+  const api = await getApi()
+  const response = await api.patch(`/api/me/item/${libraryItemId}/bookmark`, bookmark)
+  return response.data
 }
 
-export async function updateBookmarks(libraryItemId: string, bookmarks: Audiobookshelf.AudioBookmark[]) {
-  return Promise.all(bookmarks.map(bookmark => updateBookmark(libraryItemId, bookmark)));
+export async function createBookmark(libraryItemId: string, bookmark: Audiobookshelf.AudioBookmark) {
+  const api = await getApi()
+  const response = await api.post(`/api/me/item/${libraryItemId}/bookmark`, bookmark)
+  return response.data
 }
 
 export async function deleteBookmark(libraryItemId: string, time: number) {
-  const api = await getApi();
-  const response = await api.delete(`/api/me/item/${libraryItemId}/bookmark/${time}`);
-  return response.data;
+  const api = await getApi()
+  const response = await api.delete(`/api/me/item/${libraryItemId}/bookmark/${time}`)
+  return response.data
+}
+
+export async function updateBookmarks(libraryItemId: string, bookmarks: Audiobookshelf.AudioBookmark[]) {
+  const allBookmarks = await getBookmarks(libraryItemId)
+
+  const newBookmarks = bookmarks.filter(bookmark => !allBookmarks.some(b => b.time === bookmark.time))
+  const updatedBookmarks = bookmarks.filter(bookmark => allBookmarks.some(b => b.time === bookmark.time))
+  const deletedBookmarks = allBookmarks.filter(bookmark => !bookmarks.some(b => b.time === bookmark.time))
+
+  return Promise.all([
+    ...newBookmarks.map(bookmark => createBookmark(libraryItemId, bookmark)),
+    ...updatedBookmarks.map(bookmark => updateBookmark(libraryItemId, bookmark)),
+    ...deletedBookmarks.map(bookmark => deleteBookmark(libraryItemId, bookmark.time)),
+  ])
 }
