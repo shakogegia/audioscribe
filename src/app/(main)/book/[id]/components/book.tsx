@@ -1,35 +1,36 @@
-"use client";
-import { BookPlayer, BookPlayerRef } from "@/components/book-player";
-import { Hero } from "@/components/hero";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AudioFile, SearchResult } from "@/types/api";
-import Image from "next/image";
-import { useRef, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import useBookmarksStore from "../../../../../stores/bookmarks";
-import { AiChat } from "./ai-chat";
-import Bookmarks from "./bookmarks";
-import { Downloader } from "./downloader";
-import { Transcript } from "./transcript";
-import Chapters from "./chapters";
+"use client"
+import { BookPlayer, BookPlayerRef } from "@/components/book-player"
+import { Hero } from "@/components/hero"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AudioFile, SearchResult } from "@/types/api"
+import Image from "next/image"
+import { useRef, useState } from "react"
+import { twMerge } from "tailwind-merge"
+import useBookmarksStore from "../../../../../stores/bookmarks"
+import { AiChat } from "./ai-chat"
+import Bookmarks from "./bookmarks"
+import { Downloader } from "./downloader"
+import { Transcript } from "./transcript"
+import Chapters from "./chapters"
+import { Badge } from "@/components/ui/badge"
 
 interface BookProps {
-  id: string;
-  book: SearchResult;
-  files: AudioFile[];
-  revalidate: (id: string) => void;
+  id: string
+  book: SearchResult
+  files: AudioFile[]
+  revalidate: (id: string) => void
 }
 
 export default function Book({ id, book, files, revalidate }: BookProps) {
-  const bookPlayerRef = useRef<BookPlayerRef>(null);
+  const bookPlayerRef = useRef<BookPlayerRef>(null)
 
-  const [hasDownloaded, setHasDownloaded] = useState(false);
-  const setBookmarks = useBookmarksStore(state => state.setBookmarks);
+  const [hasDownloaded, setHasDownloaded] = useState(false)
+  const setBookmarks = useBookmarksStore(state => state.setBookmarks)
 
   async function onDownloadComplete() {
-    await revalidate(id);
-    setHasDownloaded(true);
-    setBookmarks(book.bookmarks);
+    await revalidate(id)
+    setHasDownloaded(true)
+    setBookmarks(book.bookmarks)
   }
 
   return (
@@ -37,6 +38,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
       <Hero
         title={book.title}
         description={[book.authors.join(", ")]}
+        content={book.cacheSize && <Badge variant="outline">{book.cacheSize}</Badge>}
         icon={
           <Image
             src={book.coverPath ?? ""}
@@ -71,7 +73,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
                   book={book}
                   files={files}
                   play={time => bookPlayerRef.current?.play(time)}
-                  getCurrentTime={() => bookPlayerRef.current?.getCurrentTime()}
+                  getCurrentTime={() => bookPlayerRef.current?.getCurrentTime() ?? 0}
                 />
               </TabsContent>
               <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
@@ -85,5 +87,5 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
         )}
       </div>
     </div>
-  );
+  )
 }

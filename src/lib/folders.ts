@@ -1,5 +1,5 @@
 import { promises as fs } from "fs"
-import { join } from "path"
+import path, { join } from "path"
 
 const cacheFolder = join(process.env.DATA_DIR!, "cache")
 
@@ -45,4 +45,28 @@ export const folders = {
       return join(folder, "wav")
     },
   }),
+}
+
+export async function dirSize(dirPath: string) {
+  let size = 0
+  const files = await fs.readdir(dirPath)
+
+  for (let i = 0; i < files.length; i++) {
+    const filePath = path.join(dirPath, files[i])
+    const stats = await fs.stat(filePath)
+
+    if (stats.isFile()) {
+      size += stats.size
+    } else if (stats.isDirectory()) {
+      size += await dirSize(filePath)
+    }
+  }
+
+  return size
+}
+
+export async function humanReadableSize(size: number) {
+  return size < 1024 * 1024 * 1024
+    ? `${(size / 1024 / 1024).toFixed(2)} MB`
+    : `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
