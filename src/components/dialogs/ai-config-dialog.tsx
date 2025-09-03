@@ -88,8 +88,8 @@ export function AiConfigDialog({ children }: { children: React.ReactNode }) {
 
           <Tabs defaultValue="account">
             <TabsList className="mx-auto">
-              <TabsTrigger value="llm">LLM</TabsTrigger>
-              <TabsTrigger value="asr">ASR</TabsTrigger>
+              <TabsTrigger value="llm">LLM Provider</TabsTrigger>
+              <TabsTrigger value="asr">ASR Model</TabsTrigger>
             </TabsList>
             <TabsContent value="llm">
               <div className="grid gap-4">
