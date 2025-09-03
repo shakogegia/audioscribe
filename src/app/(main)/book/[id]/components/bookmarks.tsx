@@ -1,30 +1,30 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { AudioFile, SearchResult } from "@/types/api";
-import axios from "axios";
-import { Bookmark as BookmarkIcon, Check, Loader2Icon, WandSparkles } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import useBookmarksStore from "../../../../../stores/bookmarks";
-import { Bookmark } from "./bookmark";
+"use client"
+import { Button } from "@/components/ui/button"
+import { AudioFile, SearchResult } from "@/types/api"
+import axios from "axios"
+import { Bookmark as BookmarkIcon, Check, Loader2Icon, WandSparkles } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+import useBookmarksStore from "../../../../../stores/bookmarks"
+import { Bookmark } from "./bookmark"
 
 type BookmarksProps = {
-  id: string;
-  book: SearchResult;
-  files: AudioFile[];
-  play?: (time?: number) => void;
-};
+  id: string
+  book: SearchResult
+  files: AudioFile[]
+  play?: (time?: number) => void
+}
 
 export default function Bookmarks({ id, play }: BookmarksProps) {
-  const bookmarks = useBookmarksStore(state => state.bookmarks);
-  const [isSaving, setIsSaving] = useState(false);
+  const bookmarks = useBookmarksStore(state => state.bookmarks)
+  const [isSaving, setIsSaving] = useState(false)
 
   async function updateBookmarks() {
-    setIsSaving(true);
-    toast.loading("Saving bookmarks...", { id: "save-bookmarks" });
-    await axios.patch(`/api/book/${id}/bookmark`, { bookmarks });
-    toast.success("Bookmarks updated", { id: "save-bookmarks" });
-    setIsSaving(false);
+    setIsSaving(true)
+    toast.loading("Saving bookmarks...", { id: "save-bookmarks" })
+    await axios.patch(`/api/book/${id}/bookmark`, { bookmarks })
+    toast.success("Bookmarks updated", { id: "save-bookmarks" })
+    setIsSaving(false)
   }
 
   return (
@@ -36,10 +36,12 @@ export default function Bookmarks({ id, play }: BookmarksProps) {
         </div>
 
         <div className="flex justify-center items-center gap-2">
-          <Button variant="outline" size="icon">
+          {/* TODO: remove this placeholder and add AI Suggestions button */}
+          <div className="h-9 block" />
+          {/* <Button variant="outline" size="icon">
             <WandSparkles className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">AI Suggestions</span>
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -64,5 +66,5 @@ export default function Bookmarks({ id, play }: BookmarksProps) {
         </div>
       )}
     </div>
-  );
+  )
 }

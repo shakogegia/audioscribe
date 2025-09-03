@@ -1,199 +1,199 @@
-"use client";
+"use client"
 
-import { AudioFile, SearchResult } from "@/types/api";
-import { Button } from "@/components/ui/button";
-import { formatTime } from "@/lib/format";
-import { Bookmark, Captions, CaptionsOff, FastForward, Pause, Play, Rewind, TableOfContents } from "lucide-react";
-import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef, Ref } from "react";
-import { twMerge } from "tailwind-merge";
+import { AudioFile, SearchResult } from "@/types/api"
+import { Button } from "@/components/ui/button"
+import { formatTime } from "@/lib/format"
+import { Bookmark, Captions, CaptionsOff, FastForward, Pause, Play, Rewind, TableOfContents } from "lucide-react"
+import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef, Ref } from "react"
+import { twMerge } from "tailwind-merge"
 // import useBookmarksStore from "@/app/book/[id]/stores/bookmarks";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { BookCaptions } from "./book-captions";
-import useBookmarksStore from "@/stores/bookmarks";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { BookCaptions } from "./book-captions"
+import useBookmarksStore from "@/stores/bookmarks"
 
 interface BookPlayerProps {
-  book: SearchResult;
-  files: AudioFile[];
-  className?: string;
-  controls: "full" | "compact";
+  book: SearchResult
+  files: AudioFile[]
+  className?: string
+  controls: "full" | "compact"
 }
 
 export interface BookPlayerRef {
-  play: (time?: number) => void;
-  getCurrentTime: () => number;
+  play: (time?: number) => void
+  getCurrentTime: () => number
 }
 
 function BookPlayerComponent({ book, files, className, controls }: BookPlayerProps, ref: Ref<BookPlayerRef>) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentFileIndex, setCurrentFileIndex] = useState(0);
-  const [fileCurrentTime, setFileCurrentTime] = useState(0);
-  const [pendingSeekTime, setPendingSeekTime] = useState<number | null>(null);
-  const [showCaptions, setShowCaptions] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentFileIndex, setCurrentFileIndex] = useState(0)
+  const [fileCurrentTime, setFileCurrentTime] = useState(0)
+  const [pendingSeekTime, setPendingSeekTime] = useState<number | null>(null)
+  const [showCaptions, setShowCaptions] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   // add bookmarks store
-  const addBookmark = useBookmarksStore(state => state.add);
+  const addBookmark = useBookmarksStore(state => state.add)
 
-  useImperativeHandle(ref, () => ({ play, getCurrentTime }));
+  useImperativeHandle(ref, () => ({ play, getCurrentTime }))
 
   function getCurrentTime() {
-    return totalCurrentTime;
+    return totalCurrentTime
   }
 
   function play(time?: number) {
     if (time) {
-      seekToTime(time);
+      seekToTime(time)
     }
-    setIsPlaying(true);
+    setIsPlaying(true)
     if (audioRef.current && audioRef.current.paused) {
-      audioRef.current.play();
+      audioRef.current.play()
     }
   }
 
   // Calculate total book duration and current total progress
-  const totalDuration = files.reduce((total, file) => total + file.duration, 0);
+  const totalDuration = files.reduce((total, file) => total + file.duration, 0)
   const totalCurrentTime =
-    files.slice(0, currentFileIndex).reduce((total, file) => total + file.duration, 0) + fileCurrentTime;
+    files.slice(0, currentFileIndex).reduce((total, file) => total + file.duration, 0) + fileCurrentTime
 
-  const currentFile = files[currentFileIndex];
+  const currentFile = files[currentFileIndex]
 
   const findFileByTime = useCallback(
     (startTime: number) => {
-      const file = files.find(file => startTime >= file.start && startTime < file.start + file.duration);
+      const file = files.find(file => startTime >= file.start && startTime < file.start + file.duration)
 
       if (!file) {
-        const lastFile = files[files.length - 1];
-        return { fileIndex: files.length - 1, fileTime: lastFile.duration, fileName: lastFile.fileName };
+        const lastFile = files[files.length - 1]
+        return { fileIndex: files.length - 1, fileTime: lastFile.duration, fileName: lastFile.fileName }
       }
 
-      const fileIndex = files.findIndex(x => x.ino === file.ino);
+      const fileIndex = files.findIndex(x => x.ino === file.ino)
 
-      return { fileIndex, fileTime: startTime - file.start, fileName: file.fileName };
+      return { fileIndex, fileTime: startTime - file.start, fileName: file.fileName }
     },
     [files]
-  );
+  )
 
   // Load current file
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    const audio = audioRef.current
+    if (!audio) return
 
-    audio.src = `/api/book/${book.id}/stream?time=${files[currentFileIndex].start}`;
+    audio.src = `/api/book/${book.id}/stream?time=${files[currentFileIndex].start}`
 
-    audio.load();
-  }, [currentFileIndex, book.id, files]);
+    audio.load()
+  }, [currentFileIndex, book.id, files])
 
   // Handle pending seek after file loads
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || pendingSeekTime === null) return;
+    const audio = audioRef.current
+    if (!audio || pendingSeekTime === null) return
 
     const handleCanPlay = () => {
-      audio.currentTime = pendingSeekTime;
-      setFileCurrentTime(pendingSeekTime);
-      setPendingSeekTime(null);
+      audio.currentTime = pendingSeekTime
+      setFileCurrentTime(pendingSeekTime)
+      setPendingSeekTime(null)
 
       // Resume playing if it was playing before the seek
       if (isPlaying) {
-        audio.play().catch(console.error);
+        audio.play().catch(console.error)
       }
-    };
+    }
 
-    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("canplay", handleCanPlay)
 
     return () => {
-      audio.removeEventListener("canplay", handleCanPlay);
-    };
-  }, [pendingSeekTime, isPlaying]);
+      audio.removeEventListener("canplay", handleCanPlay)
+    }
+  }, [pendingSeekTime, isPlaying])
 
   // Audio event handlers
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    const audio = audioRef.current
+    if (!audio) return
 
     const updateTime = () => {
-      setFileCurrentTime(audio.currentTime);
-    };
+      setFileCurrentTime(audio.currentTime)
+    }
 
     const updateDuration = () => {
       // Duration is already known from file metadata
-    };
+    }
 
     const handleEnded = () => {
-      setIsPlaying(false);
+      setIsPlaying(false)
       // Auto-advance to next file if available
       if (currentFileIndex < files.length - 1) {
-        setCurrentFileIndex(prev => prev + 1);
-        setFileCurrentTime(0);
+        setCurrentFileIndex(prev => prev + 1)
+        setFileCurrentTime(0)
       }
-    };
+    }
 
-    audio.addEventListener("timeupdate", updateTime);
-    audio.addEventListener("loadedmetadata", updateDuration);
-    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("timeupdate", updateTime)
+    audio.addEventListener("loadedmetadata", updateDuration)
+    audio.addEventListener("ended", handleEnded)
 
     return () => {
-      audio.removeEventListener("timeupdate", updateTime);
-      audio.removeEventListener("loadedmetadata", updateDuration);
-      audio.removeEventListener("ended", handleEnded);
-    };
-  }, [currentFileIndex, currentFile, files.length]);
+      audio.removeEventListener("timeupdate", updateTime)
+      audio.removeEventListener("loadedmetadata", updateDuration)
+      audio.removeEventListener("ended", handleEnded)
+    }
+  }, [currentFileIndex, currentFile, files.length])
 
   const togglePlayPause = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    const audio = audioRef.current
+    if (!audio) return
 
     try {
       if (isPlaying) {
-        audio.pause();
-        setIsPlaying(false);
+        audio.pause()
+        setIsPlaying(false)
       } else {
-        await audio.play();
+        await audio.play()
         setIsPlaying(true)
       }
     } catch (error) {
-      console.error("Error playing audio:", error);
+      console.error("Error playing audio:", error)
     }
-  };
+  }
 
   const rewind = () => {
     const currentTotalTime =
-      files.slice(0, currentFileIndex).reduce((total, file) => total + file.duration, 0) + fileCurrentTime;
-    const newTotalTime = Math.max(0, currentTotalTime - 10);
-    seekToTime(newTotalTime);
-  };
+      files.slice(0, currentFileIndex).reduce((total, file) => total + file.duration, 0) + fileCurrentTime
+    const newTotalTime = Math.max(0, currentTotalTime - 10)
+    seekToTime(newTotalTime)
+  }
 
   const forward = () => {
     const currentTotalTime =
-      files.slice(0, currentFileIndex).reduce((total, file) => total + file.duration, 0) + fileCurrentTime;
-    const newTotalTime = Math.min(totalDuration, currentTotalTime + 10);
-    seekToTime(newTotalTime);
-  };
+      files.slice(0, currentFileIndex).reduce((total, file) => total + file.duration, 0) + fileCurrentTime
+    const newTotalTime = Math.min(totalDuration, currentTotalTime + 10)
+    seekToTime(newTotalTime)
+  }
 
   const seekToTime = (targetTime: number) => {
-    const { fileIndex, fileTime } = findFileByTime(targetTime);
+    const { fileIndex, fileTime } = findFileByTime(targetTime)
 
     if (fileIndex !== currentFileIndex) {
       // Store the target time to set after the new file loads
-      setPendingSeekTime(fileTime);
-      setCurrentFileIndex(fileIndex);
+      setPendingSeekTime(fileTime)
+      setCurrentFileIndex(fileIndex)
     } else {
       // Same file, seek immediately
-      const audio = audioRef.current;
+      const audio = audioRef.current
       if (audio) {
-        audio.currentTime = fileTime;
-        setFileCurrentTime(fileTime);
+        audio.currentTime = fileTime
+        setFileCurrentTime(fileTime)
       }
     }
-  };
+  }
 
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const progressPercent = clickX / rect.width;
-    const targetTime = progressPercent * totalDuration;
-    seekToTime(targetTime);
-  };
+    const rect = e.currentTarget.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    const progressPercent = clickX / rect.width
+    const targetTime = progressPercent * totalDuration
+    seekToTime(targetTime)
+  }
 
   function addBookmarkAtCurrentTime() {
     addBookmark({
@@ -202,7 +202,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
       time: totalCurrentTime,
       fileStartTime: fileCurrentTime,
       createdAt: Date.now(),
-    });
+    })
   }
 
   if (!currentFile) {
@@ -210,13 +210,13 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
       <div className={twMerge("flex flex-col gap-4", className)}>
         <p className="text-sm text-muted-foreground">No audio files available</p>
       </div>
-    );
+    )
   }
 
   /**
    * Skip starting/zero (Opening) chapter
    */
-  const chapters = book.chapters.filter(chapter => chapter.start > 0);
+  const chapters = book.chapters.filter(chapter => chapter.start > 0)
 
   return (
     <div className={twMerge("flex flex-col gap-2", className)}>
@@ -296,25 +296,48 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
               {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
             </Button>
 
-            <Button onClick={rewind} variant="outline" size="icon" className="w-20">
-              <Rewind className="w-5 h-5" /> 10s
-            </Button>
-            <Button onClick={forward} variant="outline" size="icon" className="w-20">
-              <FastForward className="w-5 h-5" /> 10s
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={rewind} variant="outline" size="icon" className="w-10">
+                  <Rewind className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Rewind 10 seconds</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={forward} variant="outline" size="icon" className="w-10">
+                  <FastForward className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Forward 10 seconds</TooltipContent>
+            </Tooltip>
           </div>
+
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="icon" className="w-10" onClick={() => setShowCaptions(!showCaptions)}>
-              {showCaptions ? <CaptionsOff className="w-5 h-5" /> : <Captions className="w-5 h-5" />}
-            </Button>
-            <Button variant="outline" size="icon" className="w-10" onClick={addBookmarkAtCurrentTime}>
-              <Bookmark className="w-5 h-5" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" className="w-10" onClick={() => setShowCaptions(!showCaptions)}>
+                  {showCaptions ? <CaptionsOff className="w-5 h-5" /> : <Captions className="w-5 h-5" />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Toggle captions</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" className="w-10" onClick={addBookmarkAtCurrentTime}>
+                  <Bookmark className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add a new bookmark at the current time</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export const BookPlayer = forwardRef(BookPlayerComponent);
+export const BookPlayer = forwardRef(BookPlayerComponent)

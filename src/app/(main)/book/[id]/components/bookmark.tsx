@@ -1,18 +1,17 @@
 "use client"
-
-import { AudioPlayer } from "@/components/audio-player"
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useAiConfig } from "@/hooks/use-ai-config"
 import { formatTime } from "@/lib/format"
+import useBookmarksStore from "@/stores/bookmarks"
 import type * as Audiobookshelf from "@/types/audiobookshelf"
 import axios from "axios"
-import { Captions, ChevronsDownUpIcon, ChevronsUpDownIcon, Loader2, Trash, Wand, WandSparkles } from "lucide-react"
+import { Loader2, Trash, Wand } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { twMerge } from "tailwind-merge"
-import useBookmarksStore from "@/stores/bookmarks"
-import { useAiConfig } from "@/hooks/use-ai-config"
-import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 
 interface BookmarksProps {
   bookId: string
@@ -136,7 +135,7 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <BookmarkAction
+          {/* <BookmarkAction
             onClick={generateAISuggestions}
             disabled={isGeneratingSuggestions || !transcription}
             title="Generate AI suggestions"
@@ -150,19 +149,24 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
 
           <BookmarkAction onClick={transcribeAudio} title="Transcribe" disabled={isTranscribing}>
             {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Captions className="w-4 h-4" />}
-          </BookmarkAction>
+          </BookmarkAction> */}
 
-          <BookmarkAction
-            onClick={suggestBookmark}
-            title="Suggest bookmark"
-            disabled={isTranscribing || isGeneratingSuggestions}
-          >
-            {isTranscribing || isGeneratingSuggestions ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Wand className="w-4 h-4" />
-            )}
-          </BookmarkAction>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <BookmarkAction
+                onClick={suggestBookmark}
+                title="Suggest bookmark"
+                disabled={isTranscribing || isGeneratingSuggestions}
+              >
+                {isTranscribing || isGeneratingSuggestions ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Wand className="w-4 h-4" />
+                )}
+              </BookmarkAction>
+            </TooltipTrigger>
+            <TooltipContent>Suggest a bookmark using AI</TooltipContent>
+          </Tooltip>
 
           <ConfirmDialog
             title="Delete bookmark"
@@ -219,12 +223,13 @@ function BookmarkAction({
   children,
   disabled,
   title,
+  ...props
 }: {
   onClick?: VoidFunction
   children: React.ReactNode
   disabled?: boolean
   title?: string
-}) {
+} & React.ComponentProps<typeof Button>) {
   return (
     <Button
       variant="ghost"
@@ -236,6 +241,7 @@ function BookmarkAction({
       onClick={onClick}
       disabled={disabled}
       title={title}
+      {...props}
     >
       {children}
     </Button>
