@@ -5,6 +5,8 @@ import { exec } from "child_process"
 import { promises as fs } from "fs"
 import path, { join } from "path"
 
+const cleanUpTempFiles = true
+
 /**
  * Transcribe audio buffer using local Whisper via external worker
  */
@@ -105,10 +107,12 @@ export async function transcribe(
     throw new Error(`Whisper transcription failed: ${error}`)
   } finally {
     // Clean up temp files
-    await Promise.all([
-      fs.unlink(tempAudioPath).catch(() => {}),
-      fs.unlink(outputPath).catch(() => {}),
-      fs.unlink(`${tempAudioPath}.json`).catch(() => {}),
-    ])
+    if (cleanUpTempFiles) {
+      await Promise.all([
+        fs.unlink(tempAudioPath).catch(() => {}),
+        fs.unlink(outputPath).catch(() => {}),
+        fs.unlink(`${tempAudioPath}.json`).catch(() => {}),
+      ])
+    }
   }
 }

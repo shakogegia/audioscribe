@@ -1,7 +1,7 @@
-import { tempFolder } from "@/lib/utils";
-import ffmpeg from "fluent-ffmpeg";
-import { promises as fs } from "fs";
-import { join } from "path";
+import { tempFolder } from "@/lib/utils"
+import ffmpeg from "fluent-ffmpeg"
+import { promises as fs } from "fs"
+import { join } from "path"
 
 /**
  * Extract a specific time segment from an audio file
@@ -13,7 +13,7 @@ export async function extractAudioSegment(
   offset: number
 ): Promise<Buffer> {
   return new Promise(async (resolve, reject) => {
-    const tempOutputPath = join(tempFolder, `audio_segment_${Date.now()}.wav`);
+    const tempOutputPath = join(tempFolder, `audio_segment_${Date.now()}.wav`)
 
     try {
       // Convert to WAV format for better Whisper compatibility
@@ -28,22 +28,22 @@ export async function extractAudioSegment(
         .on("end", async () => {
           try {
             // Read the extracted audio file as buffer
-            const audioBuffer = await fs.readFile(tempOutputPath);
+            const audioBuffer = await fs.readFile(tempOutputPath)
 
             // Clean up temp file
-            await fs.unlink(tempOutputPath).catch(() => {}); // Ignore cleanup errors
+            await fs.unlink(tempOutputPath).catch(() => {}) // Ignore cleanup errors
 
-            resolve(audioBuffer);
+            resolve(audioBuffer)
           } catch (error) {
-            reject(new Error(`Failed to read extracted audio: ${error}`));
+            reject(new Error(`Failed to read extracted audio: ${error}`))
           }
         })
         .on("error", error => {
-          reject(new Error(`FFmpeg extraction failed: ${error.message}`));
+          reject(new Error(`FFmpeg extraction failed: ${error.message}`))
         })
-        .run();
+        .run()
     } catch (error) {
-      reject(new Error(`Failed to extract audio segment: ${error}`));
+      reject(new Error(`Failed to extract audio segment: ${error}`))
     }
-  });
+  })
 }

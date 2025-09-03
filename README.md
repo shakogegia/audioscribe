@@ -26,20 +26,20 @@ A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps
 <details>
 <summary>Local</summary>
 
-#### Dependencies
+#### System Dependencies
 
 ```sh
 brew install ffmpeg
+brew install cmake
 ```
 
-cmake
-
 #### Ollama
+
 ```sh
  # Embedder
 ollama pull all-minilm:latest
 
-ollama pull llama3.2:3b 
+ollama pull llama3.2:3b
 ```
 
 #### Install
@@ -58,11 +58,12 @@ cp .env.example .env
 ```sh
 npm run dev
 
-# or 
+# or
 npm run build
 npm run start
 
 ```
+
 </details>
 
 <details>
@@ -85,6 +86,7 @@ services:
       - ./app-data:/app/data # Persist config files
       - ./temp-cache:/tmp/audiobook-wizard # Persist audio cache
 ```
+
 </details>
 
 ## Demo
@@ -96,6 +98,7 @@ services:
 ![Book Management](demo/screenshots/book.png)
 ![ASR Transcription](demo/screenshots/asr.png)
 ![Audiobookshelf](demo/screenshots/audiobookshelf.png)
+
 </details>
 
 ## License

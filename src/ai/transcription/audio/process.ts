@@ -1,21 +1,21 @@
-import { tempFolder } from "@/lib/utils";
-import ffmpeg from "fluent-ffmpeg";
-import { promises as fs } from "fs";
-import { join } from "path";
-import { v4 as uuidv4 } from "uuid";
+import { tempFolder } from "@/lib/utils"
+import ffmpeg from "fluent-ffmpeg"
+import { promises as fs } from "fs"
+import { join } from "path"
+import { v4 as uuidv4 } from "uuid"
 
-const cleanUpTempFiles = true;
+const cleanUpTempFiles = true
 
 /**
  * Preprocess audio for better transcription quality
  */
 export async function preprocessAudio(audioBuffer: Buffer): Promise<Buffer> {
-  const tempInputPath = join(tempFolder, `preprocess_input_${uuidv4()}.wav`);
-  const tempOutputPath = join(tempFolder, `preprocess_output_${uuidv4()}.wav`);
+  const tempInputPath = join(tempFolder, `preprocess_input_${uuidv4()}.wav`)
+  const tempOutputPath = join(tempFolder, `preprocess_output_${uuidv4()}.wav`)
 
   try {
     // Write input buffer to temp file
-    await fs.writeFile(tempInputPath, audioBuffer);
+    await fs.writeFile(tempInputPath, audioBuffer)
 
     // Process audio for better transcription quality
     await new Promise<void>((resolve, reject) => {
@@ -34,24 +34,24 @@ export async function preprocessAudio(audioBuffer: Buffer): Promise<Buffer> {
         .output(tempOutputPath)
         .on("end", () => resolve())
         .on("error", error => reject(error))
-        .run();
-    });
+        .run()
+    })
 
     // Read processed audio
-    const processedBuffer = await fs.readFile(tempOutputPath);
+    const processedBuffer = await fs.readFile(tempOutputPath)
 
     // Clean up temp files
     if (cleanUpTempFiles) {
-      await Promise.all([fs.unlink(tempInputPath).catch(() => {}), fs.unlink(tempOutputPath).catch(() => {})]);
+      await Promise.all([fs.unlink(tempInputPath).catch(() => {}), fs.unlink(tempOutputPath).catch(() => {})])
     }
 
-    return processedBuffer;
+    return processedBuffer
   } catch (error) {
-    console.error("Error preprocessing audio:", error);
+    console.error("Error preprocessing audio:", error)
 
     // Clean up temp files on error
-    await Promise.all([fs.unlink(tempInputPath).catch(() => {}), fs.unlink(tempOutputPath).catch(() => {})]);
+    await Promise.all([fs.unlink(tempInputPath).catch(() => {}), fs.unlink(tempOutputPath).catch(() => {})])
 
-    return audioBuffer; // Fallback to original
+    return audioBuffer // Fallback to original
   }
 }
