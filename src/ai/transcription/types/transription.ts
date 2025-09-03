@@ -9,28 +9,28 @@ export type WhisperModel =
   | "medium.en"
   | "large-v1"
   | "large"
-  | "large-v3-turbo";
+  | "large-v3-turbo"
 
-export type WhisperProvider = { type: "whisper"; model: WhisperModel };
+export type WhisperProvider = { type: "whisper"; model: WhisperModel }
 
-export type ASRProvider = WhisperProvider;
+export type ASRProvider = WhisperProvider
 
 export interface TranscriptionRequest {
-  provider: ASRProvider;
-  audioUrl: string;
-  startTime: number;
-  duration: number; // Duration in seconds to transcribe around the bookmark
-  offset: number; // Offset in seconds to start transcribing from
+  provider: ASRProvider
+  audioUrl: string
+  startTime: number
+  duration: number // Duration in seconds to transcribe around the bookmark
+  offset: number // Offset in seconds to start transcribing from
 }
 
 export interface TranscriptionResult {
-  text: string;
-  confidence?: number;
-  segments?: TranscriptionSegment[];
+  text: string
+  confidence?: number
+  segments?: TranscriptionSegment[]
 }
 
 export interface TranscriptionSegment {
-  text: string;
-  start: number;
-  end: number;
+  text: string
+  start: number
+  end: number
 }

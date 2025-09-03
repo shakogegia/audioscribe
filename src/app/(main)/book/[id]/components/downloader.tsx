@@ -20,7 +20,7 @@ export function Downloader({ bookId, onComplete }: { bookId: string; onComplete:
     setCurrentFile("");
 
     try {
-      const eventSource = new EventSource(`/api/book/${bookId}/download?stream=true`);
+      const eventSource = new EventSource(`/api/book/${bookId}/download/stream`);
       eventSourceRef.current = eventSource;
 
       eventSource.onmessage = event => {

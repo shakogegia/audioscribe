@@ -40,11 +40,11 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { query: searchQuery ?? "", libraryId: libraryId ?? "" },
+    defaultValues: { query: searchQuery ?? "", libraryId: libraryId ?? libraries[0].id },
   });
 
   const { data, error, isLoading } = useSWR<SearchResult[]>(
-    searchQuery ? `/api/search?q=${encodeURIComponent(searchQuery)}&libraryId=${libraryId}&limit=20` : null
+    searchQuery && libraryId ? `/api/search?q=${encodeURIComponent(searchQuery)}&libraryId=${libraryId}&limit=20` : null
   );
 
   function onSubmit(values: z.infer<typeof formSchema>) {
