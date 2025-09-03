@@ -1,9 +1,9 @@
-import { type AppConfig } from "@/lib/config";
-import { create } from "zustand";
+import { type AppConfig } from "@/lib/config"
+import { create } from "zustand"
 
 interface LLMState {
-  config: AppConfig;
-  update: (config: AppConfig) => void;
+  config: AppConfig
+  update: (config: AppConfig) => void
 }
 
 const useLLMStore = create<LLMState>(set => ({
@@ -15,11 +15,12 @@ const useLLMStore = create<LLMState>(set => ({
       anthropic: { enabled: false, apiKey: null },
       ollama: { enabled: false, baseUrl: null },
     },
+    embeddingModel: null,
   },
   update: (config: AppConfig) =>
     set(state => ({
       config: { ...state.config, ...config },
     })),
-}));
+}))
 
-export default useLLMStore;
+export default useLLMStore

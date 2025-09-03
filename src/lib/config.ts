@@ -9,6 +9,7 @@ export interface AppConfig {
     anthropic: { enabled: boolean; apiKey: string | null }
     ollama: { enabled: boolean; baseUrl: string | null }
   }
+  embeddingModel: string | null
 }
 
 export const defaultConfig: AppConfig = {
@@ -19,6 +20,7 @@ export const defaultConfig: AppConfig = {
     anthropic: { enabled: false, apiKey: null },
     ollama: { enabled: false, baseUrl: null },
   },
+  embeddingModel: null,
 }
 
 const configPath = join(process.env.DATA_DIR!, "config.json")
