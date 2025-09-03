@@ -174,9 +174,10 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
             </BookmarkAction>
           </ConfirmDialog>
 
-          <BookmarkAction onClick={handlePlayClick} title="Toggle audio player">
+          {/* TODO: remove? */}
+          {/* <BookmarkAction onClick={handlePlayClick} title="Toggle audio player">
             {showPlayer ? <ChevronsDownUpIcon className="w-4 h-4" /> : <ChevronsUpDownIcon className="w-4 h-4" />}
-          </BookmarkAction>
+          </BookmarkAction> */}
         </div>
       </div>
 
@@ -203,11 +204,12 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
         </div>
       )}
 
-      {showPlayer && (
+      {/* TODO: remove? */}
+      {/* {showPlayer && (
         <div className="mt-2">
           <AudioPlayer bookId={bookId} startTime={bookmark.time} fileStartTime={bookmark.fileStartTime} />
         </div>
-      )}
+      )} */}
     </div>
   )
 }
