@@ -63,11 +63,6 @@ const aiProviders = [
     ],
   },
   {
-    name: "Anthropic",
-    value: "anthropic",
-    models: [],
-  },
-  {
     name: "Ollama",
     value: "ollama",
     models: ["llama3.2:3b", "mistral:7b", "llama2:13b", "qwen2.5:7b"],
@@ -87,7 +82,7 @@ export function AiConfigDialog({ children }: { children: React.ReactNode }) {
           </DialogHeader>
 
           <Tabs defaultValue="account">
-            <TabsList className="mx-auto">
+            <TabsList className="mb-2">
               <TabsTrigger value="llm">LLM Provider</TabsTrigger>
               <TabsTrigger value="asr">ASR Model</TabsTrigger>
             </TabsList>
