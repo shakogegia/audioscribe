@@ -1,5 +1,5 @@
-"use client";
-import { Button } from "@/components/ui/button";
+"use client"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogClose,
@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -19,9 +19,10 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import useAiStore from "@/stores/ai";
-import { whisperModels } from "@/utils/constants";
+} from "@/components/ui/select"
+import useAiStore from "@/stores/ai"
+import { whisperModels } from "@/utils/constants"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const aiProviders = [
   {
@@ -71,10 +72,10 @@ const aiProviders = [
     value: "ollama",
     models: ["llama3.2:3b", "mistral:7b", "llama2:13b", "qwen2.5:7b"],
   },
-];
+]
 
 export function AiConfigDialog({ children }: { children: React.ReactNode }) {
-  const { transcriptionModel, aiProvider, aiModel, setTranscriptionModel, setAiProvider, setAiModel } = useAiStore();
+  const { transcriptionModel, aiProvider, aiModel, setTranscriptionModel, setAiProvider, setAiModel } = useAiStore()
 
   return (
     <Dialog>
@@ -83,73 +84,88 @@ export function AiConfigDialog({ children }: { children: React.ReactNode }) {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Config</DialogTitle>
-            <DialogDescription>Adjust AI configuration</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4">
-            <div className="grid gap-3">
-              <Label>Transcription model</Label>
-              <Select value={transcriptionModel} onValueChange={setTranscriptionModel}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a transcription model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Whisper</SelectLabel>
-                    {whisperModels.map(model => (
-                      <SelectItem key={model.name} value={model.name}>
-                        {model.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-3">
-              <Label>AI Provider</Label>
-              <Select value={aiProvider} onValueChange={setAiProvider}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a transcription model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>AI Providers</SelectLabel>
-                    {aiProviders.map(provider => (
-                      <SelectItem key={provider.name} value={provider.value}>
-                        {provider.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-3">
-              <Label>AI Model</Label>
-              <Select value={aiModel} onValueChange={setAiModel}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a transcription model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Model</SelectLabel>
-                    {aiProviders
-                      .find(provider => provider.value === aiProvider)
-                      ?.models?.map(model => (
-                        <SelectItem key={model} value={model}>
-                          {model}
-                        </SelectItem>
-                      ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+
+          <Tabs defaultValue="account">
+            <TabsList className="mx-auto">
+              <TabsTrigger value="llm">LLM</TabsTrigger>
+              <TabsTrigger value="asr">ASR</TabsTrigger>
+            </TabsList>
+            <TabsContent value="llm">
+              <div className="grid gap-4">
+                <div className="grid gap-3">
+                  <Label>Provider</Label>
+                  <Select value={aiProvider} onValueChange={setAiProvider}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a transcription model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>AI Providers</SelectLabel>
+                        {aiProviders.map(provider => (
+                          <SelectItem key={provider.name} value={provider.value}>
+                            {provider.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-3">
+                  <Label>Model</Label>
+                  <Select value={aiModel} onValueChange={setAiModel}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a transcription model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Model</SelectLabel>
+                        {aiProviders
+                          .find(provider => provider.value === aiProvider)
+                          ?.models?.map(model => (
+                            <SelectItem key={model} value={model}>
+                              {model}
+                            </SelectItem>
+                          ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="asr">
+              <div className="grid gap-4">
+                <div className="grid gap-3">
+                  <Label>Transcription model</Label>
+                  <Select value={transcriptionModel} onValueChange={setTranscriptionModel}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a transcription model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Whisper</SelectLabel>
+                        {whisperModels.map(model => (
+                          <SelectItem key={model.name} value={model.name}>
+                            {model.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="submit" variant="secondary">Close</Button>
+              <Button type="submit" variant="secondary">
+                Close
+              </Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
       </form>
     </Dialog>
-  );
+  )
 }
