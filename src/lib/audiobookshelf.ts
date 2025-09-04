@@ -2,7 +2,7 @@ import type * as Audiobookshelf from "@/types/audiobookshelf"
 import axios from "axios"
 import { AudioFile, SearchResult } from "../types/api"
 import { load } from "./config"
-import { dirSize, folders, humanReadableSize } from "./folders"
+import { dirSize, folders, getBookCacheSize, humanReadableSize } from "./folders"
 
 type Library = {
   id: string
@@ -62,6 +62,7 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
       libraryId: libraryId,
       bookmarks: await getBookmarks(libraryItem.id),
       chapters: libraryItem.media.chapters,
+      cacheSize: await getBookCacheSize(libraryItem.id),
     }))
   )
 }
@@ -111,7 +112,7 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     bookmarks: await getBookmarks(libraryItemId),
     publishedYear: response.data.media.metadata.publishedYear ?? "",
     coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/cover?ts=${Date.now()}&raw=1`,
-    cacheSize: await humanReadableSize(await dirSize(await folders.book(response.data.id).folder())),
+    cacheSize: await getBookCacheSize(libraryItemId),
   }
 }
 

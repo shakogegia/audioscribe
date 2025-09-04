@@ -65,8 +65,16 @@ export async function dirSize(dirPath: string) {
   return size
 }
 
-export async function humanReadableSize(size: number) {
+export async function humanReadableSize(size: number): Promise<string> {
   return size < 1024 * 1024 * 1024
     ? `${(size / 1024 / 1024).toFixed(2)} MB`
     : `${(size / 1024 / 1024 / 1024).toFixed(2)} GB`
+}
+
+export async function getBookCacheSize(id: string): Promise<{ size: number; humanReadableSize: string }> {
+  const size = await dirSize(await folders.book(id).folder())
+  return {
+    size,
+    humanReadableSize: await humanReadableSize(size),
+  }
 }

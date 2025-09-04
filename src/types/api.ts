@@ -13,8 +13,8 @@ export interface SearchResult {
   duration: number
   libraryId: string
   bookmarks: Audiobookshelf.AudioBookmark[]
-  chapters?: Audiobookshelf.Chapter[]
-  cacheSize?: string
+  chapters: Audiobookshelf.Chapter[]
+  cacheSize: { size: number; humanReadableSize: string }
 }
 
 export interface AudioFile {

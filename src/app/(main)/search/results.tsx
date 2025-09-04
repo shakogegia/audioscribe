@@ -1,11 +1,11 @@
-"use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { SearchResult } from "@/types/api";
-import { formatDuration } from "@/lib/format";
-import { BookOpenCheck } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+"use client"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { SearchResult } from "@/types/api"
+import { formatDuration } from "@/lib/format"
+import { BookOpenCheck } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
 
 export default function SearchResults({ books }: { books: SearchResult[] }) {
   return books.map(book => (
@@ -23,6 +23,7 @@ export default function SearchResults({ books }: { books: SearchResult[] }) {
           <span className="text-sm text-neutral-500">{book.authors.join(", ")}</span>
         </div>
         <div className="flex gap-2 mt-1">
+          {book.cacheSize.size > 0 && <Badge variant="default">Cached</Badge>}
           <Badge variant="secondary">{book.bookmarks.length} Bookmarks</Badge>
           <Badge variant="secondary">{formatDuration(book.duration)}</Badge>
         </div>
@@ -34,5 +35,5 @@ export default function SearchResults({ books }: { books: SearchResult[] }) {
         </Button>
       </Link>
     </div>
-  ));
+  ))
 }

@@ -38,7 +38,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
       <Hero
         title={book.title}
         description={[book.authors.join(", ")]}
-        content={book.cacheSize && <Badge variant="outline">{book.cacheSize}</Badge>}
+        content={<Badge variant="outline">{book.cacheSize.humanReadableSize}</Badge>}
         icon={
           <Image
             src={book.coverPath ?? ""}
