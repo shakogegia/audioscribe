@@ -8,9 +8,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params
 
-    const { searchParams } = new URL(request.url)
-
-    const time = Number(searchParams.get("time"))
+    const time = Number(request.nextUrl.searchParams.get("time"))
 
     const file = await getAudioFileByTime(id, time)
 

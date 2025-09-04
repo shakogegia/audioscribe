@@ -37,9 +37,9 @@ export class AudiobookVectorDB {
 
   async ollamaEmbeddingFunction(): Promise<OllamaEmbeddingFunction> {
     const config = await load()
-    const baseUrl = config?.aiProviders.ollama.baseUrl ?? "http://localhost:11434/api"
+    const baseUrl = config?.aiProviders.ollama.baseUrl ?? "http://localhost:11434"
     return new OllamaEmbeddingFunction({
-      url: baseUrl.endsWith("/api") ? baseUrl : `${baseUrl}/api`,
+      url: baseUrl,
       model: config?.embeddingModel ?? "all-minilm:latest",
     })
   }
