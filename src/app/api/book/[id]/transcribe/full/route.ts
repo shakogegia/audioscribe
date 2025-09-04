@@ -29,10 +29,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const transcriptions = await processWithLimit(
       files,
       async file => {
-        const transcription = await transcribeFullAudioFile({
-          provider: { type: "whisper", model: config.transcriptionModel },
-          audioUrl: path.join(audioFolder, file.path),
-        })
+        const transcription = await transcribeFullAudioFile(
+          {
+            provider: { type: "whisper", model: config.transcriptionModel },
+            audioUrl: path.join(audioFolder, file.path),
+          },
+          bookId
+        )
         return {
           ...file,
           ...transcription,

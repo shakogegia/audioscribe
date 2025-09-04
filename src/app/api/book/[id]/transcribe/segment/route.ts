@@ -31,13 +31,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const audioFolder = await folders.book(bookId).downloads()
 
     // Transcribe the audio segment
-    const transcription = await transcribeAudioSegment({
-      provider: { type: "whisper", model: config.transcriptionModel },
-      audioUrl: path.join(audioFolder, file.path),
-      startTime: startTime - file.start,
-      duration,
-      offset,
-    })
+    const transcription = await transcribeAudioSegment(
+      {
+        provider: { type: "whisper", model: config.transcriptionModel },
+        audioUrl: path.join(audioFolder, file.path),
+        startTime: startTime - file.start,
+        duration,
+        offset,
+      },
+      bookId
+    )
 
     return NextResponse.json({ transcription })
   } catch (error) {

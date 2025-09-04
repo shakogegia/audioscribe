@@ -1,6 +1,6 @@
 import type { TranscriptionResult } from "@/ai/transcription/types/transription"
 import { WhisperModel } from "@/ai/transcription/types/transription"
-import { tempFolder } from "@/lib/utils"
+import { folders } from "@/lib/folders"
 import { exec } from "child_process"
 import { promises as fs } from "fs"
 import path, { join } from "path"
@@ -12,10 +12,13 @@ const cleanUpTempFiles = true
  */
 export async function transcribe(
   audioBuffer: Buffer,
+  bookId: string,
   modelName: WhisperModel = "large-v3-turbo"
 ): Promise<TranscriptionResult> {
-  const tempAudioPath = join(tempFolder, `whisper_input_${Date.now()}.wav`)
-  const outputPath = join(tempFolder, `whisper_output_${Date.now()}.json`)
+  const audioFolder = await folders.book(bookId).audio()
+  const transcriptsFolder = await folders.book(bookId).transcripts()
+  const tempAudioPath = join(audioFolder, `whisper_input_${Date.now()}.wav`)
+  const outputPath = join(transcriptsFolder, `whisper_output_${Date.now()}.json`)
 
   try {
     // Write buffer to temporary file

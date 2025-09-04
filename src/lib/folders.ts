@@ -38,11 +38,11 @@ export const folders = {
       await ensureFolder(path)
       return join(folder, "transcripts")
     },
-    async wav() {
+    async audio() {
       const folder = await this.folder()
-      const path = join(folder, "wav")
+      const path = join(folder, "audio")
       await ensureFolder(path)
-      return join(folder, "wav")
+      return join(folder, "audio")
     },
   }),
 }

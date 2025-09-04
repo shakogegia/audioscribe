@@ -1,11 +1,8 @@
 import { createHash } from "crypto"
 import { promises as fs } from "fs"
 import { join } from "path"
-import { tempFolder } from "@/lib/utils"
+import { folders } from "@/lib/folders"
 import type { TranscriptionResult, TranscriptionRequest } from "@/ai/transcription/types/transription"
-
-// Cache directory for transcription results
-const transcriptionCacheFolder = join(tempFolder, "transcription-cache")
 
 /**
  * Generate a unique cache key for a transcription request
@@ -28,30 +25,31 @@ export function generateCacheKey(request: TranscriptionRequest): string {
 }
 
 /**
- * Get the cache file path for a given cache key
+ * Get the cache file path for a given cache key and book ID
  */
-function getCacheFilePath(cacheKey: string): string {
-  return join(transcriptionCacheFolder, `${cacheKey}.json`)
+async function getCacheFilePath(cacheKey: string, bookId: string): Promise<string> {
+  const transcriptsFolder = await folders.book(bookId).transcripts()
+  return join(transcriptsFolder, `${cacheKey}.json`)
 }
 
 /**
- * Ensure the cache directory exists
+ * Ensure the cache directory exists for a specific book
  */
-async function ensureCacheDirectory(): Promise<void> {
-  try {
-    await fs.mkdir(transcriptionCacheFolder, { recursive: true })
-  } catch {
-    // Directory might already exist, ignore error
-  }
+async function ensureCacheDirectory(bookId: string): Promise<void> {
+  await folders.book(bookId).transcripts()
+  // The folders.book().transcripts() already ensures the directory exists
 }
 
 /**
  * Check if a cached transcription exists for the given request
  */
-export async function getCachedTranscription(request: TranscriptionRequest): Promise<TranscriptionResult | null> {
+export async function getCachedTranscription(
+  request: TranscriptionRequest,
+  bookId: string
+): Promise<TranscriptionResult | null> {
   try {
     const cacheKey = generateCacheKey(request)
-    const cacheFilePath = getCacheFilePath(cacheKey)
+    const cacheFilePath = await getCacheFilePath(cacheKey, bookId)
 
     console.info(`[Transcription Cache] Checking cache for key: ${cacheKey}`)
 
@@ -78,12 +76,16 @@ export async function getCachedTranscription(request: TranscriptionRequest): Pro
 /**
  * Store a transcription result in the cache
  */
-export async function cacheTranscription(request: TranscriptionRequest, result: TranscriptionResult): Promise<void> {
+export async function cacheTranscription(
+  request: TranscriptionRequest,
+  result: TranscriptionResult,
+  bookId: string
+): Promise<void> {
   try {
-    await ensureCacheDirectory()
+    await ensureCacheDirectory(bookId)
 
     const cacheKey = generateCacheKey(request)
-    const cacheFilePath = getCacheFilePath(cacheKey)
+    const cacheFilePath = await getCacheFilePath(cacheKey, bookId)
 
     const cacheData = {
       result,
@@ -101,18 +103,17 @@ export async function cacheTranscription(request: TranscriptionRequest, result: 
 }
 
 /**
- * Get cache statistics
+ * Get cache statistics for a specific book
  */
-export async function getCacheStats(): Promise<{
+export async function getCacheStats(bookId: string): Promise<{
   totalFiles: number
   totalSize: number
   oldestFile?: { path: string; timestamp: number }
   newestFile?: { path: string; timestamp: number }
 }> {
   try {
-    await ensureCacheDirectory()
-
-    const files = await fs.readdir(transcriptionCacheFolder)
+    const transcriptsFolder = await folders.book(bookId).transcripts()
+    const files = await fs.readdir(transcriptsFolder)
     const jsonFiles = files.filter(f => f.endsWith(".json"))
 
     let totalSize = 0
@@ -120,7 +121,7 @@ export async function getCacheStats(): Promise<{
     let newestFile: { path: string; timestamp: number } | undefined
 
     for (const file of jsonFiles) {
-      const filePath = join(transcriptionCacheFolder, file)
+      const filePath = join(transcriptsFolder, file)
       const stats = await fs.stat(filePath)
       totalSize += stats.size
 
@@ -153,20 +154,19 @@ export async function getCacheStats(): Promise<{
 }
 
 /**
- * Clear old cache entries (older than specified days)
+ * Clear old cache entries for a specific book (older than specified days)
  */
-export async function clearOldCache(olderThanDays: number = 30): Promise<number> {
+export async function clearOldCache(bookId: string, olderThanDays: number = 30): Promise<number> {
   try {
-    await ensureCacheDirectory()
-
-    const files = await fs.readdir(transcriptionCacheFolder)
+    const transcriptsFolder = await folders.book(bookId).transcripts()
+    const files = await fs.readdir(transcriptsFolder)
     const jsonFiles = files.filter(f => f.endsWith(".json"))
 
     const cutoffTime = Date.now() - olderThanDays * 24 * 60 * 60 * 1000
     let deletedCount = 0
 
     for (const file of jsonFiles) {
-      const filePath = join(transcriptionCacheFolder, file)
+      const filePath = join(transcriptsFolder, file)
 
       try {
         const cacheData = JSON.parse(await fs.readFile(filePath, "utf8"))
