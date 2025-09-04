@@ -1,75 +1,73 @@
-"use client";
-import { remark } from "remark";
-import html from "remark-html";
-import { useState, useEffect, useMemo, useCallback } from "react";
-import type { ReactElement } from "react";
-import { twMerge } from "tailwind-merge";
+"use client"
+import { remark } from "remark"
+import html from "remark-html"
+import { useState, useEffect, useMemo, useCallback } from "react"
+import type { ReactElement } from "react"
+import { twMerge } from "tailwind-merge"
 
 type MarkdownProps = {
-  text: string;
-  onTimeClick?: (time: string) => void;
-  className?: string;
-};
+  text: string
+  onTimeClick?: (time: string) => void
+  className?: string
+}
 
 export function Markdown({ text, onTimeClick, className = "" }: MarkdownProps) {
-  const [processedContent, setProcessedContent] = useState<ReactElement | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [processedContent, setProcessedContent] = useState<ReactElement | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   const processMarkdown = useMemo(() => {
     return async (markdownText: string) => {
       try {
-        setIsLoading(true);
-        const result = await remark().use(html, { sanitize: true }).process(markdownText);
-        return result.toString();
+        setIsLoading(true)
+        const result = await remark().use(html, { sanitize: true }).process(markdownText)
+        return result.toString()
       } catch (error) {
-        console.error("Error processing markdown:", error);
-        return markdownText; // Fallback to raw text if processing fails
+        console.error("Error processing markdown:", error)
+        return markdownText // Fallback to raw text if processing fails
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   const processTimeStamps = useCallback(
     (htmlContent: string) => {
       if (!onTimeClick) {
-        return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+        return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
       }
 
       // Replace timestamps in the HTML content with clickable spans
-      const processedHtml = htmlContent
-        .replace(/(\d{1,2}:\d{2}:\d{2})\.\d{1,3}/g, "$1") // remove milliseconds
-        .replace(/(\(?(\d{1,2}:\d{2}:\d{2})\)?)/g, (match, fullMatch, timeOnly) => {
-          return `<span class="${twMerge(
-            "timestamp-button font-mono font-medium cursor-pointer",
-            "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          )}" data-time="${timeOnly}">${fullMatch}</span>`;
-        });
+      const processedHtml = htmlContent.replace(/(\(?(\d{1,2}:\d{2}:\d{2})\)?)/g, (match, fullMatch, timeOnly) => {
+        return `<span class="${twMerge(
+          "timestamp-button font-mono font-medium cursor-pointer",
+          "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+        )}" data-time="${timeOnly}">${fullMatch}</span>`
+      })
 
       return (
         <div
           dangerouslySetInnerHTML={{ __html: processedHtml }}
           onClick={e => {
-            const target = e.target as HTMLElement;
+            const target = e.target as HTMLElement
             if (target.classList.contains("timestamp-button")) {
-              const time = target.getAttribute("data-time");
+              const time = target.getAttribute("data-time")
               if (time) {
-                onTimeClick(time);
+                onTimeClick(time)
               }
             }
           }}
         />
-      );
+      )
     },
     [onTimeClick]
-  );
+  )
 
   useEffect(() => {
     processMarkdown(text).then(htmlContent => {
-      const content = processTimeStamps(htmlContent);
-      setProcessedContent(content);
-    });
-  }, [text, processMarkdown, processTimeStamps]);
+      const content = processTimeStamps(htmlContent)
+      setProcessedContent(content)
+    })
+  }, [text, processMarkdown, processTimeStamps])
 
   if (isLoading) {
     return (
@@ -77,7 +75,7 @@ export function Markdown({ text, onTimeClick, className = "" }: MarkdownProps) {
         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
       </div>
-    );
+    )
   }
 
   return (
@@ -89,5 +87,5 @@ export function Markdown({ text, onTimeClick, className = "" }: MarkdownProps) {
     >
       {processedContent}
     </div>
-  );
+  )
 }

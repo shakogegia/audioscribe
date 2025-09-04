@@ -13,6 +13,7 @@ import { Downloader } from "./downloader"
 import { Transcript } from "./transcript"
 import Chapters from "./chapters"
 import { Badge } from "@/components/ui/badge"
+import { parseAsStringEnum, useQueryState } from "nuqs"
 
 interface BookProps {
   id: string
@@ -21,7 +22,18 @@ interface BookProps {
   revalidate: (id: string) => void
 }
 
+enum BookTab {
+  Bookmarks = "bookmarks",
+  Chapters = "chapters",
+  Chat = "chat",
+  Transcript = "transcript",
+}
+
 export default function Book({ id, book, files, revalidate }: BookProps) {
+  const [activeTab, setActiveTab] = useQueryState<BookTab>("tab", {
+    defaultValue: BookTab.Bookmarks,
+    parse: parseAsStringEnum(Object.values(BookTab)).withDefault(BookTab.Bookmarks).parse,
+  })
   const bookPlayerRef = useRef<BookPlayerRef>(null)
 
   const [hasDownloaded, setHasDownloaded] = useState(false)
@@ -38,7 +50,11 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
       <Hero
         title={book.title}
         description={[book.authors.join(", ")]}
-        content={<Badge variant="outline">{book.cacheSize.humanReadableSize}</Badge>}
+        content={
+          <>
+            <Badge variant="outline">Cache size: {book.cacheSize.humanReadableSize}</Badge>
+          </>
+        }
         icon={
           <Image
             src={book.coverPath ?? ""}
@@ -57,12 +73,12 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
           <>
             <BookPlayer book={book} files={files} ref={bookPlayerRef} controls="full" />
 
-            <Tabs defaultValue="bookmarks">
+            <Tabs defaultValue={activeTab} onValueChange={value => setActiveTab(value as BookTab)}>
               <TabsList className="self-center">
-                <TabsTrigger value="bookmarks">Bookmarks</TabsTrigger>
-                <TabsTrigger value="chapters">Chapters</TabsTrigger>
-                <TabsTrigger value="chat">Chat</TabsTrigger>
-                <TabsTrigger value="transcript">Transcript</TabsTrigger>
+                <TabsTrigger value={BookTab.Bookmarks}>Bookmarks</TabsTrigger>
+                <TabsTrigger value={BookTab.Chapters}>Chapters</TabsTrigger>
+                <TabsTrigger value={BookTab.Chat}>Chat</TabsTrigger>
+                <TabsTrigger value={BookTab.Transcript}>Transcript</TabsTrigger>
               </TabsList>
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <Bookmarks id={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
