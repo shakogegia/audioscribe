@@ -24,11 +24,12 @@ export async function transcribeAudioSegment(
       request.audioUrl,
       request.startTime,
       request.duration,
-      request.offset
+      request.offset,
+      bookId
     )
 
     // Preprocess audio for better transcription quality
-    const processedAudioBuffer = await preprocessAudio(rawAudioBuffer)
+    const processedAudioBuffer = await preprocessAudio(rawAudioBuffer, bookId)
 
     let transcription: TranscriptionResult
 
@@ -76,10 +77,10 @@ export async function transcribeFullAudioFile(
       return cachedResult
     }
 
-    const rawAudioBuffer = await convertToWavBuffer(request.audioUrl)
+    const rawAudioBuffer = await convertToWavBuffer(request.audioUrl, bookId)
 
     // // Preprocess audio for better transcription quality
-    const processedAudioBuffer = await preprocessAudio(rawAudioBuffer)
+    const processedAudioBuffer = await preprocessAudio(rawAudioBuffer, bookId)
 
     let transcription: TranscriptionResult
 

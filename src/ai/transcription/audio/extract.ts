@@ -1,4 +1,4 @@
-import { tempFolder } from "@/lib/utils"
+import { folders } from "@/lib/folders"
 import ffmpeg from "fluent-ffmpeg"
 import { promises as fs } from "fs"
 import { join } from "path"
@@ -10,10 +10,12 @@ export async function extractAudioSegment(
   audioUrl: string,
   startTime: number,
   duration: number,
-  offset: number
+  offset: number,
+  bookId: string
 ): Promise<Buffer> {
   return new Promise(async (resolve, reject) => {
-    const tempOutputPath = join(tempFolder, `audio_segment_${Date.now()}.wav`)
+    const audioFolder = await folders.book(bookId).audio()
+    const tempOutputPath = join(audioFolder, `audio_segment_${Date.now()}.wav`)
 
     try {
       // Convert to WAV format for better Whisper compatibility

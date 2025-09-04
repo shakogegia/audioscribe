@@ -1,11 +1,10 @@
 import type { TranscriptionResult } from "@/ai/transcription/types/transription"
 import { WhisperModel } from "@/ai/transcription/types/transription"
 import { folders } from "@/lib/folders"
+import { cleanUpTempFiles } from "@/lib/utils"
 import { exec } from "child_process"
 import { promises as fs } from "fs"
 import path, { join } from "path"
-
-const cleanUpTempFiles = true
 
 /**
  * Transcribe audio buffer using local Whisper via external worker

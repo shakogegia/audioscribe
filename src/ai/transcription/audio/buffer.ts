@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from "uuid"
-import { tempFolder } from "@/lib/utils"
+import { cleanUpTempFiles } from "@/lib/utils"
+import { folders } from "@/lib/folders"
 import ffmpeg from "fluent-ffmpeg"
 import { promises as fs } from "fs"
 import { join } from "path"
 
-const cleanUpTempFiles = true
-
 // Convert to WAV format for better Whisper compatibility and return buffer
-export async function convertToWavBuffer(audioUrl: string): Promise<Buffer> {
+export async function convertToWavBuffer(audioUrl: string, bookId: string): Promise<Buffer> {
   return new Promise(async (resolve, reject) => {
-    const tempOutputPath = join(tempFolder, `audio_full_${uuidv4()}.wav`)
+    const audioFolder = await folders.book(bookId).audio()
+    const tempOutputPath = join(audioFolder, `audio_full_${uuidv4()}.wav`)
 
     try {
       // Convert to WAV format for better Whisper compatibility

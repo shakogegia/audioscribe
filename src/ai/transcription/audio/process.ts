@@ -1,17 +1,17 @@
-import { tempFolder } from "@/lib/utils"
+import { cleanUpTempFiles } from "@/lib/utils"
+import { folders } from "@/lib/folders"
 import ffmpeg from "fluent-ffmpeg"
 import { promises as fs } from "fs"
 import { join } from "path"
 import { v4 as uuidv4 } from "uuid"
 
-const cleanUpTempFiles = true
-
 /**
  * Preprocess audio for better transcription quality
  */
-export async function preprocessAudio(audioBuffer: Buffer): Promise<Buffer> {
-  const tempInputPath = join(tempFolder, `preprocess_input_${uuidv4()}.wav`)
-  const tempOutputPath = join(tempFolder, `preprocess_output_${uuidv4()}.wav`)
+export async function preprocessAudio(audioBuffer: Buffer, bookId: string): Promise<Buffer> {
+  const audioFolder = await folders.book(bookId).audio()
+  const tempInputPath = join(audioFolder, `preprocess_input_${uuidv4()}.wav`)
+  const tempOutputPath = join(audioFolder, `preprocess_output_${uuidv4()}.wav`)
 
   try {
     // Write input buffer to temp file
