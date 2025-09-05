@@ -24,6 +24,9 @@ export default function SearchResults({ books }: { books: SearchResult[] }) {
         </div>
         <div className="flex gap-2 mt-1">
           {book.cacheSize.size > 0 && <Badge variant="default">Cached</Badge>}
+          <Badge variant="secondary" className="bg-blue-500 text-white dark:bg-blue-600">
+            Transcripted
+          </Badge>
           <Badge variant="secondary">{book.bookmarks.length} Bookmarks</Badge>
           <Badge variant="secondary">{formatDuration(book.duration)}</Badge>
         </div>

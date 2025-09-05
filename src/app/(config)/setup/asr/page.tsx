@@ -1,14 +1,13 @@
-"use client";
+"use client"
 
-import GradientIcon from "@/components/gradient-icon";
-import { Hero } from "@/components/hero";
-import { Captions } from "lucide-react";
+import GradientIcon from "@/components/gradient-icon"
+import { Hero } from "@/components/hero"
+import { Captions } from "lucide-react"
 
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { whisperModels } from "@/utils/constants";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { whisperModels } from "@/utils/constants"
 
-
-export default function LLMSetupPage() {
+export default function ASRListPage() {
   return (
     <div className="flex flex-col items-center gap-8 w-full min-h-full px-4">
       <Hero
@@ -39,5 +38,5 @@ export default function LLMSetupPage() {
         </Table>
       </div>
     </div>
-  );
+  )
 }
