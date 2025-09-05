@@ -1,6 +1,6 @@
 {
-  "name": "audiobook-bookmark-wizard",
-  "version": "0.1.0",
+  "name": "audioscribe",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev --turbopack\" \"npm run chroma\"",
@@ -9,7 +9,14 @@
     "lint": "eslint",
     "chroma": "chroma run --path ./data/chromadb",
     "script:vectorize": "ts-node --project workers/tsconfig.json workers/vectorize.ts",
-    "script:transcribe": "ts-node --project workers/tsconfig.json workers/transcribe.ts"
+    "script:transcribe": "ts-node --project workers/tsconfig.json workers/transcribe.ts",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset",
+    "release": "release-it"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.9",
@@ -19,6 +26,7 @@
     "@chroma-core/default-embed": "^0.1.8",
     "@chroma-core/ollama": "^0.1.7",
     "@hookform/resolvers": "^5.2.1",
+    "@prisma/client": "^6.15.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -49,6 +57,7 @@
     "nodejs-whisper": "^0.2.9",
     "nuqs": "^2.5.2",
     "ollama-ai-provider-v2": "^1.2.2",
+    "prisma": "^6.15.0",
     "react": "19.1.1",
     "react-dom": "19.1.1",
     "react-hook-form": "^7.62.0",
@@ -64,6 +73,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@release-it/conventional-changelog": "^10.0.1",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.16",
     "@types/fluent-ffmpeg": "^2.1.27",
@@ -72,6 +82,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "release-it": "^19.0.4",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
