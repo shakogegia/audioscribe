@@ -1,6 +1,6 @@
 {
   "name": "audioscribe",
-  "version": "0.3.2",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev --turbopack\" \"npm run chroma\"",
@@ -16,7 +16,7 @@
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
-    "release": "release-it"
+    "release": "dotenv release-it"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.9",
@@ -80,6 +80,7 @@
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
     "release-it": "^19.0.4",
