@@ -1,6 +1,6 @@
 {
   "name": "audioscribe",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "concurrently \"next dev --turbopack\" \"npm run chroma\"",
