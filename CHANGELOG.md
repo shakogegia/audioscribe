@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.3.1](https://github.com/shakogegia/audioscribe/compare/0.3.0...0.3.1) (2025-09-05)
+
 # 0.3.0 (2025-09-05)
 
 
