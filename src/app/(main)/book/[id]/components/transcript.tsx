@@ -1,4 +1,5 @@
 "use client"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Markdown } from "@/components/markdown"
@@ -6,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useAiConfig } from "@/hooks/use-ai-config"
 import { AudioFile, SearchResult } from "@/types/api"
 import axios from "axios"
-import { Captions, Loader2Icon } from "lucide-react"
+import { Captions, Loader2Icon, Terminal } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
@@ -49,7 +50,17 @@ export function Transcript({ bookId, play, files }: TranscriptProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4 my-6">
+    <div className="flex flex-col gap-4 mt-2 mb-6">
+      {isTranscribing && (
+        <Alert variant="default">
+          <Terminal />
+          <AlertTitle>Heads up!</AlertTitle>
+          <AlertDescription>
+            Don`t close this tab or navigate away from this page until the transcription is complete.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {transcriptions.length === 0 && (
         <Button
           variant="secondary"
