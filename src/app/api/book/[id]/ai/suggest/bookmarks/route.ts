@@ -3,13 +3,13 @@ import { provider } from "@/ai/providers"
 import { WhisperModel } from "@/ai/transcription/types/transription"
 import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
-import { formatTime } from "@/lib/format"
 import { prisma } from "@/lib/prisma"
 import { millisecondsToTime } from "@/utils/time"
 import { NextRequest, NextResponse } from "next/server"
 
 interface BookmarkSuggestionsRequestBody {
   time: number
+  offset?: number // in seconds, default is 30, seconds before and after the time to include in the transcript
   config: {
     transcriptionModel: WhisperModel
     aiProvider: AiProvider
@@ -25,14 +25,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params
     const body: BookmarkSuggestionsRequestBody = await request.json()
 
-    const { time, config } = body
+    const { time, offset = 30, config } = body
 
     const book = await getBook(bookId)
 
     const ai = await provider(config.aiProvider, config.aiModel)
-
-    // 30 seconds before and after the time
-    const offset = 30
 
     const timeInMilliseconds = time * 1000
     const offsetInMilliseconds = offset * 1000
