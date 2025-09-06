@@ -2,6 +2,8 @@
 
 A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps to enhance audiobook experience with AI bookmark title suggestions, transcription, chat and more.
 
+See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
+
 ![Bookmark Editing](demo/screenshots/edit.png)
 
 ## Features
