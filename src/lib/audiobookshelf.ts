@@ -1,4 +1,5 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf"
+import { promises as fsPromises } from "fs"
 import axios from "axios"
 import { AudioFile, SearchResult } from "../types/api"
 import { load } from "./config"
@@ -33,6 +34,12 @@ export async function getAllLibraries(): Promise<Library[]> {
   }
 }
 
+async function checkIfBookIsTranscribed(libraryItemId: string): Promise<boolean> {
+  const transcriptsFolder = await folders.book(libraryItemId).transcripts()
+  const files = await fsPromises.readdir(transcriptsFolder)
+  return files.some(file => file.startsWith("full-"))
+}
+
 export async function searchBook(libraryId: string, query: string): Promise<SearchResult[]> {
   const api = await getApi()
   const response = await api.get<{ book: { libraryItem: Audiobookshelf.LibraryItem }[] }>(
@@ -63,6 +70,7 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
       bookmarks: await getBookmarks(libraryItem.id),
       chapters: libraryItem.media.chapters,
       cacheSize: await getBookCacheSize(libraryItem.id),
+      transcribed: await checkIfBookIsTranscribed(libraryItem.id),
     }))
   )
 }
@@ -113,6 +121,7 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     publishedYear: response.data.media.metadata.publishedYear ?? "",
     coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/cover?ts=${Date.now()}&raw=1`,
     cacheSize: await getBookCacheSize(libraryItemId),
+    transcribed: await checkIfBookIsTranscribed(libraryItemId),
   }
 }
 

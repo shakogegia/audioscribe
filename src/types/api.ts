@@ -15,6 +15,7 @@ export interface SearchResult {
   bookmarks: Audiobookshelf.AudioBookmark[]
   chapters: Audiobookshelf.Chapter[]
   cacheSize: { size: number; humanReadableSize: string }
+  transcribed: boolean
 }
 
 export interface AudioFile {

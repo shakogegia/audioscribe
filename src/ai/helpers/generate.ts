@@ -1,24 +1,24 @@
-import { generateText, LanguageModel } from "ai";
+import { generateText, LanguageModel } from "ai"
 
 export async function generate(model: LanguageModel, prompt: string): Promise<string> {
   const { text } = await generateText({
     model: model,
     prompt: prompt,
-  });
+  })
 
-  return text;
+  return text
 }
 
 export type SystemPromptMessage = {
-  role: "system" | "user";
-  content: string;
-};
+  role: "system" | "user"
+  content: string
+}
 
 export async function generateSystemPrompt(model: LanguageModel, messages: SystemPromptMessage[]): Promise<string> {
   const { text } = await generateText({
     model: model,
     messages: messages,
-  });
+  })
 
-  return text;
+  return text
 }

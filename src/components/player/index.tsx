@@ -1,15 +1,24 @@
 "use client"
 
-import { AudioFile, SearchResult } from "@/types/api"
 import { Button } from "@/components/ui/button"
 import { formatTime } from "@/lib/format"
-import { Bookmark, Captions, CaptionsOff, FastForward, Pause, Play, Rewind, TableOfContents } from "lucide-react"
-import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef, Ref } from "react"
+import { AudioFile, SearchResult } from "@/types/api"
+import {
+  Bookmark,
+  Captions as CaptionsIcon,
+  CaptionsOff,
+  FastForward,
+  Pause,
+  Play,
+  Rewind,
+  TableOfContents,
+} from "lucide-react"
+import { forwardRef, Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { twMerge } from "tailwind-merge"
-// import useBookmarksStore from "@/app/book/[id]/stores/bookmarks";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { BookCaptions } from "./book-captions"
+import { useBookPlayerStore } from "@/stores/book-player"
 import useBookmarksStore from "@/stores/bookmarks"
+import { Captions } from "./captions"
 
 interface BookPlayerProps {
   book: SearchResult
@@ -30,6 +39,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
   const [pendingSeekTime, setPendingSeekTime] = useState<number | null>(null)
   const [showCaptions, setShowCaptions] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const setCurrentTime = useBookPlayerStore(state => state.setCurrentTime)
 
   // add bookmarks store
   const addBookmark = useBookmarksStore(state => state.add)
@@ -72,6 +82,10 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
     },
     [files]
   )
+
+  useEffect(() => {
+    setCurrentTime(totalCurrentTime)
+  }, [totalCurrentTime, setCurrentTime])
 
   // Load current file
   useEffect(() => {
@@ -287,7 +301,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
         )}
       </div>
 
-      {showCaptions && <BookCaptions book={book} files={files} time={totalCurrentTime} />}
+      {showCaptions && <Captions book={book} time={totalCurrentTime} />}
 
       {controls === "full" && (
         <div className="flex items-center justify-between gap-4">
@@ -319,7 +333,7 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="outline" size="icon" className="w-10" onClick={() => setShowCaptions(!showCaptions)}>
-                  {showCaptions ? <CaptionsOff className="w-5 h-5" /> : <Captions className="w-5 h-5" />}
+                  {showCaptions ? <CaptionsOff className="w-5 h-5" /> : <CaptionsIcon className="w-5 h-5" />}
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Toggle captions</TooltipContent>

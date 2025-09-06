@@ -40,7 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
           "Content-Range": `bytes ${start}-${end}/${fileSize}`,
           "Accept-Ranges": "bytes",
           "Content-Length": chunksize.toString(),
-          "Content-Type": "audio/mpeg",
+          "Content-Type": "audio/mp4", // Workaround for Safari support
           "Cache-Control": "public, max-age=3600",
         },
       })
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         status: 200,
         headers: {
           "Content-Length": fileSize.toString(),
-          "Content-Type": "audio/mpeg",
+          "Content-Type": "audio/mp4", // Workaround for Safari support
           "Accept-Ranges": "bytes",
           "Cache-Control": "public, max-age=3600",
         },

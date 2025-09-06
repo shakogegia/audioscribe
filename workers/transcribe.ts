@@ -1,86 +1,121 @@
-import "dotenv/config";
-import { program } from "commander";
-import { nodewhisper } from "nodejs-whisper";
-import fs from "fs";
-import { WhisperModel } from "@/ai/transcription/types/transription";
+import "dotenv/config"
+import { program } from "commander"
+import { nodewhisper } from "nodejs-whisper"
+import fs from "fs"
+import fsPromise from "fs/promises"
+import { WhisperModel } from "@/ai/transcription/types/transription"
+import { getBook, getBookFiles } from "@/lib/audiobookshelf"
+import { folders } from "@/lib/folders"
+import path from "path"
+import { shiftTimestamps } from "@/ai/transcription/utils/utils"
 
 interface Props {
-  modelName: WhisperModel;
-  audioFilePath: string;
-  outputPath: string;
+  bookId: string
+  modelName: WhisperModel
 }
 
 program
+  .requiredOption("-b, --book-id <string>", "The ID of the book")
   .requiredOption("-m, --model-name <string>", "The name of the model to use")
-  .requiredOption("-a, --audio-file-path <string>", "The path to the audio file to transcribe")
-  .requiredOption("-o, --output-path <string>", "The path to the output file");
 
-program.parse();
+program.parse()
 
 // Get arguments
-const { modelName, audioFilePath, outputPath } = program.opts<Props>();
+const { bookId, modelName } = program.opts<Props>()
 
-if (!audioFilePath || !outputPath) {
-  console.error("Usage: node whisper.js <modelName> <audioFile> <outputFile>");
-  process.exit(1);
+async function transcribeAudioFile(audioFilePath: string): Promise<string> {
+  console.info(`[Whisper Worker] Starting transcription of: ${audioFilePath}`)
+  console.info(`[Whisper Worker] Model: ${modelName}`)
+
+  // Check if audio file exists
+  if (!fs.existsSync(audioFilePath)) {
+    throw new Error(`Audio file not found: ${audioFilePath}`)
+  }
+
+  // Check audio file size
+  const audioStats = fs.statSync(audioFilePath)
+  console.info(`[Whisper Worker] Audio file size: ${audioStats.size} bytes`)
+
+  if (audioStats.size === 0) {
+    throw new Error(`Audio file is empty: ${audioFilePath}`)
+  }
+
+  const result = await nodewhisper(audioFilePath, {
+    modelName: modelName,
+    autoDownloadModelName: modelName,
+    removeWavFileAfterTranscription: false,
+    withCuda: false,
+    whisperOptions: {
+      outputInText: false,
+      outputInVtt: false,
+      outputInSrt: false,
+      outputInCsv: false,
+      outputInJson: true,
+      translateToEnglish: false,
+      wordTimestamps: true,
+      timestamps_length: 20,
+      splitOnWord: true,
+    },
+  })
+
+  console.info(`[Whisper Worker] Transcription completed successfully`)
+
+  return result
+}
+
+async function saveTranscription(transcription: string, outputPath: string) {
+  console.info(`[Whisper Worker] Saving transcription to: ${outputPath}`)
+  await fsPromise.writeFile(outputPath, transcription)
 }
 
 async function transcribe() {
   try {
-    console.info(`[Whisper Worker] Starting transcription of: ${audioFilePath}`);
-    console.info(`[Whisper Worker] Model: ${modelName}`);
+    const bookFiles = await getBookFiles(bookId)
 
-    // Check if audio file exists
-    if (!fs.existsSync(audioFilePath)) {
-      throw new Error(`Audio file not found: ${audioFilePath}`);
+    const downloadsFolder = await folders.book(bookId).downloads()
+    const transcriptsFolder = await folders.book(bookId).transcripts()
+
+    const audioFiles = bookFiles
+      .map(file => ({
+        ...file,
+        fileName: file.path,
+        localPath: path.join(downloadsFolder, file.path),
+      }))
+      .sort((a, b) => a.index - b.index)
+
+    const transcriptions: { text: string; start: number }[] = []
+
+    for (const audioFile of audioFiles) {
+      const transcription = await transcribeAudioFile(audioFile.localPath)
+      const audioFileTranscriptionPath = path.join(transcriptsFolder, `${audioFile.fileName}.txt`)
+      await saveTranscription(transcription, audioFileTranscriptionPath)
+      transcriptions.push({ text: transcription, start: audioFile.start })
     }
 
-    // Check audio file size
-    const audioStats = fs.statSync(audioFilePath);
-    console.info(`[Whisper Worker] Audio file size: ${audioStats.size} bytes`);
+    const fullTranscription = transcriptions
+      .map(transcription => {
+        return shiftTimestamps(transcription.text, transcription.start)
+      })
+      .join("\n")
 
-    if (audioStats.size === 0) {
-      throw new Error(`Audio file is empty: ${audioFilePath}`);
-    }
+    const fullTranscriptionPath = path.join(transcriptsFolder, `full-${modelName}.txt`)
+    await saveTranscription(fullTranscription, fullTranscriptionPath)
 
-    const result = await nodewhisper(audioFilePath, {
-      modelName: modelName,
-      autoDownloadModelName: modelName,
-      removeWavFileAfterTranscription: false,
-      withCuda: false,
-      whisperOptions: {
-        outputInText: false,
-        outputInVtt: false,
-        outputInSrt: false,
-        outputInCsv: false,
-        outputInJson: true,
-        translateToEnglish: false,
-        wordTimestamps: true,
-        timestamps_length: 20,
-        splitOnWord: true,
-      },
-    });
-
-    console.info(`[Whisper Worker] Transcription completed successfully`);
-
-    // Write result to output file
-    fs.writeFileSync(outputPath, JSON.stringify({ success: true, result: result }));
-
-    process.exit(0);
+    process.exit(0)
   } catch (error) {
-    console.error(`[Whisper Worker] Transcription failed:`, error);
+    console.error(`[Whisper Worker] Transcription failed:`, error)
 
     // Write error to output file
-    fs.writeFileSync(
-      outputPath,
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      })
-    );
+    // fs.writeFileSync(
+    //   outputPath,
+    //   JSON.stringify({
+    //     success: false,
+    //     error: error instanceof Error ? error.message : "Unknown error",
+    //   })
+    // )
 
-    process.exit(1);
+    process.exit(1)
   }
 }
 
-transcribe();
+transcribe()

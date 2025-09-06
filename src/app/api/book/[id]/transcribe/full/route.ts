@@ -5,6 +5,7 @@ import { folders } from "@/lib/folders"
 import { processWithLimit } from "@/lib/parallel"
 import { NextRequest, NextResponse } from "next/server"
 import path from "path"
+import fs from "fs"
 
 interface TranscribeRequestBody {
   parallelLimit?: number
@@ -20,31 +21,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params
     const body: TranscribeRequestBody = await request.json()
 
-    const { config, parallelLimit = 1 } = body
+    const { config } = body
 
-    const files = await getBookFiles(bookId)
-    const audioFolder = await folders.book(bookId).downloads()
+    const transcriptsFolder = await folders.book(bookId).transcripts()
 
-    // Process files with parallel limit
-    const transcriptions = await processWithLimit(
-      files,
-      async file => {
-        const transcription = await transcribeFullAudioFile(
-          {
-            provider: { type: "whisper", model: config.transcriptionModel },
-            audioUrl: path.join(audioFolder, file.path),
-          },
-          bookId
-        )
-        return {
-          ...file,
-          ...transcription,
-        }
-      },
-      parallelLimit
-    )
+    const fullTranscriptPath = path.join(transcriptsFolder, `full-${config.transcriptionModel}.txt`)
 
-    return NextResponse.json({ transcriptions })
+    const transcript = await fs.promises.readFile(fullTranscriptPath, "utf8")
+
+    return NextResponse.json({ transcript })
   } catch (error) {
     console.error("Transcription error:", error)
     return NextResponse.json({ error: "Failed to transcribe audio segment" }, { status: 500 })

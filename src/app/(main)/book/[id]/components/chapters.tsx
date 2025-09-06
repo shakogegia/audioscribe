@@ -1,50 +1,43 @@
-"use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { formatTime } from "@/lib/format";
-import { AudioFile, SearchResult } from "@/types/api";
-import { Bookmark as BookmarkIcon, BookmarkPlus, Check, Loader2Icon, Trash } from "lucide-react";
-import { useState } from "react";
-import { twMerge } from "tailwind-merge";
+"use client"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { formatTime } from "@/lib/format"
+import { AudioFile, SearchResult } from "@/types/api"
+import { Bookmark as BookmarkIcon, BookmarkPlus, Check, Loader2Icon, Trash } from "lucide-react"
+import { useState } from "react"
+import { twMerge } from "tailwind-merge"
 
 type ChaptersProps = {
-  id: string;
-  book: SearchResult;
-  files: AudioFile[];
-  play?: (time?: number) => void;
-  getCurrentTime?: () => number;
-};
+  id: string
+  book: SearchResult
+  files: AudioFile[]
+  play?: (time?: number) => void
+  getCurrentTime?: () => number
+}
 
 export default function Chapters({ play, getCurrentTime, book }: ChaptersProps) {
-  const [isSaving] = useState(false);
+  const [isSaving] = useState(false)
 
-  const [chapters, setChapters] = useState(() => book.chapters.sort((a, b) => a.start - b.start));
+  const [chapters, setChapters] = useState(() => book.chapters.sort((a, b) => a.start - b.start))
 
   function addNewChapter() {
-    const currentTime = getCurrentTime?.() || 0;
-    setChapters([
-      ...chapters,
-      { id: chapters.length + 1, start: currentTime, end: currentTime, title: "New Chapter " },
-    ]);
+    const currentTime = getCurrentTime?.() || 0
+    setChapters([...chapters, { id: chapters.length + 1, start: currentTime, end: currentTime, title: "New Chapter " }])
   }
 
-  const chaptersSorted = chapters.sort((a, b) => a.start - b.start);
+  const chaptersSorted = chapters.sort((a, b) => a.start - b.start)
 
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex items-center justify-between gap-2">
         <div className="flex justify-center items-center gap-2">
-          <BookmarkIcon className="w-4 h-4" />
-          <h3 className="text-sm text-center">List</h3>
-        </div>
-
-        <div className="flex justify-center items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" onClick={addNewChapter}>
+              <Button variant="outline" size="sm" onClick={addNewChapter}>
                 <BookmarkPlus className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Chapters</span>
+                Add Chapter
               </Button>
             </TooltipTrigger>
             <TooltipContent>Add a new chapter at the current time</TooltipContent>
@@ -93,7 +86,7 @@ export default function Chapters({ play, getCurrentTime, book }: ChaptersProps) 
         </div>
       )}
     </div>
-  );
+  )
 }
 
 function BookmarkAction({
@@ -102,10 +95,10 @@ function BookmarkAction({
   disabled,
   title,
 }: {
-  onClick?: VoidFunction;
-  children: React.ReactNode;
-  disabled?: boolean;
-  title?: string;
+  onClick?: VoidFunction
+  children: React.ReactNode
+  disabled?: boolean
+  title?: string
 }) {
   return (
     <Button
@@ -121,5 +114,5 @@ function BookmarkAction({
     >
       {children}
     </Button>
-  );
+  )
 }

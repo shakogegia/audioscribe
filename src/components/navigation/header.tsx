@@ -1,9 +1,9 @@
-import { Cog, House, SlidersHorizontal } from "lucide-react";
-import Link from "next/link";
-import { Button } from "../ui/button";
-import { ThemeSwitcher } from "./theme-switcher";
-import { AiConfigDialog } from "@/components/dialogs/ai-config-dialog";
+import { AiConfigDialog } from "@/components/dialogs/ai-config-dialog"
 import { Separator } from "@/components/ui/separator"
+import { Cog, House, SlidersHorizontal } from "lucide-react"
+import Link from "next/link"
+import { Button } from "../ui/button"
+import { ThemeSwitcher } from "./theme-switcher"
 
 export function Header() {
   return (
@@ -25,6 +25,7 @@ export function Header() {
         </Link>
 
         <ThemeSwitcher />
+
         <Link href="/setup/audiobookshelf">
           <Button variant="outline" size="icon">
             <Cog className="w-4 h-4" />
@@ -32,5 +33,5 @@ export function Header() {
         </Link>
       </div>
     </header>
-  );
+  )
 }

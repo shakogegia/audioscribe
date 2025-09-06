@@ -1,27 +1,53 @@
 "use client"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Markdown } from "@/components/markdown"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { useAiConfig } from "@/hooks/use-ai-config"
-import { AudioFile, SearchResult } from "@/types/api"
+import { findTranscriptLine } from "@/lib/caption"
+import { formatTime } from "@/lib/format"
+import { useBookPlayerStore } from "@/stores/book-player"
+import { SearchResult } from "@/types/api"
 import axios from "axios"
-import { Captions, Loader2Icon, Terminal } from "lucide-react"
-import { useState } from "react"
+import { Captions, CaptionsOff, Loader2Icon, Scroll, Terminal } from "lucide-react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { toast } from "sonner"
+import TranscriptContent from "./text"
 
 interface TranscriptProps {
   bookId: string
   book: SearchResult
-  files: AudioFile[]
   play?: (time?: number) => void
 }
 
-export function Transcript({ bookId, play, files }: TranscriptProps) {
+export function Transcript({ bookId, play }: TranscriptProps) {
   const { aiConfig } = useAiConfig()
   const [isTranscribing, setIsTranscribing] = useState(false)
-  const [transcriptions, setTranscriptions] = useState<{ text: string; index: number }[]>([])
+  const [transcript, setTranscript] = useState<string>("")
+  const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const currentTime = useBookPlayerStore(state => state.currentTime)
+  const [followCurrentTime, setFollowCurrentTime] = useState(false)
+
+  useEffect(() => {
+    if (scrollAreaRef.current && transcript && followCurrentTime) {
+      const { time } = findTranscriptLine(transcript, currentTime) ?? {}
+      if (time) {
+        scrollToTime(formatTime(time ?? 0))
+      }
+    }
+  }, [currentTime, transcript, followCurrentTime])
+
+  function scrollToTime(time: string) {
+    if (scrollAreaRef.current) {
+      const timeSpan = scrollAreaRef.current.querySelector(`span[data-time="${time}"]`)
+      const activeSpans = scrollAreaRef.current.querySelectorAll("span.active-time")
+      activeSpans.forEach(span => {
+        span.classList.remove("active-time")
+      })
+      if (timeSpan) {
+        timeSpan.scrollIntoView({ behavior: "smooth", block: "center" })
+        timeSpan.classList.add("active-time")
+      }
+    }
+  }
 
   async function transcribeFullBook() {
     toast.loading("Transcribing full book...", { id: "transcribe-full-book" })
@@ -30,7 +56,7 @@ export function Transcript({ bookId, play, files }: TranscriptProps) {
       const response = await axios.post(`/api/book/${bookId}/transcribe/full`, {
         config: aiConfig,
       })
-      setTranscriptions(response.data.transcriptions)
+      setTranscript(response.data.transcript)
       toast.success("Transcribed full book", { id: "transcribe-full-book" })
     } catch (error) {
       console.error("Failed to transcribe full book:", error)
@@ -40,14 +66,17 @@ export function Transcript({ bookId, play, files }: TranscriptProps) {
     }
   }
 
-  function onTimeClick(file: AudioFile, time: string) {
-    const timeToSeconds = time.split(":")
-    const hours = parseInt(timeToSeconds[0])
-    const minutes = parseInt(timeToSeconds[1])
-    const seconds = parseInt(timeToSeconds[2])
-    const timeInSeconds = hours * 3600 + minutes * 60 + seconds
-    play?.(timeInSeconds + file.start)
-  }
+  const onTimeClick = useCallback(
+    (time: string) => {
+      const timeToSeconds = time.split(":")
+      const hours = parseInt(timeToSeconds[0])
+      const minutes = parseInt(timeToSeconds[1])
+      const seconds = parseInt(timeToSeconds[2])
+      const timeInSeconds = hours * 3600 + minutes * 60 + seconds
+      play?.(timeInSeconds)
+    },
+    [play]
+  )
 
   return (
     <div className="flex flex-col gap-4 mt-2 mb-6">
@@ -61,7 +90,7 @@ export function Transcript({ bookId, play, files }: TranscriptProps) {
         </Alert>
       )}
 
-      {transcriptions.length === 0 && (
+      {!transcript && (
         <Button
           variant="secondary"
           className="w-full"
@@ -74,35 +103,23 @@ export function Transcript({ bookId, play, files }: TranscriptProps) {
         </Button>
       )}
 
-      {!isTranscribing && transcriptions.length > 0 && (
-        <Accordion type="single" collapsible>
-          {files.map(file => (
-            <AccordionItem key={file.index} value={file.index.toString()}>
-              <AccordionTrigger>
-                <span>
-                  <span className="text-neutral-400 dark:text-neutral-600 pr-2">{file.index}.</span>
-                  {file.fileName}
-                </span>
-              </AccordionTrigger>
-              <AccordionContent>
-                <ScrollArea className="h-[500px]">
-                  <div className="transcript-container [&_.timestamp-button]:pr-1">
-                    <Markdown
-                      text={parseTranscription(transcriptions.find(t => t.index === file.index)?.text || "")}
-                      onTimeClick={time => onTimeClick(file, time)}
-                      className=""
-                    />
-                  </div>
-                </ScrollArea>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+      {transcript && !isTranscribing && (
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setFollowCurrentTime(!followCurrentTime)}>
+            {followCurrentTime ? <CaptionsOff className="w-4 h-4" /> : <Captions className="w-4 h-4" />}
+            {followCurrentTime ? "Stop Following Player" : "Follow Player"}
+          </Button>
+
+          <Button variant="outline" onClick={() => scrollToTime(formatTime(currentTime))} disabled={followCurrentTime}>
+            <Scroll className="w-4 h-4" />
+            Scroll to Current Time
+          </Button>
+        </div>
+      )}
+
+      {!isTranscribing && transcript && (
+        <TranscriptContent text={transcript} onTimeClick={onTimeClick} ref={scrollAreaRef} />
       )}
     </div>
   )
-}
-
-function parseTranscription(text: string): string {
-  return text.replace(/\[?(\d{2}:\d{2}:\d{2})\.\d{3} --> \d{2}:\d{2}:\d{2}\.\d{3}\]?/g, "$1").replace(/\n/g, "  \n")
 }

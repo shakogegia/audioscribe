@@ -20,9 +20,10 @@ export default function SetupLayout({ children }: Props) {
         <Tabs defaultValue={pathname} onValueChange={onValueChange}>
           <TabsList>
             <TabsTrigger value="/setup/audiobookshelf">Audiobookshelf</TabsTrigger>
-            <TabsTrigger value="/setup/llm">LLM Providers</TabsTrigger>
-            <TabsTrigger value="/setup/asr">ASR Models</TabsTrigger>
-            <TabsTrigger value="/setup/embedding">Embedding Model</TabsTrigger>
+            <TabsTrigger value="/setup/llm">LLM</TabsTrigger>
+            <TabsTrigger value="/setup/asr">ASR</TabsTrigger>
+            <TabsTrigger value="/setup/embedding">Embedding</TabsTrigger>
+            <TabsTrigger value="/jobs">Jobs</TabsTrigger>
             <TabsTrigger value="/cache">Cache</TabsTrigger>
           </TabsList>
         </Tabs>

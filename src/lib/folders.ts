@@ -78,3 +78,42 @@ export async function getBookCacheSize(id: string): Promise<{ size: number; huma
     humanReadableSize: await humanReadableSize(size),
   }
 }
+
+export function clearFolder(directory: string) {
+  return deleteRecursively(directory, directory)
+}
+
+export async function deleteRecursively(
+  itemPath: string,
+  itemName: string
+): Promise<{ item: string; status: string; reason?: string }> {
+  try {
+    // Check if item can be accessed
+    await fs.access(itemPath, fs.constants.F_OK)
+
+    const stats = await fs.stat(itemPath)
+
+    if (stats.isDirectory()) {
+      // Check if directory is writable
+      await fs.access(itemPath, fs.constants.W_OK)
+
+      // Recursively delete directory contents
+      await fs.rm(itemPath, { recursive: true, force: true })
+      return { item: itemName, status: "deleted (directory)" }
+    } else {
+      // Check if file is writable
+      await fs.access(itemPath, fs.constants.W_OK)
+
+      // Delete file
+      await fs.unlink(itemPath)
+      return { item: itemName, status: "deleted (file)" }
+    }
+  } catch (accessError) {
+    console.warn(`Cannot delete ${itemName}:`, accessError)
+    return {
+      item: itemName,
+      status: "skipped",
+      reason: "permission denied or item not accessible",
+    }
+  }
+}

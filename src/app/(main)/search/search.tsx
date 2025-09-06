@@ -1,19 +1,9 @@
-"use client";
-import GradientIcon from "@/components/gradient-icon";
-import { Hero } from "@/components/hero";
-import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { SearchResult } from "@/types/api";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FileAudio, Loader2, Search as SearchIcon } from "lucide-react";
-import { useQueryState } from "nuqs";
-import { Suspense } from "react";
-import { useForm } from "react-hook-form";
-import useSWR from "swr";
-import z from "zod";
-import SearchResults from "./results";
-import SearchStatus from "./status";
+"use client"
+import GradientIcon from "@/components/gradient-icon"
+import { Hero } from "@/components/hero"
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -23,36 +13,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { SearchResult } from "@/types/api"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { FileAudio, Loader2, Search as SearchIcon } from "lucide-react"
+import { useQueryState } from "nuqs"
+import { Suspense } from "react"
+import { useForm } from "react-hook-form"
+import useSWR from "swr"
+import z from "zod"
+import SearchResults from "./results"
+import SearchStatus from "./status"
 
 type Library = {
-  id: string;
-  name: string;
-};
+  id: string
+  name: string
+}
 
 const formSchema = z.object({
   query: z.string(),
   libraryId: z.string(),
-});
+})
 
 function SearchPageContent({ libraries }: { libraries: Library[] }) {
-  const [searchQuery, setSearchQuery] = useQueryState("q");
-  const [libraryId, setLibraryId] = useQueryState("libraryId");
+  const [searchQuery, setSearchQuery] = useQueryState("q")
+  const [libraryId, setLibraryId] = useQueryState("libraryId")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { query: searchQuery ?? "", libraryId: libraryId ?? libraries[0].id },
-  });
+  })
 
   const { data, error, isLoading } = useSWR<SearchResult[]>(
     searchQuery && libraryId ? `/api/search?q=${encodeURIComponent(searchQuery)}&libraryId=${libraryId}&limit=20` : null
-  );
+  )
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (values.query) {
-      setSearchQuery(values.query);
+      setSearchQuery(values.query)
     }
     if (values.libraryId) {
-      setLibraryId(values.libraryId);
+      setLibraryId(values.libraryId)
     }
   }
 
@@ -66,9 +66,11 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
 
       {/* Search */}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col sm:flex-row w-full max-w-xl items-center gap-2">
-
-        <FormField
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex flex-col sm:flex-row w-full max-w-xl items-center gap-2"
+        >
+          <FormField
             control={form.control}
             name="libraryId"
             render={({ field }) => (
@@ -94,7 +96,6 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
             )}
           />
 
-          
           <FormField
             control={form.control}
             name="query"
@@ -138,7 +139,7 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
         {data && data.length > 0 && <SearchResults books={data} />}
       </div>
     </div>
-  );
+  )
 }
 
 export function Search({ libraries }: { libraries: Library[] }) {
@@ -150,7 +151,10 @@ export function Search({ libraries }: { libraries: Library[] }) {
             title="Audiobook Search"
             description={["Search for audiobooks in your library.", "Use book titles to search."]}
             icon={
-              <GradientIcon gradient="from-blue-600 to-pink-400" icon={<SearchIcon className="w-10 h-10 text-white" />} />
+              <GradientIcon
+                gradient="from-blue-600 to-pink-400"
+                icon={<SearchIcon className="w-10 h-10 text-white" />}
+              />
             }
           />
           <SearchStatus>
@@ -162,5 +166,5 @@ export function Search({ libraries }: { libraries: Library[] }) {
     >
       <SearchPageContent libraries={libraries} />
     </Suspense>
-  );
+  )
 }

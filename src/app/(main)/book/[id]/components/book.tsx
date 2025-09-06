@@ -1,5 +1,5 @@
 "use client"
-import { BookPlayer, BookPlayerRef } from "@/components/book-player"
+import { BookPlayer, BookPlayerRef } from "@/components/player"
 import { Hero } from "@/components/hero"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AudioFile, SearchResult } from "@/types/api"
@@ -7,7 +7,7 @@ import Image from "next/image"
 import { useRef, useState } from "react"
 import { twMerge } from "tailwind-merge"
 import useBookmarksStore from "../../../../../stores/bookmarks"
-import { AiChat } from "./ai-chat"
+import { Chat } from "./chat"
 import Bookmarks from "./bookmarks"
 import { Downloader } from "./downloader"
 import { Transcript } from "./transcript"
@@ -46,14 +46,15 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
   }
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center gap-8 my-10 px-4">
+    <div className="w-full min-h-full flex flex-col items-center gap-8 mb-10 px-4">
       <Hero
         title={book.title}
         description={[book.authors.join(", ")]}
         content={
-          <>
-            <Badge variant="outline">Cache size: {book.cacheSize.humanReadableSize}</Badge>
-          </>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">Cache size: {book.cacheSize.humanReadableSize}</Badge>
+            {book.transcribed && <Badge variant="secondary">Transcripted</Badge>}
+          </div>
         }
         icon={
           <Image
@@ -77,8 +78,8 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
               <TabsList className="self-center">
                 <TabsTrigger value={BookTab.Bookmarks}>Bookmarks</TabsTrigger>
                 <TabsTrigger value={BookTab.Chapters}>Chapters</TabsTrigger>
-                <TabsTrigger value={BookTab.Chat}>Chat</TabsTrigger>
                 <TabsTrigger value={BookTab.Transcript}>Transcript</TabsTrigger>
+                <TabsTrigger value={BookTab.Chat}>Chat</TabsTrigger>
               </TabsList>
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <Bookmarks id={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
@@ -92,11 +93,11 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
                   getCurrentTime={() => bookPlayerRef.current?.getCurrentTime() ?? 0}
                 />
               </TabsContent>
-              <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <AiChat bookId={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
-              </TabsContent>
               <TabsContent value="transcript" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <Transcript bookId={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
+                <Transcript bookId={id} book={book} play={time => bookPlayerRef.current?.play(time)} />
+              </TabsContent>
+              <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
+                <Chat bookId={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
               </TabsContent>
             </Tabs>
           </>

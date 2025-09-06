@@ -1,8 +1,9 @@
 "use client"
 import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { AudioFile, SearchResult } from "@/types/api"
 import axios from "axios"
-import { Bookmark as BookmarkIcon, Check, Loader2Icon, WandSparkles } from "lucide-react"
+import { BookmarkPlus, Check, Loader2Icon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import useBookmarksStore from "../../../../../stores/bookmarks"
@@ -31,14 +32,18 @@ export default function Bookmarks({ id, play }: BookmarksProps) {
     <div className="flex flex-col gap-4 w-full">
       <div className="flex items-center justify-between gap-2">
         <div className="flex justify-center items-center gap-2">
-          <BookmarkIcon className="w-4 h-4" />
-          <h3 className="text-sm text-center">List</h3>
-        </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm">
+                <BookmarkPlus className="h-[1.2rem] w-[1.2rem]" />
+                <span className="sr-only">Bookmarks</span>
+                Add Bookmark
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Add a new bookmark at the current time</TooltipContent>
+          </Tooltip>
 
-        <div className="flex justify-center items-center gap-2">
-          {/* TODO: remove this placeholder and add AI Suggestions button */}
-          <div className="h-9 block" />
-          {/* <Button variant="outline" size="icon">
+          {/* <Button variant="outline" size="sm">
             <WandSparkles className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">AI Suggestions</span>
           </Button> */}

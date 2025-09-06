@@ -13,7 +13,7 @@ export function Hero({ title, description, icon, content }: HeroProps) {
     <div className="flex flex-col items-center gap-4">
       {icon}
       <div className="flex flex-col items-center gap-1">
-        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">{title}</h3>
+        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight text-center">{title}</h3>
 
         {description && (
           <div className="flex flex-col">
