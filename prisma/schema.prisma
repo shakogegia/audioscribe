@@ -11,12 +11,33 @@ datasource db {
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
-  cached      Boolean  @default(false)
-  transcribed Boolean  @default(false)
-  favorite    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  cached             Boolean  @default(false)
+  transcribed        Boolean  @default(false)
+  transcriptionModel String?
+  favorite           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // relations
+  transcriptSegment TranscriptSegment[]
+}
+
+model TranscriptSegment {
+  id        Int      @id @default(autoincrement())
+  bookId    String
+  fileIno   String
+  model     String
+  text      String
+  startTime Int
+  endTime   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@index([bookId])
 }
 
 model Job {
@@ -37,13 +58,4 @@ model Job {
   updatedAt   DateTime  @updatedAt
 
   @@index([status, processAt, priority])
-}
-
-model LLMProvider {
-  id        String   @id @default(cuid())
-  name      String
-  apiKey    String?
-  baseUrl   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

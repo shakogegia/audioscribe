@@ -6,8 +6,10 @@ import axios from "axios"
 import { BookmarkPlus, Check, Loader2Icon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import useBookmarksStore from "../../../../../stores/bookmarks"
+import useBookmarksStore from "@/stores/bookmarks"
 import { Bookmark } from "./bookmark"
+import { usePlayerStore } from "@/stores/player"
+import { useTranscript } from "@/hooks/use-transcript"
 
 type BookmarksProps = {
   id: string
@@ -18,6 +20,9 @@ type BookmarksProps = {
 
 export default function Bookmarks({ id, play }: BookmarksProps) {
   const bookmarks = useBookmarksStore(state => state.bookmarks)
+  const currentTime = usePlayerStore(state => state.currentTime)
+  const addBookmark = useBookmarksStore(state => state.add)
+  const { findCaption } = useTranscript()
   const [isSaving, setIsSaving] = useState(false)
 
   async function updateBookmarks() {
@@ -28,13 +33,28 @@ export default function Bookmarks({ id, play }: BookmarksProps) {
     setIsSaving(false)
   }
 
+  function addBookmarkAtCurrentTime() {
+    const caption = findCaption(currentTime)
+
+    const title =
+      caption.current?.text ?? caption.previous?.text ?? caption.next?.text ?? `Bookmark ${bookmarks.length + 1}`
+
+    addBookmark({
+      libraryItemId: id,
+      title: title,
+      time: currentTime,
+      fileStartTime: 0,
+      createdAt: Date.now(),
+    })
+  }
+
   return (
     <div className="flex flex-col gap-4 w-full">
       <div className="flex items-center justify-between gap-2">
         <div className="flex justify-center items-center gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={addBookmarkAtCurrentTime}>
                 <BookmarkPlus className="h-[1.2rem] w-[1.2rem]" />
                 <span className="sr-only">Bookmarks</span>
                 Add Bookmark

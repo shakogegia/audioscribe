@@ -1,19 +1,21 @@
 "use client"
-import { BookPlayer, BookPlayerRef } from "@/components/player"
+import { Player, PlayerRef } from "@/components/player"
 import { Hero } from "@/components/hero"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AudioFile, SearchResult } from "@/types/api"
 import Image from "next/image"
 import { useRef, useState } from "react"
 import { twMerge } from "tailwind-merge"
-import useBookmarksStore from "../../../../../stores/bookmarks"
-import { Chat } from "./chat"
-import Bookmarks from "./bookmarks"
-import { Downloader } from "./downloader"
-import { Transcript } from "./transcript"
-import Chapters from "./chapters"
+import useBookmarksStore from "@/stores/bookmarks"
+import { Chat } from "./tabs/chat/chat"
+import Bookmarks from "./tabs/bookmarks/bookmarks"
+import { Downloader } from "./components/downloader"
+import { Transcript } from "./tabs/transcript/transcript"
+import Chapters from "./tabs/chapters/chapters"
 import { Badge } from "@/components/ui/badge"
 import { parseAsStringEnum, useQueryState } from "nuqs"
+import { useMount } from "react-use"
+import { useTranscript } from "@/hooks/use-transcript"
 
 interface BookProps {
   id: string
@@ -34,7 +36,9 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
     defaultValue: BookTab.Bookmarks,
     parse: parseAsStringEnum(Object.values(BookTab)).withDefault(BookTab.Bookmarks).parse,
   })
-  const bookPlayerRef = useRef<BookPlayerRef>(null)
+  const playerRef = useRef<PlayerRef>(null)
+
+  const { fetchTranscript, transcribe } = useTranscript()
 
   const [hasDownloaded, setHasDownloaded] = useState(false)
   const setBookmarks = useBookmarksStore(state => state.setBookmarks)
@@ -45,6 +49,10 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
     setBookmarks(book.bookmarks)
   }
 
+  useMount(() => {
+    fetchTranscript(id)
+  })
+
   return (
     <div className="w-full min-h-full flex flex-col items-center gap-8 mb-10 px-4">
       <Hero
@@ -53,7 +61,16 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
         content={
           <div className="flex items-center gap-2">
             <Badge variant="secondary">Cache size: {book.cacheSize.humanReadableSize}</Badge>
-            {book.transcribed && <Badge variant="secondary">Transcripted</Badge>}
+            {book.transcribed && (
+              <Badge variant="secondary" onClick={() => transcribe(id)}>
+                Transcripted
+              </Badge>
+            )}
+            {!book.transcribed && (
+              <Badge variant="info" onClick={() => transcribe(id)}>
+                Transcribe
+              </Badge>
+            )}
           </div>
         }
         icon={
@@ -72,7 +89,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
 
         {hasDownloaded && (
           <>
-            <BookPlayer book={book} files={files} ref={bookPlayerRef} controls="full" />
+            <Player book={book} files={files} ref={playerRef} controls="full" />
 
             <Tabs defaultValue={activeTab} onValueChange={value => setActiveTab(value as BookTab)}>
               <TabsList className="self-center">
@@ -81,23 +98,25 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
                 <TabsTrigger value={BookTab.Transcript}>Transcript</TabsTrigger>
                 <TabsTrigger value={BookTab.Chat}>Chat</TabsTrigger>
               </TabsList>
+
+              {/* Bookmarks */}
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <Bookmarks id={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
+                <Bookmarks id={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
+
+              {/* Chapters */}
               <TabsContent value="chapters" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <Chapters
-                  id={id}
-                  book={book}
-                  files={files}
-                  play={time => bookPlayerRef.current?.play(time)}
-                  getCurrentTime={() => bookPlayerRef.current?.getCurrentTime() ?? 0}
-                />
+                <Chapters id={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
-              <TabsContent value="transcript" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <Transcript bookId={id} book={book} play={time => bookPlayerRef.current?.play(time)} />
+
+              {/* Transcript */}
+              <TabsContent value="transcript" className={twMerge("data-[state=inactive]:hidden")}>
+                <Transcript bookId={id} book={book} play={time => playerRef.current?.play(time)} />
               </TabsContent>
+
+              {/* Chat */}
               <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <Chat bookId={id} book={book} files={files} play={time => bookPlayerRef.current?.play(time)} />
+                <Chat bookId={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
             </Tabs>
           </>

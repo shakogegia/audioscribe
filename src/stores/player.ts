@@ -1,11 +1,11 @@
 import { create } from "zustand"
 
-interface BookPlayerState {
+interface PlayerState {
   currentTime: number
   setCurrentTime: (currentTime: number) => void
 }
 
-export const useBookPlayerStore = create<BookPlayerState>(set => ({
+export const usePlayerStore = create<PlayerState>(set => ({
   currentTime: 0,
   setCurrentTime: (currentTime: number) => set({ currentTime }),
 }))

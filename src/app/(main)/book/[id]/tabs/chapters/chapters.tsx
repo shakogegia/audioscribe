@@ -3,8 +3,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatTime } from "@/lib/format"
+import { usePlayerStore } from "@/stores/player"
 import { AudioFile, SearchResult } from "@/types/api"
-import { Bookmark as BookmarkIcon, BookmarkPlus, Check, Loader2Icon, Trash } from "lucide-react"
+import { BookmarkPlus, Check, Loader2Icon, Trash } from "lucide-react"
 import { useState } from "react"
 import { twMerge } from "tailwind-merge"
 
@@ -16,13 +17,13 @@ type ChaptersProps = {
   getCurrentTime?: () => number
 }
 
-export default function Chapters({ play, getCurrentTime, book }: ChaptersProps) {
+export default function Chapters({ play, book }: ChaptersProps) {
   const [isSaving] = useState(false)
+  const currentTime = usePlayerStore(state => state.currentTime)
 
   const [chapters, setChapters] = useState(() => book.chapters.sort((a, b) => a.start - b.start))
 
   function addNewChapter() {
-    const currentTime = getCurrentTime?.() || 0
     setChapters([...chapters, { id: chapters.length + 1, start: currentTime, end: currentTime, title: "New Chapter " }])
   }
 

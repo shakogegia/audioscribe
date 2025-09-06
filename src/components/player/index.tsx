@@ -16,39 +16,36 @@ import {
 import { forwardRef, Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { twMerge } from "tailwind-merge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useBookPlayerStore } from "@/stores/book-player"
+import { usePlayerStore } from "@/stores/player"
 import useBookmarksStore from "@/stores/bookmarks"
 import { Captions } from "./captions"
+import { useTranscript } from "@/hooks/use-transcript"
 
-interface BookPlayerProps {
+interface PlayerProps {
   book: SearchResult
   files: AudioFile[]
   className?: string
   controls: "full" | "compact"
 }
 
-export interface BookPlayerRef {
+export interface PlayerRef {
   play: (time?: number) => void
-  getCurrentTime: () => number
 }
 
-function BookPlayerComponent({ book, files, className, controls }: BookPlayerProps, ref: Ref<BookPlayerRef>) {
+function PlayerComponent({ book, files, className, controls }: PlayerProps, ref: Ref<PlayerRef>) {
+  const { segments } = useTranscript()
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentFileIndex, setCurrentFileIndex] = useState(0)
   const [fileCurrentTime, setFileCurrentTime] = useState(0)
   const [pendingSeekTime, setPendingSeekTime] = useState<number | null>(null)
   const [showCaptions, setShowCaptions] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
-  const setCurrentTime = useBookPlayerStore(state => state.setCurrentTime)
+  const setCurrentTime = usePlayerStore(state => state.setCurrentTime)
 
   // add bookmarks store
   const addBookmark = useBookmarksStore(state => state.add)
 
-  useImperativeHandle(ref, () => ({ play, getCurrentTime }))
-
-  function getCurrentTime() {
-    return totalCurrentTime
-  }
+  useImperativeHandle(ref, () => ({ play }))
 
   function play(time?: number) {
     if (time) {
@@ -332,7 +329,13 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" className="w-10" onClick={() => setShowCaptions(!showCaptions)}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-10"
+                  onClick={() => setShowCaptions(!showCaptions)}
+                  disabled={!segments.length}
+                >
                   {showCaptions ? <CaptionsOff className="w-5 h-5" /> : <CaptionsIcon className="w-5 h-5" />}
                 </Button>
               </TooltipTrigger>
@@ -354,4 +357,6 @@ function BookPlayerComponent({ book, files, className, controls }: BookPlayerPro
   )
 }
 
-export const BookPlayer = forwardRef(BookPlayerComponent)
+PlayerComponent.displayName = "PlayerComponent"
+
+export const Player = forwardRef(PlayerComponent)

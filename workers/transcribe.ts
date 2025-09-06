@@ -1,31 +1,76 @@
-import "dotenv/config"
+import { WhisperModel } from "@/ai/transcription/types/transription"
+import { getBookFiles } from "@/lib/audiobookshelf"
+import { folders } from "@/lib/folders"
+import { prisma } from "@/lib/prisma"
+import { type Prisma } from "@prisma/client"
 import { program } from "commander"
-import { nodewhisper } from "nodejs-whisper"
+import "dotenv/config"
 import fs from "fs"
 import fsPromise from "fs/promises"
-import { WhisperModel } from "@/ai/transcription/types/transription"
-import { getBook, getBookFiles } from "@/lib/audiobookshelf"
-import { folders } from "@/lib/folders"
+import { nodewhisper } from "nodejs-whisper"
 import path from "path"
-import { shiftTimestamps } from "@/ai/transcription/utils/utils"
 
 interface Props {
   bookId: string
-  modelName: WhisperModel
+  model: WhisperModel
 }
 
 program
   .requiredOption("-b, --book-id <string>", "The ID of the book")
-  .requiredOption("-m, --model-name <string>", "The name of the model to use")
+  .requiredOption("-m, --model <string>", "The name of the model to use")
 
 program.parse()
 
 // Get arguments
-const { bookId, modelName } = program.opts<Props>()
+const { bookId, model } = program.opts<Props>()
 
-async function transcribeAudioFile(audioFilePath: string): Promise<string> {
+export type WhisperTranscriptionResult = {
+  systeminfo: string
+  model: {
+    type: string
+    multilingual: boolean
+    vocab: number
+    audio: {
+      ctx: number
+      state: number
+      head: number
+      layer: number
+    }
+    text: {
+      ctx: number
+      state: number
+      head: number
+      layer: number
+    }
+    mels: number
+    ftype: number
+  }
+  params: {
+    model: string
+    language: string
+    translate: boolean
+  }
+  result: {
+    language: string
+  }
+  transcription: Array<{
+    timestamps: {
+      from: string
+      to: string
+    }
+    offsets: {
+      from: number
+      to: number
+    }
+    text: string
+  }>
+}
+
+async function transcribeAudioFile(
+  audioFilePath: string
+): Promise<{ result: WhisperTranscriptionResult; file: string }> {
   console.info(`[Whisper Worker] Starting transcription of: ${audioFilePath}`)
-  console.info(`[Whisper Worker] Model: ${modelName}`)
+  console.info(`[Whisper Worker] Model: ${model}`)
 
   // Check if audio file exists
   if (!fs.existsSync(audioFilePath)) {
@@ -40,9 +85,9 @@ async function transcribeAudioFile(audioFilePath: string): Promise<string> {
     throw new Error(`Audio file is empty: ${audioFilePath}`)
   }
 
-  const result = await nodewhisper(audioFilePath, {
-    modelName: modelName,
-    autoDownloadModelName: modelName,
+  await nodewhisper(audioFilePath, {
+    modelName: model,
+    autoDownloadModelName: model,
     removeWavFileAfterTranscription: false,
     withCuda: false,
     whisperOptions: {
@@ -58,61 +103,104 @@ async function transcribeAudioFile(audioFilePath: string): Promise<string> {
     },
   })
 
+  // append .json to the audio file path and replace the .wav extension
+  const wavAudioFilePath = audioFilePath.replace(/\.[^/.]+$/, ".wav")
+  const outputJsonPath = `${wavAudioFilePath}.json`
+  const outputContent = await fsPromise.readFile(outputJsonPath, "utf8")
+  const resultJson = JSON.parse(outputContent) as WhisperTranscriptionResult
+
   console.info(`[Whisper Worker] Transcription completed successfully`)
 
-  return result
+  return { result: resultJson, file: outputJsonPath }
 }
 
-async function saveTranscription(transcription: string, outputPath: string) {
-  console.info(`[Whisper Worker] Saving transcription to: ${outputPath}`)
-  await fsPromise.writeFile(outputPath, transcription)
+async function saveTranscriptions({
+  bookId,
+  fileIno,
+  transcription,
+  offset,
+}: {
+  bookId: string
+  fileIno: string
+  transcription: WhisperTranscriptionResult
+  offset: number
+}) {
+  // timestamp format is 00:00:00,000
+
+  function convertTimestampToMilliseconds(timestamp: string): number {
+    // Split into [hh, mm, ss, mmm]
+    // Example: "01:23:45,678"
+    const match = timestamp.match(/^(\d{2}):(\d{2}):(\d{2}),(\d{3})$/)
+    if (!match) {
+      throw new Error(`Invalid timestamp format: ${timestamp}`)
+    }
+    const [, hours, minutes, seconds, milliseconds] = match
+    return (
+      parseInt(hours, 10) * 60 * 60 * 1000 +
+      parseInt(minutes, 10) * 60 * 1000 +
+      parseInt(seconds, 10) * 1000 +
+      parseInt(milliseconds, 10)
+    )
+  }
+
+  const data: Prisma.TranscriptSegmentCreateManyInput[] = transcription.transcription.map(item => ({
+    bookId: bookId,
+    model: model,
+    fileIno: fileIno,
+    text: item.text,
+    startTime: offset + convertTimestampToMilliseconds(item.timestamps.from),
+    endTime: offset + convertTimestampToMilliseconds(item.timestamps.to),
+  }))
+
+  await prisma.transcriptSegment.createMany({ data })
+}
+
+function cleanUpTempFiles(files: string[]) {
+  return Promise.all(files.map(file => fsPromise.unlink(file).catch(() => {})))
+}
+
+async function cleanUpOldTranscripts(bookId: string) {
+  return await prisma.transcriptSegment.deleteMany({ where: { bookId } })
+}
+
+async function updateBook(bookId: string, data: Prisma.BookUncheckedCreateInput) {
+  await prisma.book.upsert({
+    where: { id: bookId },
+    update: data,
+    create: { id: bookId, ...data },
+  })
 }
 
 async function transcribe() {
   try {
-    const bookFiles = await getBookFiles(bookId)
+    const bookFiles = (await getBookFiles(bookId)).sort((a, b) => a.index - b.index)
 
     const downloadsFolder = await folders.book(bookId).downloads()
-    const transcriptsFolder = await folders.book(bookId).transcripts()
 
-    const audioFiles = bookFiles
-      .map(file => ({
-        ...file,
-        fileName: file.path,
-        localPath: path.join(downloadsFolder, file.path),
-      }))
-      .sort((a, b) => a.index - b.index)
+    await updateBook(bookId, { transcribed: false, transcriptionModel: null })
 
-    const transcriptions: { text: string; start: number }[] = []
+    await cleanUpOldTranscripts(bookId)
 
-    for (const audioFile of audioFiles) {
-      const transcription = await transcribeAudioFile(audioFile.localPath)
-      const audioFileTranscriptionPath = path.join(transcriptsFolder, `${audioFile.fileName}.txt`)
-      await saveTranscription(transcription, audioFileTranscriptionPath)
-      transcriptions.push({ text: transcription, start: audioFile.start })
+    for (const audioFile of bookFiles) {
+      const localAudioFilePath = path.join(downloadsFolder, audioFile.path)
+
+      const { result, file } = await transcribeAudioFile(localAudioFilePath)
+
+      await saveTranscriptions({
+        bookId,
+        fileIno: audioFile.ino,
+        transcription: result,
+        offset: audioFile.start * 1000,
+      })
+
+      await cleanUpTempFiles([file])
     }
 
-    const fullTranscription = transcriptions
-      .map(transcription => {
-        return shiftTimestamps(transcription.text, transcription.start)
-      })
-      .join("\n")
-
-    const fullTranscriptionPath = path.join(transcriptsFolder, `full-${modelName}.txt`)
-    await saveTranscription(fullTranscription, fullTranscriptionPath)
+    await updateBook(bookId, { transcribed: true, transcriptionModel: model })
 
     process.exit(0)
   } catch (error) {
     console.error(`[Whisper Worker] Transcription failed:`, error)
-
-    // Write error to output file
-    // fs.writeFileSync(
-    //   outputPath,
-    //   JSON.stringify({
-    //     success: false,
-    //     error: error instanceof Error ? error.message : "Unknown error",
-    //   })
-    // )
 
     process.exit(1)
   }

@@ -10,6 +10,7 @@ import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
+import { useMemo, useState, useEffect, useCallback } from "react"
 
 dayjs.extend(relativeTime)
 
@@ -41,17 +42,30 @@ const badgeVariants: Record<string, "default" | "secondary" | "destructive" | "o
   total: "default",
 }
 
+const refreshInterval = 2000
+
 export default function JobsListPage() {
+  const [currentTime, setCurrentTime] = useState(new Date())
+
   const { data: jobs = [], isLoading: jobsLoading } = useSWR<Job[]>("/api/jobs", {
-    refreshInterval: 5000,
+    refreshInterval,
   })
 
   const { data: stats = { pending: 0, running: 0, completed: 0, failed: 0, total: 0 }, isLoading: statsLoading } =
     useSWR<QueueStats>("/api/jobs?stats=true", {
-      refreshInterval: 5000,
+      refreshInterval,
     })
 
   const loading = jobsLoading || statsLoading
+
+  // Update current time every second to ensure runTime calculations are fresh
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   const formatDate = (dateString: string) => {
     return dayjs(dateString).fromNow()
@@ -64,6 +78,41 @@ export default function JobsListPage() {
     { key: "completed", label: "Completed", color: "text-green-600" },
     { key: "failed", label: "Failed", color: "text-red-600" },
   ]
+
+  const calculateRunTime = useCallback(
+    (job: Job) => {
+      function formatTime(seconds: number) {
+        const minutes = Math.floor(seconds / 60)
+        const hours = Math.floor(seconds / 3600)
+        if (seconds < 60) {
+          return seconds + "s"
+        }
+        if (seconds < 3600) {
+          return minutes + "m " + (seconds % 60) + "s"
+        }
+        return hours + "h " + (minutes % 60) + "m " + (seconds % 60) + "s"
+      }
+
+      if (job.status === "running") {
+        return formatTime(dayjs(currentTime).diff(dayjs(job.createdAt), "seconds"))
+      }
+      if (job.completedAt) {
+        return formatTime(dayjs(job.completedAt).diff(dayjs(job.createdAt), "seconds"))
+      }
+      if (job.failedAt) {
+        return formatTime(dayjs(job.failedAt).diff(dayjs(job.createdAt), "seconds"))
+      }
+      return "-"
+    },
+    [currentTime]
+  )
+
+  const jobsWithRunTime = useMemo(() => {
+    return jobs.map(job => ({
+      ...job,
+      runTime: calculateRunTime(job),
+    }))
+  }, [jobs, calculateRunTime])
 
   return (
     <div className="flex flex-col items-center gap-8 w-full min-h-full px-4">
@@ -100,6 +149,7 @@ export default function JobsListPage() {
               <TableHead>Status</TableHead>
               <TableHead>Attempts</TableHead>
               <TableHead>Created</TableHead>
+              <TableHead>Run Time</TableHead>
               <TableHead>Completed</TableHead>
             </TableRow>
           </TableHeader>
@@ -111,7 +161,7 @@ export default function JobsListPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              jobs.map(job => (
+              jobsWithRunTime.map(job => (
                 <TableRow key={job.id}>
                   <TableCell className="font-medium capitalize">{job.type}</TableCell>
                   <TableCell>
@@ -121,6 +171,7 @@ export default function JobsListPage() {
                     {job.attempts}/{job.maxAttempts}
                   </TableCell>
                   <TableCell>{formatDate(job.createdAt)}</TableCell>
+                  <TableCell>{job.runTime}</TableCell>
                   <TableCell>
                     {job.completedAt ? formatDate(job.completedAt) : job.failedAt ? formatDate(job.failedAt) : "-"}
                   </TableCell>

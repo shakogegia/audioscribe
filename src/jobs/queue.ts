@@ -182,7 +182,7 @@ export class JobQueue {
 export const jobQueue = new JobQueue()
 
 // Public API functions
-export async function transcribe(data: { bookId: string; modelName?: string }, options?: JobOptions): Promise<string> {
+export async function transcribe(data: { bookId: string; model: string }, options?: JobOptions): Promise<string> {
   return jobQueue.add("transcribe", data, options)
 }
 

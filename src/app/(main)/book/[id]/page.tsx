@@ -1,5 +1,5 @@
 import { getBook, getBookFiles } from "@/lib/audiobookshelf"
-import Book from "./components/book"
+import Book from "./book"
 import { revalidatePath } from "next/cache"
 
 export async function revalidateBook(id: string) {

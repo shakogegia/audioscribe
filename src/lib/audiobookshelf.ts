@@ -4,6 +4,7 @@ import axios from "axios"
 import { AudioFile, SearchResult } from "../types/api"
 import { load } from "./config"
 import { dirSize, folders, getBookCacheSize, humanReadableSize } from "./folders"
+import { prisma } from "./prisma"
 
 type Library = {
   id: string
@@ -35,9 +36,10 @@ export async function getAllLibraries(): Promise<Library[]> {
 }
 
 async function checkIfBookIsTranscribed(libraryItemId: string): Promise<boolean> {
-  const transcriptsFolder = await folders.book(libraryItemId).transcripts()
-  const files = await fsPromises.readdir(transcriptsFolder)
-  return files.some(file => file.startsWith("full-"))
+  const book = await prisma.book.findUnique({
+    where: { id: libraryItemId },
+  })
+  return book?.transcribed ?? false
 }
 
 export async function searchBook(libraryId: string, query: string): Promise<SearchResult[]> {

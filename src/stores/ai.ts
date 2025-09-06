@@ -1,14 +1,14 @@
-import type { WhisperModel } from "@/ai/transcription/types/transription";
-import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import type { WhisperModel } from "@/ai/transcription/types/transription"
+import { create } from "zustand"
+import { devtools, persist } from "zustand/middleware"
 
 interface AiState {
-  transcriptionModel: WhisperModel;
-  aiProvider: string;
-  aiModel: string;
-  setTranscriptionModel: (transcriptionModel: WhisperModel) => void;
-  setAiProvider: (aiProvider: string) => void;
-  setAiModel: (aiModel: string) => void;
+  transcriptionModel: WhisperModel
+  aiProvider: string
+  aiModel: string
+  setTranscriptionModel: (transcriptionModel: WhisperModel) => void
+  setAiProvider: (aiProvider: string) => void
+  setAiModel: (aiModel: string) => void
 }
 
 const useAiStore = create<AiState>()(
@@ -27,6 +27,6 @@ const useAiStore = create<AiState>()(
       }
     )
   )
-);
+)
 
-export default useAiStore;
+export default useAiStore
