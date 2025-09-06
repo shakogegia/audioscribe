@@ -28,9 +28,15 @@ export default function Bookmarks({ id, play }: BookmarksProps) {
   async function updateBookmarks() {
     setIsSaving(true)
     toast.loading("Saving bookmarks...", { id: "save-bookmarks" })
-    await axios.patch(`/api/book/${id}/bookmark`, { bookmarks })
-    toast.success("Bookmarks updated", { id: "save-bookmarks" })
-    setIsSaving(false)
+    try {
+      await axios.patch(`/api/book/${id}/bookmark`, { bookmarks })
+      toast.success("Bookmarks updated", { id: "save-bookmarks" })
+    } catch (error) {
+      console.error("Failed to save bookmarks:", error)
+      toast.error("Failed to save bookmarks", { id: "save-bookmarks" })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   function addBookmarkAtCurrentTime() {

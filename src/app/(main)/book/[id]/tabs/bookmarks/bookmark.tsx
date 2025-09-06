@@ -8,7 +8,7 @@ import { formatTime } from "@/lib/format"
 import useBookmarksStore from "@/stores/bookmarks"
 import type * as Audiobookshelf from "@/types/audiobookshelf"
 import axios from "axios"
-import { Loader2, Trash, Wand } from "lucide-react"
+import { Loader2, Trash, Wand, WandSparkles } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { twMerge } from "tailwind-merge"
@@ -20,25 +20,22 @@ interface BookmarksProps {
 }
 
 export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
-  const [showPlayer, setShowPlayer] = useState(false)
-  const [isTranscribing, setIsTranscribing] = useState(false)
-  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const updateBookmark = useBookmarksStore(state => state.update)
-  const [transcription, setTranscription] = useState<string | null>(null)
   const { aiConfig } = useAiConfig()
-  const removeBookmark = useBookmarksStore(state => state.remove)
 
-  const handlePlayClick = () => {
-    setShowPlayer(!showPlayer)
-  }
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
+
+  const [showSuggestions, setShowSuggestions] = useState(false)
+
+  const [suggestions, setSuggestions] = useState<string[]>([])
+
+  const updateBookmark = useBookmarksStore(state => state.update)
+  const removeBookmark = useBookmarksStore(state => state.remove)
 
   async function deleteBookmark() {
     removeBookmark(bookmark)
   }
 
-  async function generateAISuggestions() {
+  async function generateSuggestions() {
     if (isGeneratingSuggestions) return
 
     try {
@@ -46,22 +43,12 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
       toast.loading("Generating AI suggestions...", { id: `ai-suggestions-${bookmark.time}` })
 
       const response = await axios.post(`/api/book/${bookId}/ai/suggest/bookmarks`, {
-        startTime: bookmark.time,
-        transcription: transcription,
-        // ?.replace(/(\d{1,2}:\d{2}:\d{2})\.\d{1,3}/g, "$1") // remove milliseconds
-        // .replace(/\[\d{2}:\d{2}:\d{2}\s*-->\s*\d{2}:\d{2}:\d{2}\]/g, "") // remove timestamps
-        // .replace(/\s+/g, " ")
-        // .replace(/\n/g, "")
-        // .replace(/\\n/g, " ")
-        // .replace(/^[ \t]+|[ \t]+$/g, "")
-        // .replace(/[\n\r]/g, " ")
-        // .replace(/\\n/g, " "),
-        timestamp: bookmark.fileStartTime,
+        time: bookmark.time,
         config: aiConfig,
       })
 
       const suggestions = response.data.suggestions || []
-      setAiSuggestions(suggestions)
+      setSuggestions(suggestions)
       setShowSuggestions(true)
 
       toast.success(`Generated ${suggestions.length} suggestions`, { id: `ai-suggestions-${bookmark.time}` })
@@ -82,39 +69,10 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
     }
   }
 
-  async function transcribeAudio() {
-    if (isTranscribing) return
-
-    try {
-      setIsTranscribing(true)
-      toast.loading("Transcribing audio...", { id: `transcribe-${bookmark.time}` })
-
-      const response = await axios.post<{ transcription: { text: string } }>(`/api/book/${bookId}/transcribe/segment`, {
-        startTime: bookmark.time,
-        // duration: 30,
-        // offset: 15,
-        config: aiConfig,
-      })
-
-      setTranscription(response.data.transcription.text)
-      toast.success("Transcribed audio", { id: `transcribe-${bookmark.time}` })
-    } catch (error: unknown) {
-      console.error("Failed to transcribe audio:", error)
-      toast.error("Failed to transcribe audio", { id: `transcribe-${bookmark.time}` })
-    } finally {
-      setIsTranscribing(false)
-    }
-  }
-
-  async function suggestBookmark() {
-    await transcribeAudio()
-    await generateAISuggestions()
-  }
-
   function applySuggestion(suggestion: string) {
     updateBookmark({ ...bookmark, title: suggestion })
     setShowSuggestions(false)
-    setAiSuggestions([])
+    setSuggestions([])
     toast.success("Applied AI suggestion", { id: `ai-suggestions-${bookmark.time}` })
   }
 
@@ -135,33 +93,13 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* <BookmarkAction
-            onClick={generateAISuggestions}
-            disabled={isGeneratingSuggestions || !transcription}
-            title="Generate AI suggestions"
-          >
-            {isGeneratingSuggestions ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <WandSparkles className="w-4 h-4" />
-            )}
-          </BookmarkAction>
-
-          <BookmarkAction onClick={transcribeAudio} title="Transcribe" disabled={isTranscribing}>
-            {isTranscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Captions className="w-4 h-4" />}
-          </BookmarkAction> */}
-
           <Tooltip>
             <TooltipTrigger asChild>
-              <BookmarkAction
-                onClick={suggestBookmark}
-                title="Suggest bookmark"
-                disabled={isTranscribing || isGeneratingSuggestions}
-              >
-                {isTranscribing || isGeneratingSuggestions ? (
+              <BookmarkAction onClick={generateSuggestions} title="Suggest bookmark" disabled={isGeneratingSuggestions}>
+                {isGeneratingSuggestions ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <Wand className="w-4 h-4" />
+                  <WandSparkles className="w-4 h-4" />
                 )}
               </BookmarkAction>
             </TooltipTrigger>
@@ -185,11 +123,11 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
         </div>
       </div>
 
-      {showSuggestions && aiSuggestions.length > 0 && (
+      {showSuggestions && suggestions.length > 0 && (
         <div className="mt-2 space-y-2">
           <div className="text-xs font-medium text-muted-foreground">AI Suggestions:</div>
           <div className="grid gap-1">
-            {aiSuggestions.map((suggestion, index) => (
+            {suggestions.map((suggestion, index) => (
               <button
                 key={index}
                 onClick={() => applySuggestion(suggestion)}
@@ -207,13 +145,6 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
           </button>
         </div>
       )}
-
-      {/* TODO: remove? */}
-      {/* {showPlayer && (
-        <div className="mt-2">
-          <AudioPlayer bookId={bookId} startTime={bookmark.time} fileStartTime={bookmark.fileStartTime} />
-        </div>
-      )} */}
     </div>
   )
 }

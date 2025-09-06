@@ -4,11 +4,12 @@ import { WhisperModel } from "@/ai/transcription/types/transription"
 import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
 import { formatTime } from "@/lib/format"
+import { prisma } from "@/lib/prisma"
+import { millisecondsToTime } from "@/utils/time"
 import { NextRequest, NextResponse } from "next/server"
 
 interface BookmarkSuggestionsRequestBody {
-  transcription: string
-  offset?: number
+  time: number
   config: {
     transcriptionModel: WhisperModel
     aiProvider: AiProvider
@@ -16,23 +17,48 @@ interface BookmarkSuggestionsRequestBody {
   }
 }
 
+// disable cache
+export const maxAge = 0
+
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: bookId } = await params
     const body: BookmarkSuggestionsRequestBody = await request.json()
 
-    const { transcription, offset = 15, config } = body
+    const { time, config } = body
 
     const book = await getBook(bookId)
 
     const ai = await provider(config.aiProvider, config.aiModel)
 
+    // 30 seconds before and after the time
+    const offset = 30
+
+    const timeInMilliseconds = time * 1000
+    const offsetInMilliseconds = offset * 1000
+
+    const startTimeInMilliseconds = timeInMilliseconds - offsetInMilliseconds
+    const endTimeInMilliseconds = timeInMilliseconds + offsetInMilliseconds
+
+    const segments = await prisma.transcriptSegment.findMany({
+      where: {
+        // TODO: model
+        bookId,
+        AND: [{ startTime: { gte: startTimeInMilliseconds } }, { endTime: { lte: endTimeInMilliseconds } }],
+      },
+      orderBy: {
+        startTime: "asc",
+      },
+    })
+
+    const transcript = segments.map(s => `${millisecondsToTime(s.startTime)} ${s.text}`).join("\n\n")
+
     const { suggestions } = await generateBookmarkSuggestions(ai, {
-      transcription: transcription,
+      transcript: transcript,
       context: {
         bookTitle: book?.title ?? "",
         authors: book?.authors ?? [],
-        time: formatTime(Number(offset)),
+        time: millisecondsToTime(timeInMilliseconds),
       },
     })
 

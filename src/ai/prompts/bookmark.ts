@@ -1,18 +1,18 @@
-import { LanguageModel } from "ai";
-import { generate } from "@/ai/helpers/generate";
-import { createPrompt } from "@/ai/helpers/prompt";
+import { LanguageModel } from "ai"
+import { generate } from "@/ai/helpers/generate"
+import { createPrompt } from "@/ai/helpers/prompt"
 
 export interface BookmarkSuggestionRequest {
-  transcription: string;
+  transcript: string
   context: {
-    bookTitle: string;
-    authors: string[];
-    time: string;
-  };
+    bookTitle: string
+    authors: string[]
+    time: string
+  }
 }
 
 export interface BookmarkSuggestionResponse {
-  suggestions: string[];
+  suggestions: string[]
 }
 
 /**
@@ -24,19 +24,19 @@ export async function generateBookmarkSuggestions(
 ): Promise<BookmarkSuggestionResponse> {
   try {
     // Create prompt
-    const prompt = await createPrompt("bookmark-suggestions", request);
+    const prompt = await createPrompt("bookmark-suggestions", request)
 
     // Generate response
-    const response = await generate(provider, prompt);
+    const response = await generate(provider, prompt)
 
     // Parse response
-    const suggestions = parseResult(response);
+    const suggestions = parseResult(response)
 
     // Return response
-    return { suggestions };
+    return { suggestions }
   } catch (error) {
-    console.error("Error generating bookmark suggestions:", error);
-    throw new Error("Failed to generate bookmark suggestions");
+    console.error("Error generating bookmark suggestions:", error)
+    throw new Error("Failed to generate bookmark suggestions")
   }
 }
 
@@ -54,11 +54,11 @@ export async function generateBookmarkSuggestions(
 function parseResult(text: string): string[] {
   try {
     // return the array of suggestions
-    const jsonString = text.replace(/^```json\n/, "").replace(/\n```$/, "");
-    const json = JSON.parse(jsonString);
-    return json;
+    const jsonString = text.replace(/^```json\n/, "").replace(/\n```$/, "")
+    const json = JSON.parse(jsonString)
+    return json
   } catch (error) {
-    console.error("Error parsing bookmark suggestions:", error);
-    return ["Bookmark"]; // Fallback
+    console.error("Error parsing bookmark suggestions:", error)
+    return ["Bookmark"] // Fallback
   }
 }

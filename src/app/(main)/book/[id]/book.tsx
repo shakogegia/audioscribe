@@ -60,17 +60,10 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
         description={[book.authors.join(", ")]}
         content={
           <div className="flex items-center gap-2">
+            <Badge variant="secondary" onClick={() => transcribe(id)}>
+              {book.transcribed ? "Transcripted" : "Transcribe"}
+            </Badge>
             <Badge variant="secondary">Cache size: {book.cacheSize.humanReadableSize}</Badge>
-            {book.transcribed && (
-              <Badge variant="secondary" onClick={() => transcribe(id)}>
-                Transcripted
-              </Badge>
-            )}
-            {!book.transcribed && (
-              <Badge variant="info" onClick={() => transcribe(id)}>
-                Transcribe
-              </Badge>
-            )}
           </div>
         }
         icon={
