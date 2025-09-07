@@ -1,6 +1,4 @@
-import { LLMSelectorDialog } from "@/components/dialogs/llm-selector-dialog"
-import { Separator } from "@/components/ui/separator"
-import { Cog, House, SlidersHorizontal } from "lucide-react"
+import { Cog, House } from "lucide-react"
 import Link from "next/link"
 import { Button } from "../ui/button"
 import { ThemeSwitcher } from "./theme-switcher"

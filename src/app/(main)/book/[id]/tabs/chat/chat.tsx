@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Toggle } from "@/components/ui/toggle"
 import useLLMStore from "@/stores/llm"
 import { AudioFile, SearchResult } from "@/types/api"
-import { useChat } from "@ai-sdk/react"
-import { DefaultChatTransport } from "ai"
+// import { useChat } from "@ai-sdk/react"
+// import { DefaultChatTransport } from "ai"
 import axios from "axios"
 import { Lightbulb, Loader2Icon, ScanSearch, Scroll, Send, TriangleAlert } from "lucide-react"
 import { useState } from "react"
@@ -26,13 +26,13 @@ export function Chat({ bookId, play }: ChatProps) {
   const { provider, model } = useLLMStore()
   const [isGenerating, setIsGenerating] = useState(false)
   const [contextType, setContextType] = useState<"contextual" | "full">("contextual")
-  const [input, setInput] = useState("")
+  // const [input, setInput] = useState("")
 
-  const { messages, sendMessage: sendMessageStream } = useChat({
-    transport: new DefaultChatTransport({
-      api: `/api/book/${bookId}/ai/chat/stream`,
-    }),
-  })
+  // const { messages, sendMessage: sendMessageStream } = useChat({
+  //   transport: new DefaultChatTransport({
+  //     api: `/api/book/${bookId}/ai/chat/stream`,
+  //   }),
+  // })
 
   const [message, setMessage] = useState("")
   const [analysis, setAnalysis] = useState("")

@@ -12,12 +12,6 @@ export async function executeTranscribeJob(data: unknown): Promise<unknown> {
     throw new Error("Missing required parameter: bookId")
   }
 
-  const book = await getBook(bookId)
-
-  const duration = book.duration
-
-  // Progress tracking is now handled by BookSetupProgress in the unified setup job
-
   await prisma.book.upsert({
     where: { id: bookId },
     update: { model: model, updatedAt: new Date(), transcribed: false },

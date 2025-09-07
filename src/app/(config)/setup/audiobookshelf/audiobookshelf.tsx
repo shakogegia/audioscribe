@@ -1,36 +1,29 @@
-"use client";
-import { Hero } from "@/components/hero";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { AppConfig } from "@/lib/config";
-import { ExternalLink } from "lucide-react";
-import Image from "next/image";
+"use client"
+import { Hero } from "@/components/hero"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { AppConfig } from "@/lib/config"
+import { ExternalLink } from "lucide-react"
+import Image from "next/image"
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { toast } from "sonner";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { toast } from "sonner"
 
 const formSchema = z.object({
   url: z.string().min(1, { message: "URL is required." }),
   apiKey: z.string().min(1, { message: "API Key is required." }),
-});
+})
 
 type Props = {
-  config: AppConfig;
-  updateConfig: (config: AppConfig) => void;
-};
+  config: AppConfig
+  updateConfig: (config: AppConfig) => void
+}
 
 export default function AudiobookshelfPage({ config, updateConfig }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -39,15 +32,15 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
       url: config.audiobookshelf.url ?? "",
       apiKey: config.audiobookshelf.apiKey ?? "",
     },
-  });
+  })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    toast.loading("Saving configuration...", { id: "save-config" });
+    toast.loading("Saving configuration...", { id: "save-config" })
     await updateConfig({
       ...config,
       audiobookshelf: { url: values.url, apiKey: values.apiKey },
-    });
-    toast.success("Configuration saved", { id: "save-config" });
+    })
+    toast.success("Configuration saved", { id: "save-config" })
   }
   return (
     <div className="flex flex-col items-center gap-8 w-full h-full px-4">
@@ -114,7 +107,11 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
                             <Label htmlFor="apiKey">API Key</Label>
                             {/* /audiobookshelf/config/api-keys */}
                             <a
-                              href={form.getValues("url") ? `${form.getValues("url")}/audiobookshelf/config/api-keys` : "https://www.audiobookshelf.org/guides/api-keys/"}
+                              href={
+                                form.getValues("url")
+                                  ? `${form.getValues("url")}/audiobookshelf/config/api-keys`
+                                  : "https://www.audiobookshelf.org/guides/api-keys/"
+                              }
                               target="_blank"
                               className="ml-auto inline-flex items-center gap-1 text-sm font-normal underline-offset-4 hover:underline"
                             >
@@ -142,5 +139,5 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
         </form>
       </Form>
     </div>
-  );
+  )
 }

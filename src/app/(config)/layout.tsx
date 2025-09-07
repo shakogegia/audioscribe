@@ -19,7 +19,7 @@ export default function SetupLayout({ children }: Props) {
       <div className="w-fit mx-auto">
         <Tabs defaultValue={pathname} onValueChange={onValueChange}>
           <TabsList>
-            <TabsTrigger value="/setup/audiobookshelf">Audiobookshelf</TabsTrigger>
+            <TabsTrigger value="/setup/audiobookshelf">ABS</TabsTrigger>
             <TabsTrigger value="/setup/llm">LLM</TabsTrigger>
             <TabsTrigger value="/setup/asr">ASR</TabsTrigger>
             <TabsTrigger value="/setup/embedding">Embedding</TabsTrigger>

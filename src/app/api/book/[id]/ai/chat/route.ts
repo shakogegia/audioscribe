@@ -1,10 +1,8 @@
-import { generate, generateSystemPrompt, SystemPromptMessage } from "@/ai/helpers/generate"
-import { AudiobookVectorDB, vectorDb } from "@/ai/lib/vector"
-import { generateBookAnalysis } from "@/ai/prompts/book"
+import { generateSystemPrompt, SystemPromptMessage } from "@/ai/helpers/generate"
+import { vectorDb } from "@/ai/lib/vector"
 import { provider } from "@/ai/providers"
 import { WhisperModel } from "@/ai/transcription/types/transription"
 import { AiModel, AiProvider } from "@/ai/types/ai"
-import { getBook } from "@/lib/audiobookshelf"
 import { NextRequest, NextResponse } from "next/server"
 
 interface AiChatRequestBody {
@@ -22,9 +20,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params
     const body: AiChatRequestBody = await request.json()
 
-    const { transcriptions, message, config } = body
+    const { message, config } = body
 
-    const book = await getBook(bookId)
     const ai = await provider(config.aiProvider, config.aiModel)
 
     // Initialize vector DB for this book
@@ -41,7 +38,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // const messages = buildSimpleContext(message, relevantChunks);
-    const messages = buildContext(message, relevantChunks)
+    const messages = buildContext(
+      message,
+      relevantChunks as unknown as { text: string; metadata: { startTime: string; endTime: string } }[]
+    )
     // const response = await ollama.chat(messages);
 
     // const { analysis } = await generateBookAnalysis(ai, {
@@ -81,7 +81,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 }
 
-function buildContext(userQuestion: string, relevantChunks: any[]): SystemPromptMessage[] {
+function buildContext(
+  userQuestion: string,
+  relevantChunks: { text: string; metadata: { startTime: string; endTime: string } }[]
+): SystemPromptMessage[] {
   const systemPrompt = `
   You are an intelligent audiobook companion assistant.
   Analyze the provided transcript sections and answer questions about characters, plot points, and themes.
@@ -103,23 +106,23 @@ function buildContext(userQuestion: string, relevantChunks: any[]): SystemPrompt
   ]
 }
 
-function buildSimpleContext(question: string, relevantChunks: any[]): SystemPromptMessage[] {
-  let context = `Question: ${question}\n\nRelevant transcript sections:\n\n`
+// function buildSimpleContext(question: string, relevantChunks: any[]): SystemPromptMessage[] {
+//   let context = `Question: ${question}\n\nRelevant transcript sections:\n\n`
 
-  relevantChunks.forEach(chunk => {
-    context += `=== ${chunk.metadata.startTime} - ${chunk.metadata.endTime}  ===\n`
-    context += `${chunk.text}\n\n`
-  })
+//   relevantChunks.forEach(chunk => {
+//     context += `=== ${chunk.metadata.startTime} - ${chunk.metadata.endTime}  ===\n`
+//     context += `${chunk.text}\n\n`
+//   })
 
-  context +=
-    "Instructions: Answer based only on the provided sections. Include specific timestamps when referencing content."
+//   context +=
+//     "Instructions: Answer based only on the provided sections. Include specific timestamps when referencing content."
 
-  return [
-    {
-      role: "system",
-      content:
-        "You are an audiobook companion. Answer questions based only on the provided transcript sections. Include timestamps when referencing content.",
-    },
-    { role: "user", content: context },
-  ]
-}
+//   return [
+//     {
+//       role: "system",
+//       content:
+//         "You are an audiobook companion. Answer questions based only on the provided transcript sections. Include timestamps when referencing content.",
+//     },
+//     { role: "user", content: context },
+//   ]
+// }

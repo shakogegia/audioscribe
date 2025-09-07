@@ -20,7 +20,6 @@ export interface SearchResult {
   transcribed: boolean
   vectorized: boolean
   cached: boolean
-
   progress?: BookSetupProgress
 }
 

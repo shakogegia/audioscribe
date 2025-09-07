@@ -4,14 +4,12 @@ import { secondsToMilliseconds } from "@/utils/time"
 import { TranscriptSegment } from "@prisma/client"
 import axios from "axios"
 import { useState } from "react"
-import { toast } from "sonner"
 
 interface Response {
   isLoading: boolean
   segments: TranscriptSegment[]
 
   fetchTranscript: (bookId: string) => Promise<void>
-  transcribe: (bookId: string) => Promise<void>
   findCaption: (seconds: number) => Caption
 }
 
@@ -61,23 +59,9 @@ export function useTranscript(): Response {
     return caption
   }
 
-  async function transcribe(bookId: string) {
-    try {
-      toast.loading("Transcribing...", { id: "transcribe" })
-      await axios.post<{ message: string }>(`/api/book/${bookId}/transcribe`, {
-        model: aiConfig.transcriptionModel,
-      })
-      toast.success("Transcription job queued", { id: "transcribe" })
-    } catch (error) {
-      console.error("Failed to transcribe:", error)
-      toast.error("Failed to transcribe", { id: "transcribe" })
-    }
-  }
-
   return {
     isLoading,
     segments,
-    transcribe,
     fetchTranscript,
     findCaption,
   }

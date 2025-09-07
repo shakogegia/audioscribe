@@ -34,7 +34,7 @@ export function Transcript({ play }: TranscriptProps) {
         scrollToTime(formatTime(transcriptSegment.startTime / 1000))
       }
     }
-  }, [currentTime, segments, followCurrentTime])
+  }, [currentTime, segments, followCurrentTime]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function scrollToTime(time: string) {
     if (scrollAreaRef.current) {

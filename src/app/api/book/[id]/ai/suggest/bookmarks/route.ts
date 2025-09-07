@@ -1,6 +1,5 @@
 import { generateBookmarkSuggestions } from "@/ai/prompts/bookmark"
 import { provider } from "@/ai/providers"
-import { WhisperModel } from "@/ai/transcription/types/transription"
 import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
 import { prisma } from "@/lib/prisma"

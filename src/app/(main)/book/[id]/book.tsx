@@ -2,10 +2,9 @@
 import { Player, PlayerRef } from "@/components/player"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useTranscript } from "@/hooks/use-transcript"
-import useBookmarksStore from "@/stores/bookmarks"
 import { AudioFile, SearchResult } from "@/types/api"
 import { parseAsStringEnum, useQueryState } from "nuqs"
-import { useRef, useState } from "react"
+import { useRef } from "react"
 import { useMount } from "react-use"
 import { twMerge } from "tailwind-merge"
 import BookInfo from "./components/book-info"
@@ -36,22 +35,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
   })
   const playerRef = useRef<PlayerRef>(null)
 
-  const { fetchTranscript, transcribe } = useTranscript()
-
-  const [hasDownloaded, setHasDownloaded] = useState(false)
-  const [hasTranscripted, setHasTranscripted] = useState(false)
-  const setBookmarks = useBookmarksStore(state => state.setBookmarks)
-
-  async function onDownloadComplete() {
-    await revalidate(id)
-    setHasDownloaded(true)
-    setBookmarks(book.bookmarks)
-  }
-
-  async function onTranscriptComplete() {
-    await revalidate(id)
-    setHasTranscripted(true)
-  }
+  const { fetchTranscript } = useTranscript()
 
   useMount(() => {
     fetchTranscript(id)

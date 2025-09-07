@@ -32,6 +32,10 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
       revalidate(book.id)
     } else if (data?.progress?.stage === "failed") {
       toast.error("Book setup failed")
+    } else if (data?.progress?.stage === "transcribing") {
+      toast.info("Book download is complete")
+    } else if (data?.progress?.stage === "vectorizing") {
+      toast.info("Book transcription is complete")
     }
   }, [data?.progress?.stage, revalidate, book.id])
 
@@ -55,7 +59,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
             <>
               <p className="text-sm font-medium">Steps to process book:</p>
               <div className="[&_div]:border-transparent border rounded-lg">
-                <Alert>
+                <Alert className="rounded-b-none">
                   {STAGES[data.progress.stage] > 1 ? (
                     <CircleCheckIcon />
                   ) : (
@@ -63,15 +67,15 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                   )}
                   <AlertTitle>Step 1: Download book</AlertTitle>
                   <AlertDescription>
-                    Download book from Audiobookshelf and save it to the cache folder.
+                    Download book from Audiobookshelf and save it to the local cache folder.
                     <br />
-                    Takes a few seconds if Audiobookshelf is locally hosted.
+                    Takes a few seconds up to a minute if Audiobookshelf is locally hosted.
                   </AlertDescription>
                 </Alert>
 
                 <Separator />
 
-                <Alert>
+                <Alert className="rounded-none">
                   {STAGES[data.progress.stage] > 2 ? (
                     <CircleCheckIcon />
                   ) : (
@@ -91,7 +95,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
 
                 <Separator />
 
-                <Alert>
+                <Alert className="rounded-t-none">
                   {STAGES[data.progress.stage] > 3 ? (
                     <CircleCheckIcon />
                   ) : (

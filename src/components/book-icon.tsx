@@ -1,6 +1,5 @@
 import { ReactNode } from "react"
 import { twMerge } from "tailwind-merge"
-import { BackgroundGradientAnimation } from "@/components/ui/background-gradient-animation"
 
 interface BookIconProps {
   icon: ReactNode

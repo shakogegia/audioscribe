@@ -165,7 +165,9 @@ export default function JobsListPage() {
                 <TableRow key={job.id}>
                   <TableCell className="font-medium capitalize">{job.type}</TableCell>
                   <TableCell>
-                    <Badge variant={badgeVariants[job.status] || "outline"}>{job.status}</Badge>
+                    <Badge variant={badgeVariants[job.status] || "outline"} className="capitalize">
+                      {job.status}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {job.attempts}/{job.maxAttempts}
