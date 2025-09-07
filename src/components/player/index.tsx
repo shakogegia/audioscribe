@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { formatTime } from "@/lib/format"
 import { AudioFile, SearchResult } from "@/types/api"
 import {
+  BookHeadphones,
   Bookmark,
   Captions as CaptionsIcon,
   CaptionsOff,
@@ -245,6 +246,26 @@ function PlayerComponent({ book, files, className, controls }: PlayerProps, ref:
               style={{ width: `${(totalCurrentTime / totalDuration) * 100}%` }}
             />
 
+            {/* ABS Position */}
+            {book.currentTime && (
+              <div
+                className="h-2 w-px bg-red-500 absolute -top-2 transition-all hover:scale-150 hover:-top-2.5 group"
+                style={{ left: `${(book.currentTime / totalDuration) * 100}%` }}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="h-full w-[9px] -ml-[4px] block" onClick={() => play(book.currentTime)}></div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="flex items-center gap-1">
+                      <BookHeadphones className="w-4 h-4" /> {formatTime(book.currentTime)} - Audiobookshelf position
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
+
+            {/* Bookmarks */}
             {book.bookmarks.map(bookmark => (
               <div
                 key={bookmark.time}
@@ -264,6 +285,7 @@ function PlayerComponent({ book, files, className, controls }: PlayerProps, ref:
               </div>
             ))}
 
+            {/* Chapters */}
             {chapters.map(chapter => (
               <div
                 key={chapter.start}
@@ -323,6 +345,21 @@ function PlayerComponent({ book, files, className, controls }: PlayerProps, ref:
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Forward 10 seconds</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-10"
+                  onClick={() => seekToTime(book.currentTime ?? 0)}
+                  disabled={!book.currentTime}
+                >
+                  <BookHeadphones className="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Go to Audiobookshelf position</TooltipContent>
             </Tooltip>
           </div>
 

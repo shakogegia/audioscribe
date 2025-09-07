@@ -189,3 +189,8 @@ export async function transcribe(data: { bookId: string; model: string }, option
 export async function vectorize(data: { bookId: string }, options?: JobOptions): Promise<string> {
   return jobQueue.add("vectorize", data, options)
 }
+
+export async function setupBook(data: { bookId: string; model: string }, options?: JobOptions): Promise<string> {
+  // return jobQueue.add("setupBook", data, options)
+  return "setupBook"
+}

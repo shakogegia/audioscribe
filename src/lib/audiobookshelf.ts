@@ -73,6 +73,7 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
       chapters: libraryItem.media.chapters,
       cacheSize: await getBookCacheSize(libraryItem.id),
       transcribed: await checkIfBookIsTranscribed(libraryItem.id),
+      currentTime: (await getLastSession(libraryItem.id))?.currentTime,
     }))
   )
 }
@@ -111,6 +112,8 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
   const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`)
   const config = await load()
 
+  const session = await getLastSession(libraryItemId)
+
   return {
     id: response.data.id,
     title: response.data.media.metadata.title ?? "",
@@ -125,6 +128,7 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/cover?ts=${Date.now()}&raw=1`,
     cacheSize: await getBookCacheSize(libraryItemId),
     transcribed: await checkIfBookIsTranscribed(libraryItemId),
+    currentTime: session?.currentTime,
   }
 }
 
@@ -185,4 +189,44 @@ export async function updateBookmarks(libraryItemId: string, bookmarks: Audioboo
     ...updatedBookmarks.map(bookmark => updateBookmark(libraryItemId, bookmark)),
     ...deletedBookmarks.map(bookmark => deleteBookmark(libraryItemId, bookmark.time)),
   ])
+}
+
+// TODO: better cache management
+let cacheAllSessions: Audiobookshelf.Session[] = []
+
+export async function getAllSessions() {
+  if (cacheAllSessions.length > 0) {
+    return cacheAllSessions
+  }
+
+  const api = await getApi()
+  type SessionResponse = {
+    total: number
+    numPages: number
+    page: number
+    itemsPerPage: number
+    sessions: Audiobookshelf.Session[]
+  }
+
+  let allSessions: Audiobookshelf.Session[] = []
+  let page = 0
+  let hasMore = true
+
+  while (hasMore) {
+    const response = await api.get<SessionResponse>(`/api/sessions?page=${page}`)
+    allSessions = allSessions.concat(response.data.sessions)
+
+    hasMore = page + 1 < response.data.numPages
+    page++
+  }
+
+  cacheAllSessions = allSessions
+  return allSessions
+}
+
+export async function getLastSession(libraryItemId: string) {
+  const sessions = await getAllSessions()
+  return sessions
+    .filter(session => session.libraryItemId === libraryItemId)
+    .sort((a, b) => b.startedAt - a.startedAt)[0]
 }

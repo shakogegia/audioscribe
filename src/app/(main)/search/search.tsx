@@ -1,4 +1,6 @@
 "use client"
+import { WhisperModel } from "@/ai/transcription/types/transription"
+import BookIcon from "@/components/book-icon"
 import GradientIcon from "@/components/gradient-icon"
 import { Hero } from "@/components/hero"
 import { Button } from "@/components/ui/button"
@@ -15,14 +17,21 @@ import {
 } from "@/components/ui/select"
 import { SearchResult } from "@/types/api"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { FileAudio, Loader2, Search as SearchIcon } from "lucide-react"
+import { Loader2, Search as SearchIcon } from "lucide-react"
 import { useQueryState } from "nuqs"
 import { Suspense } from "react"
 import { useForm } from "react-hook-form"
+import { useMount } from "react-use"
+import SiriWave from "siriwave"
 import useSWR from "swr"
 import z from "zod"
-import SearchResults from "./results"
+import SearchResults from "./search-results"
 import SearchStatus from "./status"
+
+type Props = {
+  libraries: Library[]
+  setupBook: (bookId: string, model: WhisperModel) => void
+}
 
 type Library = {
   id: string
@@ -34,7 +43,7 @@ const formSchema = z.object({
   libraryId: z.string(),
 })
 
-function SearchPageContent({ libraries }: { libraries: Library[] }) {
+function SearchPageContent({ libraries, setupBook }: Props) {
   const [searchQuery, setSearchQuery] = useQueryState("q")
   const [libraryId, setLibraryId] = useQueryState("libraryId")
 
@@ -56,12 +65,21 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
     }
   }
 
+  useMount(() => {
+    new SiriWave({
+      container: document.getElementById("siri-container") as HTMLElement,
+      width: 128,
+      height: 128,
+      speed: 0.05,
+    })
+  })
+
   return (
     <div className="flex flex-col items-center gap-8 w-full my-10 px-4">
       <Hero
         title="AudioScribe"
         description={["Add intelligent bookmarks and transcriptions", "to enhance your audiobook experience."]}
-        icon={<GradientIcon icon={<FileAudio className="w-10 h-10 text-white" />} />}
+        icon={<BookIcon icon={<div id="siri-container"></div>} />}
       />
 
       {/* Search */}
@@ -136,13 +154,13 @@ function SearchPageContent({ libraries }: { libraries: Library[] }) {
           </SearchStatus>
         )}
 
-        {data && data.length > 0 && <SearchResults books={data} />}
+        {data && data.length > 0 && <SearchResults books={data} setupBook={setupBook} />}
       </div>
     </div>
   )
 }
 
-export function Search({ libraries }: { libraries: Library[] }) {
+export function Search({ libraries, setupBook }: Props) {
   return (
     <Suspense
       fallback={
@@ -164,7 +182,7 @@ export function Search({ libraries }: { libraries: Library[] }) {
         </div>
       }
     >
-      <SearchPageContent libraries={libraries} />
+      <SearchPageContent libraries={libraries} setupBook={setupBook} />
     </Suspense>
   )
 }

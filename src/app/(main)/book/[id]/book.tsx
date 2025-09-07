@@ -17,6 +17,8 @@ import { parseAsStringEnum, useQueryState } from "nuqs"
 import { useMount } from "react-use"
 import { useTranscript } from "@/hooks/use-transcript"
 import { TranscriptProgress } from "./components/transcript"
+import BookInfo from "./components/book-info"
+import { ProcessingInfo } from "./components/porcessing-info"
 
 interface BookProps {
   id: string
@@ -62,34 +64,16 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
 
   return (
     <div className="w-full min-h-full flex flex-col items-center gap-8 mb-10 px-4">
-      <Hero
-        title={book.title}
-        description={[book.authors.join(", ")]}
-        content={
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" onClick={() => transcribe(id)}>
-              {book.transcribed ? "Transcripted" : "Transcribe"}
-            </Badge>
-            <Badge variant="secondary">Cache size: {book.cacheSize.humanReadableSize}</Badge>
-          </div>
-        }
-        icon={
-          <Image
-            src={book.coverPath ?? ""}
-            alt={book.title}
-            className="w-32 h-32 object-cover rounded-md shadow-md"
-            width={128}
-            height={128}
-          />
-        }
-      />
+      <BookInfo book={book} />
 
       <div className="w-full max-w-xl mx-auto flex flex-col gap-8">
-        {!hasDownloaded && <Downloader bookId={id} onComplete={onDownloadComplete} />}
+        <ProcessingInfo book={book} />
 
-        {!hasTranscripted && <TranscriptProgress bookId={id} onComplete={onTranscriptComplete} />}
+        {/* {!hasDownloaded && <Downloader bookId={id} onComplete={onDownloadComplete} />}
 
-        {hasDownloaded && (
+        {!hasTranscripted && <TranscriptProgress bookId={id} onComplete={onTranscriptComplete} />} */}
+
+        {/* {hasDownloaded && (
           <>
             <Player book={book} files={files} ref={playerRef} controls="full" />
 
@@ -101,28 +85,24 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
                 <TabsTrigger value={BookTab.Chat}>Chat</TabsTrigger>
               </TabsList>
 
-              {/* Bookmarks */}
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <Bookmarks id={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
 
-              {/* Chapters */}
               <TabsContent value="chapters" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <Chapters id={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
 
-              {/* Transcript */}
               <TabsContent value="transcript" className={twMerge("data-[state=inactive]:hidden")}>
                 <Transcript bookId={id} book={book} play={time => playerRef.current?.play(time)} />
               </TabsContent>
 
-              {/* Chat */}
               <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <Chat bookId={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
             </Tabs>
           </>
-        )}
+        )} */}
       </div>
     </div>
   )

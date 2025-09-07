@@ -22,10 +22,16 @@ export async function executeTranscribeJob(data: unknown): Promise<unknown> {
     completedAt?: Date
   }) {
     const existingProgress = await prisma.transcriptProgress.findFirst({ where: { bookId: bookId } })
-
+    console.log("existingProgress", { ...progress, bookId: bookId })
     if (!existingProgress) {
       await prisma.transcriptProgress.create({
-        data: { ...progress, bookId: bookId },
+        data: {
+          bookId: bookId,
+          model: progress.model,
+          percentage: progress.percentage,
+          totalDuration: progress.totalDuration,
+          processedDuration: progress.processedDuration,
+        },
       })
       return
     }
@@ -35,6 +41,12 @@ export async function executeTranscribeJob(data: unknown): Promise<unknown> {
       data: { ...progress, bookId: bookId },
     })
   }
+
+  await prisma.book.upsert({
+    where: { id: bookId },
+    update: { transcriptionModel: model, updatedAt: new Date(), transcribed: false },
+    create: { id: bookId, transcriptionModel: model, transcribed: false },
+  })
 
   await updateProgress({
     model: model,

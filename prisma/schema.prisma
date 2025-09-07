@@ -46,8 +46,8 @@ model TranscriptProgress {
   bookId            String
   model             String
   percentage        Float
-  totalDuration     Int
-  processedDuration Int
+  totalDuration     Float
+  processedDuration Float
 
   startedAt   DateTime?
   completedAt DateTime?

@@ -16,6 +16,7 @@ export interface SearchResult {
   chapters: Audiobookshelf.Chapter[]
   cacheSize: { size: number; humanReadableSize: string }
   transcribed: boolean
+  currentTime?: number
 }
 
 export interface AudioFile {
