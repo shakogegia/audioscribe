@@ -103,7 +103,6 @@ async function transcribeAudioFile(
     },
   })
 
-  // append .json to the audio file path and replace the .wav extension
   const wavAudioFilePath = audioFilePath.replace(/\.[^/.]+$/, ".wav")
   const outputJsonPath = `${wavAudioFilePath}.json`
   const outputContent = await fsPromise.readFile(outputJsonPath, "utf8")

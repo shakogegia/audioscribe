@@ -110,12 +110,13 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
   const api = await getApi()
   const response = await api.get<Audiobookshelf.LibraryItem>(`/api/items/${libraryItemId}`)
   const config = await load()
+
   return {
     id: response.data.id,
     title: response.data.media.metadata.title ?? "",
     authors: response.data.media.metadata.authors.map(author => author.name),
     series: response.data.media.metadata.series.map(series => series.name),
-    duration: response.data.media.duration ?? 0,
+    duration: response.data.media.audioFiles.reduce((acc, file) => acc + file.duration, 0),
     narrators: response.data.media.metadata.narrators,
     libraryId: response.data.libraryId,
     chapters: response.data.media.chapters,

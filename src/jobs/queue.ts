@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 import { JobData } from "@/jobs/runner"
 
 const prisma = new PrismaClient()
@@ -16,10 +16,10 @@ export interface JobStatus {
   attempts: number
   maxAttempts: number
   createdAt: Date
-  completedAt?: Date
-  failedAt?: Date
-  error?: string
-  result?: string
+  completedAt?: Date | null
+  failedAt?: Date | null
+  error?: string | null
+  result?: string | null
 }
 
 export class JobQueue {
@@ -63,7 +63,7 @@ export class JobQueue {
   }
 
   async getJobs(status?: string, type?: string, limit: number = 100, offset: number = 0): Promise<JobStatus[]> {
-    const where: any = {}
+    const where: Prisma.JobWhereInput = {}
     if (status) where.status = status
     if (type) where.type = type
 

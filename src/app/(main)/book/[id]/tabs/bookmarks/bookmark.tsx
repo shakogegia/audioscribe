@@ -8,7 +8,7 @@ import { formatTime } from "@/lib/format"
 import useBookmarksStore from "@/stores/bookmarks"
 import type * as Audiobookshelf from "@/types/audiobookshelf"
 import axios from "axios"
-import { Loader2, Trash, Wand, WandSparkles } from "lucide-react"
+import { Loader2, Trash, WandSparkles } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { twMerge } from "tailwind-merge"
@@ -40,7 +40,7 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
 
     try {
       setIsGeneratingSuggestions(true)
-      toast.loading("Generating AI suggestions...", { id: `ai-suggestions-${bookmark.time}` })
+      toast.loading("Generating suggestions...", { id: `ai-suggestions-${bookmark.time}` })
 
       const response = await axios.post(`/api/book/${bookId}/ai/suggest/bookmarks`, {
         time: bookmark.time,
@@ -53,7 +53,7 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
 
       toast.success(`Generated ${suggestions.length} suggestions`, { id: `ai-suggestions-${bookmark.time}` })
     } catch (error: unknown) {
-      console.error("Failed to generate AI suggestions:", error)
+      console.error("Failed to generate suggestions:", error)
 
       let errorMessage = "Failed to generate suggestions"
       if (error && typeof error === "object" && "response" in error) {
@@ -73,7 +73,6 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
     updateBookmark({ ...bookmark, title: suggestion })
     setShowSuggestions(false)
     setSuggestions([])
-    toast.success("Applied AI suggestion", { id: `ai-suggestions-${bookmark.time}` })
   }
 
   return (
@@ -125,7 +124,16 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
 
       {showSuggestions && suggestions.length > 0 && (
         <div className="mt-2 space-y-2">
-          <div className="text-xs font-medium text-muted-foreground">AI Suggestions:</div>
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-medium text-muted-foreground">AI Suggestions:</div>
+
+            <button
+              onClick={() => setShowSuggestions(false)}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Hide suggestions
+            </button>
+          </div>
           <div className="grid gap-1">
             {suggestions.map((suggestion, index) => (
               <button
@@ -137,12 +145,6 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
               </button>
             ))}
           </div>
-          <button
-            onClick={() => setShowSuggestions(false)}
-            className="text-xs text-muted-foreground hover:text-foreground"
-          >
-            Hide suggestions
-          </button>
         </div>
       )}
     </div>

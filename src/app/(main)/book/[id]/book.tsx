@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { parseAsStringEnum, useQueryState } from "nuqs"
 import { useMount } from "react-use"
 import { useTranscript } from "@/hooks/use-transcript"
+import { TranscriptProgress } from "./components/transcript"
 
 interface BookProps {
   id: string
@@ -41,12 +42,18 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
   const { fetchTranscript, transcribe } = useTranscript()
 
   const [hasDownloaded, setHasDownloaded] = useState(false)
+  const [hasTranscripted, setHasTranscripted] = useState(false)
   const setBookmarks = useBookmarksStore(state => state.setBookmarks)
 
   async function onDownloadComplete() {
     await revalidate(id)
     setHasDownloaded(true)
     setBookmarks(book.bookmarks)
+  }
+
+  async function onTranscriptComplete() {
+    await revalidate(id)
+    setHasTranscripted(true)
   }
 
   useMount(() => {
@@ -79,6 +86,8 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
 
       <div className="w-full max-w-xl mx-auto flex flex-col gap-8">
         {!hasDownloaded && <Downloader bookId={id} onComplete={onDownloadComplete} />}
+
+        {!hasTranscripted && <TranscriptProgress bookId={id} onComplete={onTranscriptComplete} />}
 
         {hasDownloaded && (
           <>

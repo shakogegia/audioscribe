@@ -148,9 +148,9 @@ export default function JobsListPage() {
               <TableHead className="w-[150px]">Name</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Attempts</TableHead>
-              <TableHead>Created</TableHead>
               <TableHead>Run Time</TableHead>
-              <TableHead>Completed</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Finished</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -170,8 +170,8 @@ export default function JobsListPage() {
                   <TableCell>
                     {job.attempts}/{job.maxAttempts}
                   </TableCell>
-                  <TableCell>{formatDate(job.createdAt)}</TableCell>
                   <TableCell>{job.runTime}</TableCell>
+                  <TableCell>{formatDate(job.createdAt)}</TableCell>
                   <TableCell>
                     {job.completedAt ? formatDate(job.completedAt) : job.failedAt ? formatDate(job.failedAt) : "-"}
                   </TableCell>

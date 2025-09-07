@@ -59,7 +59,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       },
     })
 
-    return NextResponse.json({ suggestions: suggestions })
+    return NextResponse.json({ suggestions: suggestions, transcript })
   } catch (error) {
     console.error("AI suggestion error:", error)
 

@@ -4,10 +4,13 @@ export interface SpawnWorkerOptions {
   workerScript: string
   args: string[]
   logPrefix: string
+  log?: (message: string) => void
+  onError?: (error: Error) => void
+  onComplete?: () => void
 }
 
-export async function spawnWorker(options: SpawnWorkerOptions): Promise<any> {
-  const { workerScript, args, logPrefix } = options
+export async function spawnWorker(options: SpawnWorkerOptions): Promise<unknown> {
+  const { workerScript, args, logPrefix, log, onError, onComplete } = options
 
   return new Promise((resolve, reject) => {
     const fullArgs = ["--project", "workers/tsconfig.json", `workers/${workerScript}`, ...args]
@@ -23,6 +26,7 @@ export async function spawnWorker(options: SpawnWorkerOptions): Promise<any> {
     child.stdout?.on("data", data => {
       stdout += data.toString()
       console.log(`[${logPrefix}] ${data}`)
+      log?.(data.toString())
     })
 
     child.stderr?.on("data", data => {
@@ -32,8 +36,10 @@ export async function spawnWorker(options: SpawnWorkerOptions): Promise<any> {
 
     child.on("close", code => {
       if (code === 0) {
+        onComplete?.()
         resolve({ stdout, exitCode: code })
       } else {
+        onError?.(new Error(`${logPrefix} failed with exit code ${code}. stderr: ${stderr}`))
         reject(new Error(`${logPrefix} failed with exit code ${code}. stderr: ${stderr}`))
       }
     })

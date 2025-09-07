@@ -20,7 +20,8 @@ model Book {
   updatedAt          DateTime @updatedAt
 
   // relations
-  transcriptSegment TranscriptSegment[]
+  transcriptSegment  TranscriptSegment[]
+  transcriptProgress TranscriptProgress[]
 }
 
 model TranscriptSegment {
@@ -35,6 +36,25 @@ model TranscriptSegment {
   updatedAt DateTime @updatedAt
 
   // relations
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@index([bookId])
+}
+
+model TranscriptProgress {
+  id                Int    @id @default(autoincrement())
+  bookId            String
+  model             String
+  percentage        Float
+  totalDuration     Int
+  processedDuration Int
+
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   book Book @relation(fields: [bookId], references: [id])
 
   @@index([bookId])
