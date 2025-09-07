@@ -16,7 +16,7 @@ export function Hero({ title, description, icon, content }: HeroProps) {
         <h3 className="scroll-m-20 text-3xl font-semibold tracking-tight text-center font-sans">{title}</h3>
 
         {description && (
-          <div className="flex flex-col">
+          <div className="flex flex-col text-muted-foreground text-center">
             {description?.map((text, index) => (
               <p key={index} className={twMerge("leading-7")}>
                 {text}

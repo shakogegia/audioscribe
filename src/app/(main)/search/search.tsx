@@ -19,7 +19,7 @@ import { SearchResult } from "@/types/api"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Search as SearchIcon } from "lucide-react"
 import { useQueryState } from "nuqs"
-import { Suspense } from "react"
+import { Suspense, useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { useMount } from "react-use"
 import SiriWave from "siriwave"
@@ -46,6 +46,7 @@ const formSchema = z.object({
 function SearchPageContent({ libraries, setupBook }: Props) {
   const [searchQuery, setSearchQuery] = useQueryState("q")
   const [libraryId, setLibraryId] = useQueryState("libraryId")
+  const siriWaveRef = useRef<SiriWave | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,14 +66,17 @@ function SearchPageContent({ libraries, setupBook }: Props) {
     }
   }
 
-  useMount(() => {
-    new SiriWave({
+  useEffect(() => {
+    siriWaveRef.current = new SiriWave({
       container: document.getElementById("siri-container") as HTMLElement,
       width: 128,
       height: 128,
       speed: 0.05,
     })
-  })
+    return () => {
+      siriWaveRef.current?.dispose()
+    }
+  }, [])
 
   return (
     <div className="flex flex-col items-center gap-8 w-full my-10 px-4">
