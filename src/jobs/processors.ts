@@ -1,6 +1,9 @@
 import { spawnWorker } from "@/jobs/utils"
-import { getBook } from "@/lib/audiobookshelf"
+import { getBook, getBookFiles } from "@/lib/audiobookshelf"
 import { prisma } from "@/lib/prisma"
+import { folders } from "@/lib/folders"
+import fs from "fs"
+import path from "path"
 
 export async function executeTranscribeJob(data: unknown): Promise<unknown> {
   const { bookId, model } = data as { bookId: string; model: string }
@@ -13,96 +16,30 @@ export async function executeTranscribeJob(data: unknown): Promise<unknown> {
 
   const duration = book.duration
 
-  async function updateProgress(progress: {
-    model: string
-    percentage: number
-    totalDuration: number
-    processedDuration: number
-    startedAt?: Date
-    completedAt?: Date
-  }) {
-    const existingProgress = await prisma.transcriptProgress.findFirst({ where: { bookId: bookId } })
-    console.log("existingProgress", { ...progress, bookId: bookId })
-    if (!existingProgress) {
-      await prisma.transcriptProgress.create({
-        data: {
-          bookId: bookId,
-          model: progress.model,
-          percentage: progress.percentage,
-          totalDuration: progress.totalDuration,
-          processedDuration: progress.processedDuration,
-        },
-      })
-      return
-    }
-
-    await prisma.transcriptProgress.update({
-      where: { id: existingProgress.id },
-      data: { ...progress, bookId: bookId },
-    })
-  }
+  // Progress tracking is now handled by BookSetupProgress in the unified setup job
 
   await prisma.book.upsert({
     where: { id: bookId },
-    update: { transcriptionModel: model, updatedAt: new Date(), transcribed: false },
-    create: { id: bookId, transcriptionModel: model, transcribed: false },
+    update: { model: model, updatedAt: new Date(), transcribed: false },
+    create: { id: bookId, model: model, transcribed: false },
   })
 
-  await updateProgress({
-    model: model,
-    percentage: 0,
-    totalDuration: duration,
-    processedDuration: 0,
-    startedAt: new Date(),
-  })
+  console.log(`[Transcribe Job] Starting transcription for book ${bookId} with model ${model}`)
 
   return spawnWorker({
     workerScript: "transcribe.ts",
     args: ["--book-id", bookId, "--model", model],
     logPrefix: "Transcribe Job",
-    onComplete: () => {
-      updateProgress({
-        percentage: 100,
-        totalDuration: duration,
-        processedDuration: duration,
-        model: model,
+    onComplete: async () => {
+      await prisma.book.update({
+        where: { id: bookId },
+        data: { transcribed: true },
       })
+      console.log(`[Transcribe Job] Transcription completed for book ${bookId}`)
     },
     onError: error => {
-      updateProgress({
-        percentage: 0,
-        totalDuration: duration,
-        processedDuration: 0,
-        model: model,
-      })
+      console.error(`[Transcribe Job] Transcription failed for book ${bookId}:`, error)
     },
-    // log: (message: string) => {
-    //   // Find the last timestamp efficiently using regex
-    //   const timestampRegex = /\[(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})\]/g
-    //   let lastTimestamp = ""
-    //   let match
-
-    //   // Find all matches and get the last one
-    //   while ((match = timestampRegex.exec(message)) !== null) {
-    //     lastTimestamp = match[2] // match[2] is the end timestamp
-    //   }
-
-    //   if (lastTimestamp) {
-    //     const [hours, minutes, seconds] = lastTimestamp.split(".")[0].split(":")
-    //     const timestampInSeconds = parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds)
-
-    //     const percentage = (timestampInSeconds / duration) * 100
-    //     const progress = {
-    //       percentage: percentage,
-    //       totalDuration: duration,
-    //       processedDuration: timestampInSeconds,
-    //       model: model,
-    //       completedAt: percentage === 100 ? new Date() : undefined,
-    //     }
-
-    //     updateProgress(progress)
-    //   }
-    // },
   })
 }
 
@@ -118,4 +55,235 @@ export async function executeVectorizeJob(data: unknown): Promise<unknown> {
     args: ["--book-id", bookId],
     logPrefix: "Vectorize Job",
   })
+}
+
+export async function executeSetupBookJob(data: unknown): Promise<unknown> {
+  interface SetupBookJobData {
+    bookId: string
+    model: string
+    forceRedownload?: boolean
+    forceRetranscribe?: boolean
+    forceRevectorize?: boolean
+  }
+
+  const {
+    bookId,
+    model,
+    forceRedownload = false,
+    forceRetranscribe = false,
+    forceRevectorize = false,
+  } = data as SetupBookJobData
+
+  if (!bookId || !model) {
+    throw new Error("Missing required parameters: bookId, model")
+  }
+
+  console.log(`[Setup Book Job] Starting setup for book ${bookId} with model ${model}`)
+
+  async function updateSetupProgress(progress: {
+    stage: string
+    downloadProgress?: number
+    transcriptionProgress?: number
+    vectorizationProgress?: number
+    overallProgress?: number
+    error?: string
+    startedAt?: Date
+    completedAt?: Date
+  }) {
+    const existingProgress = await prisma.bookSetupProgress.findFirst({ where: { bookId } })
+
+    if (!existingProgress) {
+      await prisma.bookSetupProgress.create({
+        data: {
+          bookId,
+          model,
+          ...progress,
+        },
+      })
+      return
+    }
+
+    await prisma.bookSetupProgress.update({
+      where: { id: existingProgress.id },
+      data: progress,
+    })
+  }
+
+  try {
+    await updateSetupProgress({ stage: "downloading", startedAt: new Date() })
+
+    // Stage 1: Download
+    await getBook(bookId) // Validate book exists
+    const files = await getBookFiles(bookId)
+    const audioFolder = await folders.book(bookId).downloads()
+
+    let shouldDownload = forceRedownload
+    if (!shouldDownload) {
+      // Check if files already exist
+      for (const file of files) {
+        const filePath = path.join(audioFolder, file.path)
+        const exists = await fs.promises
+          .access(filePath, fs.constants.F_OK)
+          .then(() => true)
+          .catch(() => false)
+        if (!exists) {
+          shouldDownload = true
+          break
+        }
+      }
+    }
+
+    if (shouldDownload) {
+      console.log(`[Setup Book Job] Downloading ${files.length} audio files`)
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        const response = await fetch(file.downloadUrl)
+        const blob = await response.blob()
+        const buffer = await blob.arrayBuffer()
+        await fs.promises.writeFile(path.join(audioFolder, file.path), Buffer.from(buffer))
+
+        const progress = ((i + 1) / files.length) * 100
+        await updateSetupProgress({
+          stage: "downloading",
+          downloadProgress: progress,
+          overallProgress: progress * 0.1, // Download is 10% of overall progress
+        })
+      }
+
+      await prisma.book.upsert({
+        where: { id: bookId },
+        update: { cached: true },
+        create: { id: bookId, cached: true },
+      })
+
+      console.log(`[Setup Book Job] Download completed`)
+    } else {
+      console.log(`[Setup Book Job] Files already downloaded, skipping`)
+      await updateSetupProgress({
+        stage: "downloading",
+        downloadProgress: 100,
+        overallProgress: 10,
+      })
+    }
+
+    // Stage 2: Transcription
+    await updateSetupProgress({ stage: "transcribing" })
+
+    let shouldTranscribe = forceRetranscribe
+    if (!shouldTranscribe) {
+      const existingBook = await prisma.book.findUnique({ where: { id: bookId } })
+      shouldTranscribe = !existingBook?.transcribed || existingBook.model !== model
+    }
+
+    if (shouldTranscribe) {
+      console.log(`[Setup Book Job] Starting transcription with model ${model}`)
+
+      await prisma.book.upsert({
+        where: { id: bookId },
+        update: { transcribed: false, model },
+        create: { id: bookId, transcribed: false, model },
+      })
+
+      // Clean up old transcripts
+      await prisma.transcriptSegment.deleteMany({ where: { bookId } })
+
+      await spawnWorker({
+        workerScript: "transcribe.ts",
+        args: ["--book-id", bookId, "--model", model],
+        logPrefix: "Setup Book - Transcribe",
+        onComplete: async () => {
+          await prisma.book.update({
+            where: { id: bookId },
+            data: { transcribed: true },
+          })
+          console.log(`[Setup Book Job] Transcription completed`)
+        },
+        onError: async error => {
+          await updateSetupProgress({
+            stage: "failed",
+            error: `Transcription failed: ${error}`,
+            overallProgress: 50,
+          })
+          throw error
+        },
+      })
+
+      await updateSetupProgress({
+        stage: "transcribing",
+        transcriptionProgress: 100,
+        overallProgress: 60, // Transcription completes at 60% overall
+      })
+    } else {
+      console.log(`[Setup Book Job] Already transcribed with correct model, skipping`)
+      await updateSetupProgress({
+        stage: "transcribing",
+        transcriptionProgress: 100,
+        overallProgress: 60,
+      })
+    }
+
+    // Stage 3: Vectorization
+    await updateSetupProgress({ stage: "vectorizing" })
+
+    let shouldVectorize = forceRevectorize
+    if (!shouldVectorize) {
+      const existingBook = await prisma.book.findUnique({ where: { id: bookId } })
+      shouldVectorize = !existingBook?.vectorized
+    }
+
+    if (shouldVectorize) {
+      console.log(`[Setup Book Job] Starting vectorization`)
+
+      await spawnWorker({
+        workerScript: "vectorize.js",
+        args: ["--book-id", bookId],
+        logPrefix: "Setup Book - Vectorize",
+        onComplete: async () => {
+          await prisma.book.update({
+            where: { id: bookId },
+            data: { vectorized: true },
+          })
+          console.log(`[Setup Book Job] Vectorization completed`)
+        },
+        onError: async error => {
+          await updateSetupProgress({
+            stage: "failed",
+            error: `Vectorization failed: ${error}`,
+            overallProgress: 80,
+          })
+          throw error
+        },
+      })
+
+      await updateSetupProgress({
+        stage: "vectorizing",
+        vectorizationProgress: 100,
+        overallProgress: 100,
+      })
+    } else {
+      console.log(`[Setup Book Job] Already vectorized, skipping`)
+      await updateSetupProgress({
+        stage: "vectorizing",
+        vectorizationProgress: 100,
+        overallProgress: 100,
+      })
+    }
+
+    // Complete
+    await updateSetupProgress({
+      stage: "completed",
+      completedAt: new Date(),
+      overallProgress: 100,
+    })
+
+    console.log(`[Setup Book Job] Setup completed for book ${bookId}`)
+    return { bookId, stage: "completed" }
+  } catch (error) {
+    console.error(`[Setup Book Job] Setup failed for book ${bookId}:`, error)
+    await updateSetupProgress({
+      stage: "failed",
+      error: error instanceof Error ? error.message : String(error),
+    })
+    throw error
+  }
 }

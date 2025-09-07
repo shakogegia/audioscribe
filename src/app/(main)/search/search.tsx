@@ -1,5 +1,4 @@
 "use client"
-import { WhisperModel } from "@/ai/transcription/types/transription"
 import BookIcon from "@/components/book-icon"
 import GradientIcon from "@/components/gradient-icon"
 import { Hero } from "@/components/hero"
@@ -21,7 +20,6 @@ import { Loader2, Search as SearchIcon } from "lucide-react"
 import { useQueryState } from "nuqs"
 import { Suspense, useEffect, useRef } from "react"
 import { useForm } from "react-hook-form"
-import { useMount } from "react-use"
 import SiriWave from "siriwave"
 import useSWR from "swr"
 import z from "zod"
@@ -30,7 +28,6 @@ import SearchStatus from "./status"
 
 type Props = {
   libraries: Library[]
-  setupBook: (bookId: string, model: WhisperModel) => void
 }
 
 type Library = {
@@ -43,7 +40,7 @@ const formSchema = z.object({
   libraryId: z.string(),
 })
 
-function SearchPageContent({ libraries, setupBook }: Props) {
+function SearchPageContent({ libraries }: Props) {
   const [searchQuery, setSearchQuery] = useQueryState("q")
   const [libraryId, setLibraryId] = useQueryState("libraryId")
   const siriWaveRef = useRef<SiriWave | null>(null)
@@ -54,7 +51,10 @@ function SearchPageContent({ libraries, setupBook }: Props) {
   })
 
   const { data, error, isLoading } = useSWR<SearchResult[]>(
-    searchQuery && libraryId ? `/api/search?q=${encodeURIComponent(searchQuery)}&libraryId=${libraryId}&limit=20` : null
+    searchQuery && libraryId
+      ? `/api/search?q=${encodeURIComponent(searchQuery)}&libraryId=${libraryId}&limit=20`
+      : null,
+    { refreshInterval: 0, revalidateOnFocus: true }
   )
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -158,13 +158,13 @@ function SearchPageContent({ libraries, setupBook }: Props) {
           </SearchStatus>
         )}
 
-        {data && data.length > 0 && <SearchResults books={data} setupBook={setupBook} />}
+        {data && data.length > 0 && <SearchResults books={data} />}
       </div>
     </div>
   )
 }
 
-export function Search({ libraries, setupBook }: Props) {
+export function Search({ libraries }: Props) {
   return (
     <Suspense
       fallback={
@@ -186,7 +186,7 @@ export function Search({ libraries, setupBook }: Props) {
         </div>
       }
     >
-      <SearchPageContent libraries={libraries} setupBook={setupBook} />
+      <SearchPageContent libraries={libraries} />
     </Suspense>
   )
 }

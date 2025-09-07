@@ -5,6 +5,7 @@ import { AudioFile, SearchResult } from "../types/api"
 import { load } from "./config"
 import { dirSize, folders, getBookCacheSize, humanReadableSize } from "./folders"
 import { prisma } from "./prisma"
+import { Book } from "@prisma/client"
 
 type Library = {
   id: string
@@ -35,11 +36,16 @@ export async function getAllLibraries(): Promise<Library[]> {
   }
 }
 
-async function checkIfBookIsTranscribed(libraryItemId: string): Promise<boolean> {
+async function getBookFromDatabase(
+  libraryItemId: string
+): Promise<{ book: Book | null; progress: BookSetupProgress | null }> {
   const book = await prisma.book.findUnique({
     where: { id: libraryItemId },
+    include: {
+      bookSetupProgress: true,
+    },
   })
-  return book?.transcribed ?? false
+  return { book, progress: book?.bookSetupProgress[0] }
 }
 
 export async function searchBook(libraryId: string, query: string): Promise<SearchResult[]> {
@@ -57,24 +63,30 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
   const config = await load()
 
   return Promise.all(
-    response.data.book.map(async ({ libraryItem }) => ({
-      id: libraryItem.id,
-      title: libraryItem.media.metadata.title ?? "",
-      authors: libraryItem.media.metadata.authors.map(author => author.name),
-      series: libraryItem.media.metadata.series.map(series => series.name),
-      duration: libraryItem.media.duration ?? 0,
-      coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${
-        libraryItem.id
-      }/cover?ts=${Date.now()}&raw=1`,
-      narrators: libraryItem.media.metadata.narrators,
-      publishedYear: libraryItem.media.metadata.publishedYear ?? "",
-      libraryId: libraryId,
-      bookmarks: await getBookmarks(libraryItem.id),
-      chapters: libraryItem.media.chapters,
-      cacheSize: await getBookCacheSize(libraryItem.id),
-      transcribed: await checkIfBookIsTranscribed(libraryItem.id),
-      currentTime: (await getLastSession(libraryItem.id))?.currentTime,
-    }))
+    response.data.book.map(async ({ libraryItem }) => {
+      const { book, progress } = await getBookFromDatabase(libraryItem.id)
+      return {
+        id: libraryItem.id,
+        title: libraryItem.media.metadata.title ?? "",
+        authors: libraryItem.media.metadata.authors.map(author => author.name),
+        series: libraryItem.media.metadata.series.map(series => series.name),
+        duration: libraryItem.media.duration ?? 0,
+        coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${
+          libraryItem.id
+        }/cover?ts=${Date.now()}&raw=1`,
+        narrators: libraryItem.media.metadata.narrators,
+        publishedYear: libraryItem.media.metadata.publishedYear ?? "",
+        libraryId: libraryId,
+        bookmarks: await getBookmarks(libraryItem.id),
+        chapters: libraryItem.media.chapters,
+        cacheSize: await getBookCacheSize(libraryItem.id),
+        currentTime: (await getLastSession(libraryItem.id))?.currentTime,
+        transcribed: book?.transcribed ?? false,
+        vectorized: book?.vectorized ?? false,
+        cached: book?.cached ?? false,
+        progress: progress,
+      }
+    })
   )
 }
 
@@ -114,6 +126,8 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
 
   const session = await getLastSession(libraryItemId)
 
+  const { book, progress } = await getBookFromDatabase(libraryItemId)
+
   return {
     id: response.data.id,
     title: response.data.media.metadata.title ?? "",
@@ -127,8 +141,11 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     publishedYear: response.data.media.metadata.publishedYear ?? "",
     coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/cover?ts=${Date.now()}&raw=1`,
     cacheSize: await getBookCacheSize(libraryItemId),
-    transcribed: await checkIfBookIsTranscribed(libraryItemId),
     currentTime: session?.currentTime,
+    transcribed: book?.transcribed ?? false,
+    vectorized: book?.vectorized ?? false,
+    cached: book?.cached ?? false,
+    progress: progress,
   }
 }
 

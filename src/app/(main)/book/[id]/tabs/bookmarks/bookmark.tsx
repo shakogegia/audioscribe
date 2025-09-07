@@ -3,9 +3,9 @@ import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useAiConfig } from "@/hooks/use-ai-config"
 import { formatTime } from "@/lib/format"
 import useBookmarksStore from "@/stores/bookmarks"
+import useLLMStore from "@/stores/llm"
 import type * as Audiobookshelf from "@/types/audiobookshelf"
 import axios from "axios"
 import { Loader2, Trash, WandSparkles } from "lucide-react"
@@ -20,7 +20,7 @@ interface BookmarksProps {
 }
 
 export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
-  const { aiConfig } = useAiConfig()
+  const { provider, model } = useLLMStore()
 
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
 
@@ -44,7 +44,7 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
 
       const response = await axios.post(`/api/book/${bookId}/ai/suggest/bookmarks`, {
         time: bookmark.time,
-        config: aiConfig,
+        config: { provider, model },
       })
 
       const suggestions = response.data.suggestions || []

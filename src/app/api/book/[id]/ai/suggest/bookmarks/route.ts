@@ -11,9 +11,8 @@ interface BookmarkSuggestionsRequestBody {
   time: number
   offset?: number // in seconds, default is 30, seconds before and after the time to include in the transcript
   config: {
-    transcriptionModel: WhisperModel
-    aiProvider: AiProvider
-    aiModel: AiModel
+    provider: AiProvider
+    model: AiModel
   }
 }
 
@@ -29,7 +28,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const book = await getBook(bookId)
 
-    const ai = await provider(config.aiProvider, config.aiModel)
+    const ai = await provider(config.provider, config.model)
 
     const timeInMilliseconds = time * 1000
     const offsetInMilliseconds = offset * 1000

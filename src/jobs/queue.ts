@@ -69,6 +69,9 @@ export class JobQueue {
 
     const jobs = await prisma.job.findMany({
       where,
+      include: {
+        book: true,
+      },
       orderBy: { createdAt: "desc" },
       take: limit,
       skip: offset,
@@ -190,7 +193,15 @@ export async function vectorize(data: { bookId: string }, options?: JobOptions):
   return jobQueue.add("vectorize", data, options)
 }
 
-export async function setupBook(data: { bookId: string; model: string }, options?: JobOptions): Promise<string> {
-  // return jobQueue.add("setupBook", data, options)
-  return "setupBook"
+export async function setupBook(
+  data: {
+    bookId: string
+    model: string
+    forceRedownload?: boolean
+    forceRetranscribe?: boolean
+    forceRevectorize?: boolean
+  },
+  options?: JobOptions
+): Promise<string> {
+  return jobQueue.add("setupBook", data, options)
 }

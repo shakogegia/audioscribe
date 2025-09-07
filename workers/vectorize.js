@@ -10,63 +10,22 @@ program.requiredOption("-b, --book-id <string>", "The ID of the book").parse(pro
 
 program.parse()
 
-const { transcript, bookId } = program.opts()
+const { bookId } = program.opts()
 
-async function setupNewBook(transcriptPath, bookId) {
+async function setupNewBook(bookId) {
   console.log("Setting up audiobook:", bookId)
 
-  // temp dir
-  const response = await axios.post(`http://localhost:3000/api/book/${bookId}/transcribe/full`, {
-    config: {
-      transcriptionModel: "tiny.en",
+  // Fetch segments from API
+  const response = await axios.get(`http://localhost:3000/api/book/${bookId}/transcript`, {
+    params: {
+      model: "tiny.en",
     },
   })
-  const { transcript } = response.data
-
-  // Read transcript
-  // const transcript = transcriptions
-  //   .map(transcription => {
-  //     const text = transcription.text;
-  //     const fileStartTime = transcription.start;
-
-  //     // update timestamps and add file start time
-  //     // format is [starttime --> endtime]
-  //     // result should be [file start time + starttime --> file start time + endtime]
-  //     // timestamps are in this format: 00:00:00.000
-
-  //     // Helper function to convert timestamp to seconds
-  //     const timestampToSeconds = timestamp => {
-  //       const [hours, minutes, seconds] = timestamp.split(":");
-  //       return parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseFloat(seconds);
-  //     };
-
-  //     // Helper function to convert seconds to timestamp
-  //     const secondsToTimestamp = totalSeconds => {
-  //       const hours = Math.floor(totalSeconds / 3600);
-  //       const minutes = Math.floor((totalSeconds % 3600) / 60);
-  //       const seconds = totalSeconds % 60;
-  //       return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds
-  //         .toFixed(3)
-  //         .padStart(6, "0")}`;
-  //     };
-
-  //     // Process the text to update timestamps
-  //     const result = text.replace(
-  //       /\[(\d{2}:\d{2}:\d{2}\.\d{3}) --> (\d{2}:\d{2}:\d{2}\.\d{3})\]/g,
-  //       (match, startTime, endTime) => {
-  //         const startSeconds = timestampToSeconds(startTime) + fileStartTime;
-  //         const endSeconds = timestampToSeconds(endTime) + fileStartTime;
-  //         return `[${secondsToTimestamp(startSeconds)} --> ${secondsToTimestamp(endSeconds)}]`;
-  //       }
-  //     );
-
-  //     return result;
-  //   })
-  //   .join("\n");
+  const { segments } = response.data
 
   // Chunk transcript
   console.log("Chunking transcript...")
-  const chunks = chunkTranscript(transcript, { maxChunkDuration: 120, maxChunkLines: 25, minChunkDuration: 30 })
+  const chunks = chunkTranscript(segments, { maxChunkDuration: 120, maxChunkLines: 25, minChunkDuration: 30 })
   console.log(`Created ${chunks.length} chunks`)
 
   // Initialize vector database
@@ -82,4 +41,4 @@ async function setupNewBook(transcriptPath, bookId) {
   return { chunks: chunks.length, bookId }
 }
 
-setupNewBook(transcript, bookId)
+setupNewBook(bookId)

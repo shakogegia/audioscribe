@@ -1,24 +1,19 @@
 "use client"
 import { Player, PlayerRef } from "@/components/player"
-import { Hero } from "@/components/hero"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AudioFile, SearchResult } from "@/types/api"
-import Image from "next/image"
-import { useRef, useState } from "react"
-import { twMerge } from "tailwind-merge"
-import useBookmarksStore from "@/stores/bookmarks"
-import { Chat } from "./tabs/chat/chat"
-import Bookmarks from "./tabs/bookmarks/bookmarks"
-import { Downloader } from "./components/downloader"
-import { Transcript } from "./tabs/transcript/transcript"
-import Chapters from "./tabs/chapters/chapters"
-import { Badge } from "@/components/ui/badge"
-import { parseAsStringEnum, useQueryState } from "nuqs"
-import { useMount } from "react-use"
 import { useTranscript } from "@/hooks/use-transcript"
-import { TranscriptProgress } from "./components/transcript"
+import useBookmarksStore from "@/stores/bookmarks"
+import { AudioFile, SearchResult } from "@/types/api"
+import { parseAsStringEnum, useQueryState } from "nuqs"
+import { useRef, useState } from "react"
+import { useMount } from "react-use"
+import { twMerge } from "tailwind-merge"
 import BookInfo from "./components/book-info"
-import { ProcessingInfo } from "./components/porcessing-info"
+import { ProcessingInfo } from "./components/processing-info"
+import Bookmarks from "./tabs/bookmarks/bookmarks"
+import Chapters from "./tabs/chapters/chapters"
+import { Chat } from "./tabs/chat/chat"
+import { Transcript } from "./tabs/transcript/transcript"
 
 interface BookProps {
   id: string
@@ -62,18 +57,18 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
     fetchTranscript(id)
   })
 
+  const showProcessingInfo = !book.cached || !book.transcribed || !book.vectorized
+
   return (
     <div className="w-full min-h-full flex flex-col items-center gap-8 mb-10 px-4">
       <BookInfo book={book} />
 
       <div className="w-full max-w-xl mx-auto flex flex-col gap-8">
-        <ProcessingInfo book={book} />
+        {showProcessingInfo && <ProcessingInfo book={book} revalidate={revalidate} />}
 
-        {/* {!hasDownloaded && <Downloader bookId={id} onComplete={onDownloadComplete} />}
+        {/* {!hasDownloaded && <Downloader bookId={id} onComplete={onDownloadComplete} />} */}
 
-        {!hasTranscripted && <TranscriptProgress bookId={id} onComplete={onTranscriptComplete} />} */}
-
-        {/* {hasDownloaded && (
+        {!showProcessingInfo && (
           <>
             <Player book={book} files={files} ref={playerRef} controls="full" />
 
@@ -102,7 +97,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
               </TabsContent>
             </Tabs>
           </>
-        )} */}
+        )}
       </div>
     </div>
   )

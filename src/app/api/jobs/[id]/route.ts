@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { jobQueue } from "@/jobs/queue"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const job = await jobQueue.getJob(params.id)
+    const { id } = await params
+    const job = await jobQueue.getJob(id)
 
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 })
@@ -16,13 +17,14 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params
     const body = await request.json()
     const { action, delay } = body
 
     if (action === "retry") {
-      const success = await jobQueue.retryJob(params.id, delay || 0)
+      const success = await jobQueue.retryJob(id, delay || 0)
 
       if (!success) {
         return NextResponse.json({ error: "Cannot retry job" }, { status: 400 })
@@ -38,9 +40,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const success = await jobQueue.deleteJob(params.id)
+    const { id } = await params
+    const success = await jobQueue.deleteJob(id)
 
     if (!success) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 })

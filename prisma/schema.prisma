@@ -11,17 +11,20 @@ datasource db {
 }
 
 model Book {
-  id                 String   @id @default(cuid())
-  cached             Boolean  @default(false)
-  transcribed        Boolean  @default(false)
-  transcriptionModel String?
-  favorite           Boolean  @default(false)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id          String  @id @default(cuid())
+  cached      Boolean @default(false)
+  transcribed Boolean @default(false)
+  vectorized  Boolean @default(false)
+  model       String?
+
+  favorite  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // relations
-  transcriptSegment  TranscriptSegment[]
-  transcriptProgress TranscriptProgress[]
+  transcriptSegment TranscriptSegment[]
+  bookSetupProgress BookSetupProgress[]
+  Job               Job[]
 }
 
 model TranscriptSegment {
@@ -41,27 +44,9 @@ model TranscriptSegment {
   @@index([bookId])
 }
 
-model TranscriptProgress {
-  id                Int    @id @default(autoincrement())
-  bookId            String
-  model             String
-  percentage        Float
-  totalDuration     Float
-  processedDuration Float
-
-  startedAt   DateTime?
-  completedAt DateTime?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  book Book @relation(fields: [bookId], references: [id])
-
-  @@index([bookId])
-}
-
 model Job {
   id          String    @id @default(cuid())
+  bookId      String?
   type        String
   data        String
   status      String    @default("pending")
@@ -77,5 +62,29 @@ model Job {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  // relations
+  book Book? @relation(fields: [bookId], references: [id])
+
   @@index([status, processAt, priority])
+}
+
+model BookSetupProgress {
+  id                    String    @id @default(cuid())
+  bookId                String
+  stage                 String    @default("pending") // pending, downloading, transcribing, vectorizing, completed, failed
+  downloadProgress      Float     @default(0)
+  transcriptionProgress Float     @default(0)
+  vectorizationProgress Float     @default(0)
+  overallProgress       Float     @default(0)
+  model                 String?
+  error                 String?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // relations
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@index([bookId])
 }

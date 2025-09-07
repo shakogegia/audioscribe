@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { AudioFile, SearchResult } from "@/types/api"
 import axios from "axios"
-import { BookmarkPlus, Check, Loader2Icon } from "lucide-react"
+import { BookmarkPlus, Check, Loader2Icon, SlidersHorizontal } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import useBookmarksStore from "@/stores/bookmarks"
 import { Bookmark } from "./bookmark"
 import { usePlayerStore } from "@/stores/player"
 import { useTranscript } from "@/hooks/use-transcript"
+import { LLMSelectorDialog } from "@/components/dialogs/llm-selector-dialog"
 
 type BookmarksProps = {
   id: string
@@ -72,8 +73,15 @@ export default function Bookmarks({ id, play }: BookmarksProps) {
           {/* <Button variant="outline" size="sm">
             <WandSparkles className="h-[1.2rem] w-[1.2rem]" />
             <span className="sr-only">AI Suggestions</span>
-          </Button> */}
+            </Button> */}
         </div>
+
+        <LLMSelectorDialog>
+          <Button variant="outline" size="sm">
+            <SlidersHorizontal className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">LLM Configuration</span>
+          </Button>
+        </LLMSelectorDialog>
       </div>
 
       <div className="flex flex-col gap-2 w-full">

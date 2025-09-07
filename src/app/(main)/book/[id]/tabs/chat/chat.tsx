@@ -5,15 +5,15 @@ import { Label } from "@/components/ui/label"
 import { Markdown } from "@/components/markdown"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Textarea } from "@/components/ui/textarea"
-import { useAiConfig } from "@/hooks/use-ai-config"
-import { AudioFile, SearchResult } from "@/types/api"
-import axios from "axios"
-import { Fullscreen, Lightbulb, Loader2Icon, ScanSearch, Scroll, Send, TriangleAlert } from "lucide-react"
-import { useState } from "react"
-import { toast } from "sonner"
 import { Toggle } from "@/components/ui/toggle"
+import useLLMStore from "@/stores/llm"
+import { AudioFile, SearchResult } from "@/types/api"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
+import axios from "axios"
+import { Lightbulb, Loader2Icon, ScanSearch, Scroll, Send, TriangleAlert } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
 
 interface ChatProps {
   bookId: string
@@ -23,7 +23,7 @@ interface ChatProps {
 }
 
 export function Chat({ bookId, play }: ChatProps) {
-  const { aiConfig } = useAiConfig()
+  const { provider, model } = useLLMStore()
   const [isGenerating, setIsGenerating] = useState(false)
   const [contextType, setContextType] = useState<"contextual" | "full">("contextual")
   const [input, setInput] = useState("")
@@ -43,7 +43,7 @@ export function Chat({ bookId, play }: ChatProps) {
       setIsGenerating(true)
       const response = await axios.post(`/api/book/${bookId}/ai/chat`, {
         message,
-        config: aiConfig,
+        config: { provider, model },
       })
       setAnalysis(response.data.analysis)
       setIsGenerating(false)

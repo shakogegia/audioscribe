@@ -1,76 +1,54 @@
 // lib/chunkTranscript.js - Improved version
-module.exports.chunkTranscript = function chunkTranscript(transcriptText, options = {}) {
+module.exports.chunkTranscript = function chunkTranscript(segments, options = {}) {
   const {
     maxChunkDuration = 180, // 3 minutes
     maxChunkLines = 50, // Maximum lines per chunk
     minChunkDuration = 30, // Minimum 30 seconds per chunk
-  } = options;
+  } = options
 
-  console.log("🔄 Starting transcript chunking...");
+  console.log("🔄 Starting transcript chunking...")
 
-  const lines = transcriptText.split("\n").filter(line => line.trim());
-  const chunks = [];
-  let currentChunk = [];
-  let chunkStartTime = null;
-  let chunkEndTime = null;
-  let lastValidEndTime = null;
+  const chunks = []
+  let currentChunk = []
+  let chunkStartTime = null
+  let chunkEndTime = null
+  let lastValidEndTime = null
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i]
 
-    if (!line) continue; // Skip empty lines
+    if (!segment.text || !segment.text.trim()) continue // Skip empty segments
 
-    // Check if line contains timestamp
-    if (line.includes("-->")) {
-      const timeMatch = line.match(/\[(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})\]/);
+    // Set chunk start time if this is the first segment in chunk
+    if (!chunkStartTime) {
+      chunkStartTime = segment.startTime
+    }
 
-      if (timeMatch) {
-        const startTime = timeMatch[1].split(".")[0];
-        const endTime = timeMatch[2].split(".")[0];
+    chunkEndTime = segment.endTime
+    lastValidEndTime = segment.endTime
 
-        // Set chunk start time if this is the first timestamp in chunk
-        if (!chunkStartTime) {
-          chunkStartTime = startTime;
-        }
+    // Add segment text to current chunk
+    currentChunk.push(segment.text.trim())
 
-        chunkEndTime = endTime;
-        lastValidEndTime = endTime;
-        const processedLine = line
-          .replace(/(\d{1,2}:\d{2}:\d{2})\.\d{1,3}/g, "$1") // remove milliseconds
-          .replace(/\[\d{2}:\d{2}:\d{2}\s*-->\s*\d{2}:\d{2}:\d{2}\]/g, "") // remove timestamps
-          .replace(/\s+/g, " ")
-          .replace(/\n/g, "")
-          .replace(/\\n/g, " ")
-          .replace(/^[ \t]+|[ \t]+$/g, "")
-          .replace(/[\n\r]/g, " ")
-          .replace(/\\n/g, " ");
+    // Check if we should end this chunk
+    const duration = (chunkEndTime - chunkStartTime) / 1000 // Convert from milliseconds to seconds
+    const shouldEndChunk =
+      duration >= maxChunkDuration ||
+      currentChunk.length >= maxChunkLines ||
+      (duration >= minChunkDuration && isNaturalBreak(segment, segments[i + 1]))
 
-        currentChunk.push(processedLine);
+    if (shouldEndChunk && currentChunk.length > 5) {
+      // Ensure minimum chunk size
+      // Create chunk
+      const chunk = createChunk(currentChunk, chunkStartTime, chunkEndTime, chunks.length)
+      chunks.push(chunk)
 
-        // Check if we should end this chunk
-        const duration = getTimeDifference(chunkStartTime, endTime);
-        const shouldEndChunk =
-          duration >= maxChunkDuration ||
-          currentChunk.length >= maxChunkLines ||
-          (duration >= minChunkDuration && isNaturalBreak(line, lines[i + 1]));
+      console.log(`✅ Created chunk ${chunks.length}: ${chunk.duration}s, ${currentChunk.length} lines`)
 
-        if (shouldEndChunk && currentChunk.length > 5) {
-          // Ensure minimum chunk size
-          // Create chunk
-          const chunk = createChunk(currentChunk, chunkStartTime, chunkEndTime, chunks.length);
-          chunks.push(chunk);
-
-          console.log(`✅ Created chunk ${chunks.length}: ${chunk.duration}s, ${currentChunk.length} lines`);
-
-          // Reset for next chunk
-          currentChunk = [];
-          chunkStartTime = null;
-          chunkEndTime = null;
-        }
-      }
-    } else {
-      // Add content line to current chunk
-      currentChunk.push(line);
+      // Reset for next chunk
+      currentChunk = []
+      chunkStartTime = null
+      chunkEndTime = null
     }
   }
 
@@ -78,36 +56,34 @@ module.exports.chunkTranscript = function chunkTranscript(transcriptText, option
   if (currentChunk.length > 0) {
     const finalChunk = createChunk(
       currentChunk,
-      chunkStartTime || "00:00:00.000",
-      chunkEndTime || lastValidEndTime || "00:00:00.000",
+      chunkStartTime || 0,
+      chunkEndTime || lastValidEndTime || 0,
       chunks.length
-    );
-    chunks.push(finalChunk);
-    console.log(`✅ Created final chunk ${chunks.length}: ${finalChunk.duration}s, ${currentChunk.length} lines`);
+    )
+    chunks.push(finalChunk)
+    console.log(`✅ Created final chunk ${chunks.length}: ${finalChunk.duration}s, ${currentChunk.length} lines`)
   }
 
-  console.log(`🎉 Chunking complete! Generated ${chunks.length} chunks`);
+  console.log(`🎉 Chunking complete! Generated ${chunks.length} chunks`)
 
   // Log chunk statistics
-  const avgDuration = chunks.reduce((sum, chunk) => sum + chunk.duration, 0) / chunks.length;
-  const avgLines = chunks.reduce((sum, chunk) => sum + chunk.lineCount, 0) / chunks.length;
-  console.log(`📊 Average chunk: ${Math.round(avgDuration)}s duration, ${Math.round(avgLines)} lines`);
+  const avgDuration = chunks.reduce((sum, chunk) => sum + chunk.duration, 0) / chunks.length
+  const avgLines = chunks.reduce((sum, chunk) => sum + chunk.lineCount, 0) / chunks.length
+  console.log(`📊 Average chunk: ${Math.round(avgDuration)}s duration, ${Math.round(avgLines)} lines`)
 
-  return chunks;
-};
+  return chunks
+}
 
 function createChunk(lines, startTime, endTime, index) {
-  const rawText = lines.join(" ");
+  const rawText = lines.join(" ")
 
   // Clean text for better embeddings
   const cleanText = rawText
-    .replace(/\[\d{2}:\d{2}:\d{2}.*?\]/g, "") // Remove all timestamps
-    .replace(/-->/g, "") // Remove arrows
     .replace(/\s+/g, " ") // Normalize whitespace
     .replace(/[^\w\s.,!?-]/g, " ") // Remove special chars but keep punctuation
-    .trim();
+    .trim()
 
-  const duration = getTimeDifference(startTime, endTime);
+  const duration = (endTime - startTime) / 1000 // Convert from milliseconds to seconds
 
   return {
     text: rawText, // Keep original for display
@@ -120,35 +96,35 @@ function createChunk(lines, startTime, endTime, index) {
     wordCount: cleanText.split(/\s+/).length,
     id: `chunk_${index}`,
     keyPhrases: extractKeyPhrases(cleanText),
-  };
+  }
 }
 
 function getTimeDifference(start, end) {
   try {
-    const startSeconds = timeToSeconds(start);
-    const endSeconds = timeToSeconds(end);
-    return Math.max(0, endSeconds - startSeconds);
+    const startSeconds = timeToSeconds(start)
+    const endSeconds = timeToSeconds(end)
+    return Math.max(0, endSeconds - startSeconds)
   } catch (error) {
-    console.warn("Error calculating time difference:", error);
-    return 0;
+    console.warn("Error calculating time difference:", error)
+    return 0
   }
 }
 
 function timeToSeconds(timeStr) {
-  if (!timeStr || typeof timeStr !== "string") return 0;
+  if (!timeStr || typeof timeStr !== "string") return 0
 
-  const parts = timeStr.split(":");
-  if (parts.length !== 3) return 0;
+  const parts = timeStr.split(":")
+  if (parts.length !== 3) return 0
 
-  const hours = parseInt(parts[0]) || 0;
-  const minutes = parseInt(parts[1]) || 0;
-  const seconds = parseFloat(parts[2]) || 0;
+  const hours = parseInt(parts[0]) || 0
+  const minutes = parseInt(parts[1]) || 0
+  const seconds = parseFloat(parts[2]) || 0
 
-  return hours * 3600 + minutes * 60 + seconds;
+  return hours * 3600 + minutes * 60 + seconds
 }
 
-function isNaturalBreak(currentLine, nextLine) {
-  if (!nextLine) return true;
+function isNaturalBreak(currentSegment, nextSegment) {
+  if (!nextSegment) return true
 
   // Look for natural breaking points
   const breakIndicators = [
@@ -162,9 +138,11 @@ function isNaturalBreak(currentLine, nextLine) {
     "Later",
     "The next day",
     "Hours later",
-  ];
+  ]
 
-  return breakIndicators.some(indicator => nextLine.includes(indicator) || currentLine.includes(indicator));
+  return breakIndicators.some(
+    indicator => nextSegment.text.includes(indicator) || currentSegment.text.includes(indicator)
+  )
 }
 
 function extractKeyPhrases(text) {
@@ -223,118 +201,106 @@ function extractKeyPhrases(text) {
     "its",
     "our",
     "their",
-  ]);
+  ])
 
   const words = text
     .toLowerCase()
     .replace(/[^\w\s]/g, " ")
     .split(/\s+/)
-    .filter(word => word.length > 3 && !commonWords.has(word));
+    .filter(word => word.length > 3 && !commonWords.has(word))
 
   // Get word frequency
-  const wordFreq = {};
+  const wordFreq = {}
   words.forEach(word => {
-    wordFreq[word] = (wordFreq[word] || 0) + 1;
-  });
+    wordFreq[word] = (wordFreq[word] || 0) + 1
+  })
 
   // Return top 10 most frequent meaningful words
   return Object.entries(wordFreq)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 10)
-    .map(([word]) => word);
+    .map(([word]) => word)
 }
 
 // Alternative simple chunking for testing
-module.exports.simpleChunkTranscript = function simpleChunkTranscript(transcriptText, linesPerChunk = 30) {
-  console.log("🔄 Using simple line-based chunking...");
+module.exports.simpleChunkTranscript = function simpleChunkTranscript(segments, segmentsPerChunk = 30) {
+  console.log("🔄 Using simple segment-based chunking...")
 
-  const lines = transcriptText.split("\n").filter(line => line.trim());
-  const chunks = [];
+  const chunks = []
 
-  for (let i = 0; i < lines.length; i += linesPerChunk) {
-    const chunkLines = lines.slice(i, i + linesPerChunk);
+  for (let i = 0; i < segments.length; i += segmentsPerChunk) {
+    const chunkSegments = segments.slice(i, i + segmentsPerChunk)
 
-    // Find first and last timestamps in this chunk
-    let startTime = "00:00:00.000";
-    let endTime = "00:00:00.000";
-
-    for (const line of chunkLines) {
-      const timeMatch = line.match(/\[(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})\]/);
-      if (timeMatch) {
-        if (startTime === "00:00:00.000") startTime = timeMatch[1];
-        endTime = timeMatch[2];
-      }
-    }
+    // Get first and last segment times
+    const startTime = chunkSegments[0]?.startTime || 0
+    const endTime = chunkSegments[chunkSegments.length - 1]?.endTime || 0
 
     const chunk = {
-      text: chunkLines.join("\n"),
+      text: chunkSegments.map(s => s.text).join(" "),
       startTime,
       endTime,
-      duration: Math.round(getTimeDifference(startTime, endTime)),
-      lineCount: chunkLines.length,
+      duration: Math.round((endTime - startTime) / 1000), // Convert to seconds
+      lineCount: chunkSegments.length,
       chapterIndex: Math.floor(chunks.length / 20),
       id: `chunk_${chunks.length}`,
-    };
+    }
 
-    chunks.push(chunk);
-    console.log(`✅ Created simple chunk ${chunks.length}: ${chunk.lineCount} lines`);
+    chunks.push(chunk)
+    console.log(`✅ Created simple chunk ${chunks.length}: ${chunk.lineCount} segments`)
   }
 
-  console.log(`🎉 Simple chunking complete! Generated ${chunks.length} chunks`);
-  return chunks;
-};
+  console.log(`🎉 Simple chunking complete! Generated ${chunks.length} chunks`)
+  return chunks
+}
 
 // Usage in setup script:
-module.exports.setupNewBook = async function setupNewBook(transcriptPath, bookId, options = {}) {
-  console.log("📚 Setting up audiobook:", bookId);
+module.exports.setupNewBook = async function setupNewBook(segments, bookId, options = {}) {
+  console.log("📚 Setting up audiobook:", bookId)
 
-  const fs = await import("fs");
-  const transcript = fs.readFileSync(transcriptPath, "utf-8");
-
-  console.log(`📄 Transcript loaded: ${transcript.length} characters`);
+  console.log(`📄 Transcript loaded: ${segments.length} segments`)
 
   // Try advanced chunking first, fall back to simple if it fails
-  let chunks;
+  let chunks
   try {
-    chunks = chunkTranscript(transcript, options);
+    chunks = chunkTranscript(segments, options)
   } catch (error) {
-    console.warn("⚠️ Advanced chunking failed, using simple chunking:", error.message);
-    chunks = simpleChunkTranscript(transcript);
+    console.warn("⚠️ Advanced chunking failed, using simple chunking:", error.message)
+    chunks = simpleChunkTranscript(segments)
   }
 
   if (chunks.length === 0) {
-    throw new Error("❌ No chunks generated - check transcript format");
+    throw new Error("❌ No chunks generated - check transcript format")
   }
 
   if (chunks.length === 1) {
-    console.log("⚠️ Only 1 chunk generated - trying simple chunking instead");
-    chunks = simpleChunkTranscript(transcript, 25); // Smaller chunks
+    console.log("⚠️ Only 1 chunk generated - trying simple chunking instead")
+    chunks = simpleChunkTranscript(segments, 25) // Smaller chunks
   }
 
   // Show chunk preview
-  console.log("\n📋 Chunk Preview:");
+  console.log("\n📋 Chunk Preview:")
   chunks.slice(0, 3).forEach((chunk, i) => {
-    console.log(`\nChunk ${i + 1}:`);
-    console.log(`  📏 Duration: ${chunk.duration}s`);
-    console.log(`  📄 Lines: ${chunk.lineCount}`);
-    console.log(`  ⏰ Time: ${chunk.startTime} - ${chunk.endTime}`);
-    console.log(`  📝 Preview: ${chunk.text.substring(0, 100)}...`);
-  });
+    console.log(`\nChunk ${i + 1}:`)
+    console.log(`  📏 Duration: ${chunk.duration}s`)
+    console.log(`  📄 Segments: ${chunk.lineCount}`)
+    console.log(`  ⏰ Time: ${chunk.startTime}ms - ${chunk.endTime}ms`)
+    console.log(`  📝 Preview: ${chunk.text.substring(0, 100)}...`)
+  })
 
   // Initialize vector database
-  const { AudiobookVectorDB } = await import("./vectorDb.js");
-  const vectorDb = new AudiobookVectorDB();
-  await vectorDb.initialize(bookId);
+  const { AudiobookVectorDB } = await import("./vectorDb.js")
+  const vectorDb = new AudiobookVectorDB()
+  await vectorDb.initialize(bookId)
 
   // Add chunks to vector database
-  console.log("🧠 Creating embeddings and storing in vector database...");
-  await vectorDb.addChunks(chunks);
+  console.log("🧠 Creating embeddings and storing in vector database...")
+  await vectorDb.addChunks(chunks)
 
-  console.log("✅ Setup complete!");
+  console.log("✅ Setup complete!")
   return {
     chunks: chunks.length,
     bookId,
     totalDuration: chunks.reduce((sum, chunk) => sum + chunk.duration, 0),
     avgChunkDuration: Math.round(chunks.reduce((sum, chunk) => sum + chunk.duration, 0) / chunks.length),
-  };
-};
+  }
+}

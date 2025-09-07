@@ -1,11 +1,10 @@
 "use client"
 import { useTranscriptStore } from "@/stores/transcript"
+import { secondsToMilliseconds } from "@/utils/time"
+import { TranscriptSegment } from "@prisma/client"
 import axios from "axios"
 import { useState } from "react"
-import { useAiConfig } from "./use-ai-config"
-import { TranscriptSegment } from "@prisma/client"
 import { toast } from "sonner"
-import { secondsToMilliseconds } from "@/utils/time"
 
 interface Response {
   isLoading: boolean
@@ -23,8 +22,6 @@ type Caption = {
 }
 
 export function useTranscript(): Response {
-  const { aiConfig } = useAiConfig()
-
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const segments = useTranscriptStore(state => state.segments)
@@ -33,11 +30,7 @@ export function useTranscript(): Response {
   async function fetchTranscript(bookId: string) {
     try {
       setIsLoading(true)
-      const response = await axios.get<{ segments: TranscriptSegment[] }>(`/api/book/${bookId}/transcript`, {
-        params: {
-          model: JSON.parse(localStorage["ai-storage"]).state["transcriptionModel"] || aiConfig.transcriptionModel,
-        },
-      })
+      const response = await axios.get<{ segments: TranscriptSegment[] }>(`/api/book/${bookId}/transcript`)
       setSegments(response.data.segments)
     } catch (error) {
       console.error("Failed to fetch transcriptions:", error)

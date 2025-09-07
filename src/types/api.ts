@@ -1,4 +1,5 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf"
+import { BookSetupProgress } from "@prisma/client"
 
 export interface SearchResult {
   id: string
@@ -15,8 +16,12 @@ export interface SearchResult {
   bookmarks: Audiobookshelf.AudioBookmark[]
   chapters: Audiobookshelf.Chapter[]
   cacheSize: { size: number; humanReadableSize: string }
-  transcribed: boolean
   currentTime?: number
+  transcribed: boolean
+  vectorized: boolean
+  cached: boolean
+
+  progress?: BookSetupProgress
 }
 
 export interface AudioFile {

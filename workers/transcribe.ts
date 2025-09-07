@@ -176,7 +176,7 @@ async function transcribe() {
 
     const downloadsFolder = await folders.book(bookId).downloads()
 
-    await updateBook(bookId, { transcribed: false, transcriptionModel: null })
+    await updateBook(bookId, { transcribed: false, model: null })
 
     await cleanUpOldTranscripts(bookId)
 
@@ -195,7 +195,7 @@ async function transcribe() {
       await cleanUpTempFiles([file])
     }
 
-    await updateBook(bookId, { transcribed: true, transcriptionModel: model })
+    await updateBook(bookId, { transcribed: true, model: model })
 
     process.exit(0)
   } catch (error) {
