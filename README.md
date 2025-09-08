@@ -86,6 +86,7 @@ services:
     ports:
       - 3000:3000
     restart: unless-stopped
+    user: "1000:1000" # Match your host user UID:GID
     volumes:
       - ./app-data:/app/data # Persist config files
 ```
@@ -94,6 +95,21 @@ Then run:
 
 ```sh
 docker-compose up -d
+```
+
+### Portainer Configuration
+
+If using Portainer, create a stack with:
+
+```yaml
+audioscribe:
+  image: shakogegia/audioscribe:latest
+  container_name: audioscribe
+  ports:
+    - 3000:3000
+  restart: unless-stopped
+  volumes:
+    - /path/to/your/data:/app/data
 ```
 
 </details>
