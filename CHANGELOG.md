@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.1.0](https://github.com/shakogegia/audioscribe/compare/0.0.13...0.1.0) (2025-09-08)
+
+
+### Bug Fixes
+
+* rerun jobs on startup ([0c72fc2](https://github.com/shakogegia/audioscribe/commit/0c72fc218f562ada95a291e262f38f2a9b12222c))
+
+
+### Features
+
+* ability to re-transcript the book ([c1c5234](https://github.com/shakogegia/audioscribe/commit/c1c523408ddeaad6ca65912a8c244bebdfc790f2))
+
 ## [0.0.13](https://github.com/shakogegia/audioscribe/compare/0.0.12...0.0.13) (2025-09-08)
 
 ## [0.0.12](https://github.com/shakogegia/audioscribe/compare/0.0.11...0.0.12) (2025-09-08)
