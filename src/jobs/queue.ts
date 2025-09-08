@@ -158,6 +158,23 @@ export class JobQueue {
     return result.count
   }
 
+  async resetRunningJobs(): Promise<number> {
+    const result = await prisma.job.updateMany({
+      where: { status: "running" },
+      data: {
+        status: "pending",
+        processAt: new Date(),
+        attempts: 0,
+        error: null,
+        failedAt: null,
+      },
+    })
+    if (result.count > 0) {
+      console.log(`Reset ${result.count} running jobs to pending`)
+    }
+    return result.count
+  }
+
   async getQueueStats(): Promise<{
     pending: number
     running: number

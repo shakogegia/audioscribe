@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { jobQueue, transcribe, vectorize } from "@/jobs/queue"
+import { jobQueue, setupBook } from "@/jobs/queue"
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -34,10 +34,8 @@ export async function POST(request: NextRequest) {
     let jobId: string
 
     // Use typed job functions for better validation
-    if (type === "transcribe") {
-      jobId = await transcribe(data, options)
-    } else if (type === "vectorize") {
-      jobId = await vectorize(data, options)
+    if (type === "setupBook") {
+      jobId = await setupBook(data, options)
     } else {
       // Fallback to generic add for unknown job types
       jobId = await jobQueue.add(type, data, options)

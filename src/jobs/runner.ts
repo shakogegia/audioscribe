@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import { executeSetupBookJob } from "@/jobs/processors"
+import { jobQueue } from "@/jobs/queue"
 
 const prisma = new PrismaClient()
 
@@ -58,6 +59,8 @@ export class JobRunner {
       console.log("Job runner is already running")
       return
     }
+
+    await jobQueue.resetRunningJobs()
 
     this.isRunning = true
     this.polling = true
