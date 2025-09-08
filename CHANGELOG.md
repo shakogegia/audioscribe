@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.12](https://github.com/shakogegia/audioscribe/compare/0.0.11...0.0.12) (2025-09-08)
+
+
+### Bug Fixes
+
+* ffmpeg codec ([f8b838d](https://github.com/shakogegia/audioscribe/commit/f8b838d94508febc197c17fc4db94ccb79add913))
+
 ## [0.0.11](https://github.com/shakogegia/audioscribe/compare/0.0.10...0.0.11) (2025-09-08)
 
 
