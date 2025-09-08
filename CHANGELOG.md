@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.0.13](https://github.com/shakogegia/audioscribe/compare/0.0.12...0.0.13) (2025-09-08)
+
 ## [0.0.12](https://github.com/shakogegia/audioscribe/compare/0.0.11...0.0.12) (2025-09-08)
 
 
