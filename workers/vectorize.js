@@ -1,3 +1,4 @@
+require("dotenv").config()
 const { program } = require("commander")
 const { chunkTranscript } = require("./lib/chunk-transcript")
 const { AudiobookVectorDB } = require("./lib/chroma-db")

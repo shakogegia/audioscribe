@@ -8,8 +8,7 @@ export async function updateConfig(config: AppConfig) {
   "use server"
   await save(config)
   // Revalidate the page to clear any cached config
-  revalidatePath("/setup/embedding")
-  revalidatePath("/search")
+  revalidatePath("/", "layout")
 }
 
 export default async function EmbeddingSetupPage() {

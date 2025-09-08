@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run next:dev\" \"npm run chroma\" \"npm run job-runner\"",
+    "dev": "concurrently \"npm run next:dev\" \"npm run chroma\" \"npm run jobs\"",
     "build": "npm run next:build",
-    "start": "concurrently \"npm run next:start\" \"npm run chroma\" \"npm run job-runner\"",
-    "job-runner": "ts-node --project workers/tsconfig.json ./scripts/start-job-runner.ts",
+    "start": "concurrently \"npm run next:start\" \"npm run chroma\" \"npm run jobs\"",
+    "jobs": "ts-node --project workers/tsconfig.json ./scripts/start-jobs.ts",
     "next:dev": "next dev --turbopack",
     "next:build": "next build --turbopack",
     "next:start": "next start",

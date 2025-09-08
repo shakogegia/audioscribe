@@ -19,10 +19,14 @@ program
   .requiredOption("-b, --book-id <string>", "The ID of the book")
   .requiredOption("-m, --model <string>", "The name of the model to use")
 
-program.parse()
+program.parse(process.argv)
 
 // Get arguments
 const { bookId, model } = program.opts<Props>()
+
+// Debug logging
+console.log("Parsed arguments:", { bookId, model })
+console.log("Process argv:", process.argv)
 
 export type WhisperTranscriptionResult = {
   systeminfo: string

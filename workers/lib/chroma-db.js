@@ -1,10 +1,7 @@
 const { ChromaClient } = require("chromadb")
 const { OllamaEmbeddingFunction } = require("@chroma-core/ollama")
-
-const embedder = new OllamaEmbeddingFunction({
-  url: "http://127.0.0.1:11434",
-  model: "all-minilm:latest",
-})
+const { join } = require("path")
+const { promises: fs } = require("fs")
 
 module.exports.AudiobookVectorDB = class AudiobookVectorDB {
   constructor() {
@@ -23,11 +20,28 @@ module.exports.AudiobookVectorDB = class AudiobookVectorDB {
       this.collection = await this.client.getOrCreateCollection({
         name: `audiobook_${bookId}`,
         metadata: { "hnsw:space": "cosine" },
-        embeddingFunction: embedder,
+        embeddingFunction: await this.embedder(),
       })
     } catch (error) {
       console.error("Vector DB initialization failed:", error)
     }
+  }
+
+  async embedder() {
+    const embedder = await this.ollamaEmbeddingFunction()
+    return embedder
+  }
+
+  async ollamaEmbeddingFunction() {
+    const configPath = join(process.env.DATA_DIR, "config.json")
+    const configContent = await fs.readFile(configPath, "utf8")
+    const config = JSON.parse(configContent)
+
+    const baseUrl = config?.aiProviders.ollama.baseUrl ?? "http://localhost:11434"
+    return new OllamaEmbeddingFunction({
+      url: baseUrl,
+      model: config?.embeddingModel ?? "all-minilm:latest",
+    })
   }
 
   async clearCollection(bookId) {
@@ -44,7 +58,7 @@ module.exports.AudiobookVectorDB = class AudiobookVectorDB {
     for (let i = 0; i < chunks.length; i++) {
       console.info(`Adding chunk ${i + 1} of ${chunks.length}`)
       const chunk = chunks[i]
-      const embedding = await embedder.generate([chunk.text])
+      const embedding = await (await this.embedder()).generate([chunk.text])
       console.info(`Chunk ${i + 1}: generated embedding`)
 
       await this.collection.add({
@@ -68,7 +82,7 @@ module.exports.AudiobookVectorDB = class AudiobookVectorDB {
   }
 
   async searchSimilar(query, nResults = 3) {
-    const queryEmbedding = await embedder.generate([query])
+    const queryEmbedding = await (await this.embedder()).generate([query])
 
     const results = await this.collection.query({
       queryEmbeddings: queryEmbedding,

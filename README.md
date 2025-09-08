@@ -74,22 +74,27 @@ npm run start
 <details>
 <summary>Docker</summary>
 
-The included `docker-compose.yml` provides a complete setup:
+Create a `docker-compose.yml` file:
 
 ```yaml
 version: "3.8"
 
 services:
-  audiobook-bookmark-wizard:
-    image: shakogegia/audiobook-bookmark-wizard:latest
-    container_name: audiobook-bookmark-wizard
+  audioscribe:
+    image: shakogegia/audioscribe:latest
+    container_name: audioscribe
     user: "${UID:-1000}:${GID:-1000}"
     ports:
       - 3000:3000
     restart: unless-stopped
     volumes:
       - ./app-data:/app/data # Persist config files
-      - ./temp-cache:/tmp/audiobook-wizard # Persist audio cache
+```
+
+Then run:
+
+```sh
+docker-compose up -d
 ```
 
 </details>
