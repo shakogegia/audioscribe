@@ -1,7 +1,10 @@
 "use client"
+import { ConfirmSetup } from "@/app/(main)/search/confirm-setup"
 import { Hero } from "@/components/hero"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { SearchResult } from "@/types/api"
+import { AudioLinesIcon } from "lucide-react"
 import Image from "next/image"
 
 interface BookProps {
@@ -15,7 +18,12 @@ export default function BookInfo({ book }: BookProps) {
       description={[book.authors.join(", ")]}
       content={
         <div className="flex items-center gap-2">
-          <Badge variant="secondary">Cache size: {book.cacheSize.humanReadableSize}</Badge>
+          <ConfirmSetup title="Re-setup book" book={book}>
+            <Button variant="outline" size="sm">
+              <AudioLinesIcon className="w-4 h-4" />
+              Options
+            </Button>
+          </ConfirmSetup>
         </div>
       }
       icon={

@@ -1,4 +1,5 @@
 import { WhisperModel } from "@/ai/transcription/types/transription"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -23,17 +24,18 @@ import {
 import { SearchResult } from "@/types/api"
 import { whisperModels } from "@/utils/constants"
 import axios from "axios"
-import { AudioLinesIcon, Loader2 } from "lucide-react"
+import { AudioLinesIcon, InfoIcon, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 
 type ConfirmSetupProps = {
+  title?: string
   children: React.ReactNode
   book: SearchResult
 }
 
-export function ConfirmSetup({ children, book }: ConfirmSetupProps) {
+export function ConfirmSetup({ title, children, book }: ConfirmSetupProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -58,14 +60,31 @@ export function ConfirmSetup({ children, book }: ConfirmSetupProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <form>
         <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Setup book</DialogTitle>
+            <DialogTitle>{title || "Setup book"}</DialogTitle>
             <DialogDescription>
               This will download the book locally and starts the transcription process.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
+            <Alert>
+              <InfoIcon />
+              <AlertTitle>Heads up!</AlertTitle>
+              <AlertDescription>
+                <p>Use best (slowest) model you can run on your machine.</p>
+                <ul className="list-inside list-disc text-sm">
+                  <li>
+                    Fastest model is <span className="font-medium inline">tiny.en</span> but it has the lowest accuracy.
+                  </li>
+                  <li>
+                    Most accurate model is <span className="font-medium inline">large-v3-turbo</span> but it requires
+                    more memory and time.
+                  </li>
+                </ul>
+              </AlertDescription>
+            </Alert>
+
             <div className="grid gap-3">
               <Label>Transcription model</Label>
               <Select value={model} onValueChange={value => setModel(value as WhisperModel)}>
