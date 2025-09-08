@@ -11,15 +11,11 @@ See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 
 ## Features
 
-- **AI Suggestions**: Generate meaningful bookmark titles using LLM's
+- **Bookmark Suggestions**: Generate meaningful bookmark titles using LLM's
 - **Transcription**: Transcribe audiobook
 - **Captions**: View generated captions for your audiobooks
 - **Multiple AI Providers**: Support for OpenAI, Google Gemini, Claude, and local Ollama models
 - **Manual Bookmarking**: Easily rename and manage your own bookmarks
-
-### Transcription
-
-- Audio transcription is powered by OpenAI's Whisper model
 
 ## Prerequisites
 
