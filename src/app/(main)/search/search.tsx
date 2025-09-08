@@ -1,7 +1,7 @@
 "use client"
-import BookIcon from "@/components/book-icon"
 import GradientIcon from "@/components/gradient-icon"
 import { Hero } from "@/components/hero"
+import Logo from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -18,9 +18,8 @@ import { SearchResult } from "@/types/api"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Search as SearchIcon } from "lucide-react"
 import { useQueryState } from "nuqs"
-import { Suspense, useEffect, useRef } from "react"
+import { Suspense } from "react"
 import { useForm } from "react-hook-form"
-import SiriWave from "siriwave"
 import useSWR from "swr"
 import z from "zod"
 import SearchResults from "./search-results"
@@ -43,7 +42,6 @@ const formSchema = z.object({
 function SearchPageContent({ libraries }: Props) {
   const [searchQuery, setSearchQuery] = useQueryState("q")
   const [libraryId, setLibraryId] = useQueryState("libraryId")
-  const siriWaveRef = useRef<SiriWave | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,24 +64,12 @@ function SearchPageContent({ libraries }: Props) {
     }
   }
 
-  useEffect(() => {
-    siriWaveRef.current = new SiriWave({
-      container: document.getElementById("siri-container") as HTMLElement,
-      width: 128,
-      height: 128,
-      speed: 0.05,
-    })
-    return () => {
-      siriWaveRef.current?.dispose()
-    }
-  }, [])
-
   return (
     <div className="flex flex-col items-center gap-8 w-full my-10 px-4">
       <Hero
         title="AudioScribe"
         description={["Add intelligent bookmarks and transcriptions", "to enhance your audiobook experience."]}
-        icon={<BookIcon icon={<div id="siri-container"></div>} />}
+        icon={<Logo size={128} />}
       />
 
       {/* Search */}
