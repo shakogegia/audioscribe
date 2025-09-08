@@ -23,7 +23,7 @@ export interface JobStatus {
 }
 
 export class JobQueue {
-  async add(jobType: string, data: JobData, options: JobOptions = {}): Promise<string> {
+  async add(jobType: "setupBook", data: JobData, options: JobOptions = {}): Promise<string> {
     const { priority = 0, delay = 0, maxAttempts = 3, processAt = new Date(Date.now() + delay * 1000) } = options
 
     const job = await prisma.job.create({
@@ -184,24 +184,6 @@ export class JobQueue {
 
 export const jobQueue = new JobQueue()
 
-// Public API functions
-export async function transcribe(data: { bookId: string; model: string }, options?: JobOptions): Promise<string> {
-  return jobQueue.add("transcribe", data, options)
-}
-
-export async function vectorize(data: { bookId: string }, options?: JobOptions): Promise<string> {
-  return jobQueue.add("vectorize", data, options)
-}
-
-export async function setupBook(
-  data: {
-    bookId: string
-    model: string
-    forceRedownload?: boolean
-    forceRetranscribe?: boolean
-    forceRevectorize?: boolean
-  },
-  options?: JobOptions
-): Promise<string> {
+export async function setupBook(data: { bookId: string; model: string }, options?: JobOptions): Promise<string> {
   return jobQueue.add("setupBook", data, options)
 }

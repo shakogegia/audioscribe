@@ -7,7 +7,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params
     const body = await request.json()
 
-    const { model, forceRedownload = false, forceRetranscribe = false, forceRevectorize = false } = body
+    const { model } = body
 
     if (!model) {
       return NextResponse.json({ error: "Missing model" }, { status: 400 })
@@ -24,19 +24,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       })
     }
 
-    const jobId = await setupBook(
-      {
-        bookId,
-        model,
-        forceRedownload,
-        forceRetranscribe,
-        forceRevectorize,
-      },
-      {
-        priority: 1,
-        maxAttempts: 1,
-      }
-    )
+    const jobId = await setupBook({ bookId, model }, { priority: 1, maxAttempts: 1 })
 
     return NextResponse.json({
       jobId,

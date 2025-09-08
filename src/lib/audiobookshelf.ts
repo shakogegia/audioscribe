@@ -80,9 +80,8 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
         chapters: libraryItem.media.chapters,
         cacheSize: await getBookCacheSize(libraryItem.id),
         currentTime: (await getLastSession(libraryItem.id))?.currentTime,
-        transcribed: book?.transcribed ?? false,
-        vectorized: book?.vectorized ?? false,
-        cached: book?.cached ?? false,
+        setup: book?.setup ?? false,
+        model: book?.model ?? null,
         progress: progress,
       }
     })
@@ -141,9 +140,8 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItemId}/cover?ts=${Date.now()}&raw=1`,
     cacheSize: await getBookCacheSize(libraryItemId),
     currentTime: session?.currentTime,
-    transcribed: book?.transcribed ?? false,
-    vectorized: book?.vectorized ?? false,
-    cached: book?.cached ?? false,
+    setup: book?.setup ?? false,
+    model: book?.model ?? null,
     progress: progress,
   }
 }

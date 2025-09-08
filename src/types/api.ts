@@ -17,9 +17,8 @@ export interface SearchResult {
   chapters: Audiobookshelf.Chapter[]
   cacheSize: { size: number; humanReadableSize: string }
   currentTime?: number
-  transcribed: boolean
-  vectorized: boolean
-  cached: boolean
+  setup: boolean
+  model?: string | null
   progress?: BookSetupProgress
 }
 

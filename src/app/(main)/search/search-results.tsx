@@ -37,9 +37,9 @@ export default function SearchResults({ books }: Props) {
           <span className="text-sm text-neutral-500">{book.authors.join(", ")}</span>
         </div>
         <div className="flex gap-2 mt-1">
-          {book.progress && (
+          {/* {book.progress && (
             <Badge variant={STAGES[book.progress.stage].variant}>{STAGES[book.progress.stage].label}</Badge>
-          )}
+          )} */}
 
           <Badge variant="secondary">{formatDuration(book.duration)}</Badge>
         </div>

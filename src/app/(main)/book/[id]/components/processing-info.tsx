@@ -2,42 +2,73 @@ import { SearchResult } from "@/types/api"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
-import { CircleCheckIcon, CircleDashedIcon, InfoIcon, Loader2Icon } from "lucide-react"
+import { CircleCheckIcon, CircleDashedIcon, InfoIcon, Loader2Icon, CircleXIcon, RefreshCcwIcon } from "lucide-react"
 import useSWR from "swr"
 import { BookSetupProgress } from "@prisma/client"
 import { useEffect } from "react"
 import { twMerge } from "tailwind-merge"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import axios from "axios"
 
 type ProcessingInfoProps = {
   book: SearchResult
   revalidate: (id: string) => void
 }
 
-const STAGES: Record<string, number> = {
-  pending: 0,
-  downloading: 1,
-  transcribing: 2,
-  vectorizing: 3,
-  completed: 4,
-  failed: 5,
+type ProgressResponse = {
+  stages: BookSetupProgress[]
+  currentStage: BookSetupProgress | null
+  progress: BookSetupProgress | null // Legacy support
 }
 
 export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
-  const { data } = useSWR<{ progress: BookSetupProgress }>(`/api/book/${book.id}/setup/progress`)
+  const { data } = useSWR<ProgressResponse>(`/api/book/${book.id}/setup/progress`)
+
+  const allCompleted = data?.stages.every(s => s.status === "completed")
+  const hasFailed = data?.stages.some(s => s.status === "failed")
 
   useEffect(() => {
-    if (data?.progress?.stage === "completed") {
+    if (!data?.currentStage) return
+
+    const currentStage = data?.currentStage
+
+    if (allCompleted) {
       toast.success("Book is ready")
       revalidate(book.id)
-    } else if (data?.progress?.stage === "failed") {
+    } else if (hasFailed) {
       toast.error("Book setup failed")
-    } else if (data?.progress?.stage === "transcribing") {
+    } else if (currentStage.stage === "transcribe" && currentStage.status === "running") {
       toast.info("Book download is complete")
-    } else if (data?.progress?.stage === "vectorizing") {
+    } else if (currentStage.stage === "vectorize" && currentStage.status === "running") {
       toast.info("Book transcription is complete")
     }
-  }, [data?.progress?.stage, revalidate, book.id])
+  }, [
+    data?.currentStage?.stage,
+    data?.currentStage,
+    data?.currentStage?.status,
+    revalidate,
+    book.id,
+    allCompleted,
+    hasFailed,
+  ])
+
+  const runningStage = data?.currentStage?.stage
+  const completedStages = data?.stages.filter(s => s.status === "completed")
+  const failedStages = data?.stages.filter(s => s.status === "failed")
+
+  async function retry() {
+    if (!book.model) {
+      toast.error("Book model is not set")
+      return
+    }
+
+    toast.loading("Sending a request", { id: "setup-book" })
+    await axios.post(`/api/book/${book.id}/setup`, {
+      model: book.model,
+    })
+    toast.success("Request sent", { id: "setup-book" })
+  }
 
   return (
     <div>
@@ -59,61 +90,81 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
             <>
               <p className="text-sm font-medium">Steps to process book:</p>
               <div className="[&_div]:border-transparent border rounded-lg">
-                <Alert className="rounded-b-none">
-                  {STAGES[data.progress.stage] > 1 ? (
-                    <CircleCheckIcon />
-                  ) : (
-                    <CircleDashedIcon className={twMerge(data.progress.stage === "downloading" && "animate-spin")} />
-                  )}
-                  <AlertTitle>Step 1: Download book</AlertTitle>
-                  <AlertDescription>
-                    Download book from Audiobookshelf and save it to the local cache folder.
-                    <br />
-                    Takes a few seconds up to a minute if Audiobookshelf is locally hosted.
-                  </AlertDescription>
-                </Alert>
-
+                <Stage
+                  title="Step 1: Download book"
+                  className="rounded-b-none"
+                  isRunning={runningStage === "download"}
+                  isCompleted={completedStages?.some(s => s.stage === "download") ?? false}
+                  isFailed={failedStages?.some(s => s.stage === "download") ?? false}
+                >
+                  Download book from Audiobookshelf and save it to the local cache folder.
+                  <br />
+                  Fastest stage, can be completed in a few seconds if Audiobookshelf is locally hosted.
+                </Stage>
                 <Separator />
-
-                <Alert className="rounded-none">
-                  {STAGES[data.progress.stage] > 2 ? (
-                    <CircleCheckIcon />
-                  ) : (
-                    <CircleDashedIcon className={twMerge(data.progress.stage === "transcribing" && "animate-spin")} />
-                  )}
-                  <AlertTitle>Step 2: Transcript book</AlertTitle>
-                  <AlertDescription>
-                    <p>
-                      Transcribe the whole book using{" "}
-                      <span className="font-medium inline">{data?.progress?.model}</span> model and save the transcript
-                      to the database.
-                      <br />
-                      Takes a few minutes depending on the size of the book and the model used.
-                    </p>
-                  </AlertDescription>
-                </Alert>
-
-                <Separator />
-
-                <Alert className="rounded-t-none">
-                  {STAGES[data.progress.stage] > 3 ? (
-                    <CircleCheckIcon />
-                  ) : (
-                    <CircleDashedIcon className={twMerge(data.progress.stage === "vectorizing" && "animate-spin")} />
-                  )}
-                  <AlertTitle>Step 3: Vectorize book</AlertTitle>
-                  <AlertDescription>
-                    Vectorize the book and save the chunks to the vector database. This will allow you to ask questions
-                    about the book.
+                <Stage
+                  title="Step 2: Transcript book"
+                  className="rounded-none"
+                  isRunning={runningStage === "transcribe"}
+                  isCompleted={completedStages?.some(s => s.stage === "transcribe") ?? false}
+                  isFailed={failedStages?.some(s => s.stage === "transcribe") ?? false}
+                >
+                  <p>
+                    Transcribe the whole book using <span className="font-medium inline">{data?.progress?.model}</span>{" "}
+                    model and save the transcript to the database.
                     <br />
-                    Takes a few minutes depending on the size of the book.
-                  </AlertDescription>
-                </Alert>
+                    Slowest stage, depending on the size of the book and the model used.
+                  </p>
+                </Stage>
+                <Separator />
+                <Stage
+                  title="Step 3: Vectorize book"
+                  className="rounded-t-none"
+                  isRunning={runningStage === "vectorize"}
+                  isCompleted={completedStages?.some(s => s.stage === "vectorize") ?? false}
+                  isFailed={failedStages?.some(s => s.stage === "vectorize") ?? false}
+                >
+                  Vectorize the book and save the chunks to the vector database. This will allow you to ask questions
+                  about the book.
+                  <br />
+                  Second fastest stage, can be completed in a max of few minutes.
+                </Stage>
               </div>
             </>
           )}
         </div>
+
+        {hasFailed && (
+          <Button onClick={retry}>
+            <RefreshCcwIcon className="w-4 h-4" />
+            Retry
+          </Button>
+        )}
       </div>
     </div>
+  )
+}
+
+type StageProps = {
+  title: string
+  isRunning: boolean
+  isCompleted: boolean
+  isFailed: boolean
+  children: React.ReactNode
+  className: string
+}
+export function Stage({ title, isRunning, isCompleted, isFailed, children, className }: StageProps) {
+  return (
+    <Alert className={twMerge("rounded-b-none", className)} variant={isFailed ? "destructive" : "default"}>
+      {isFailed ? (
+        <CircleXIcon />
+      ) : isCompleted ? (
+        <CircleCheckIcon />
+      ) : (
+        <CircleDashedIcon className={twMerge(isRunning && "animate-spin")} />
+      )}
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription>{children}</AlertDescription>
+    </Alert>
   )
 }

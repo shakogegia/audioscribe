@@ -41,7 +41,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
     fetchTranscript(id)
   })
 
-  const showProcessingInfo = !book.cached || !book.transcribed || !book.vectorized
+  const showProcessingInfo = !book.setup
 
   return (
     <div className="w-full min-h-full flex flex-col items-center gap-8 mb-10 px-4">

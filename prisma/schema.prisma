@@ -11,12 +11,9 @@ datasource db {
 }
 
 model Book {
-  id          String  @id @default(cuid())
-  cached      Boolean @default(false)
-  transcribed Boolean @default(false)
-  vectorized  Boolean @default(false)
-  model       String?
-
+  id        String   @id @default(cuid())
+  setup     Boolean  @default(false)
+  model     String?
   favorite  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -24,7 +21,7 @@ model Book {
   // relations
   transcriptSegment TranscriptSegment[]
   bookSetupProgress BookSetupProgress[]
-  Job               Job[]
+  jobs              Job[]
 }
 
 model TranscriptSegment {
@@ -69,22 +66,22 @@ model Job {
 }
 
 model BookSetupProgress {
-  id                    String    @id @default(cuid())
-  bookId                String
-  stage                 String    @default("pending") // pending, downloading, transcribing, vectorizing, completed, failed
-  downloadProgress      Float     @default(0)
-  transcriptionProgress Float     @default(0)
-  vectorizationProgress Float     @default(0)
-  overallProgress       Float     @default(0)
-  model                 String?
-  error                 String?
-  startedAt             DateTime?
-  completedAt           DateTime?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
+  id     String  @id @default(cuid())
+  bookId String
+  stage  String // "download", "transcribe", "vectorize"
+  status String  @default("pending") // pending, running, completed, failed
+  model  String?
+  error  String?
+
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // relations
   book Book @relation(fields: [bookId], references: [id])
 
+  @@unique([bookId, stage])
   @@index([bookId])
 }

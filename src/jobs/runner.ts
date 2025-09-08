@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client"
-import { executeTranscribeJob, executeVectorizeJob, executeSetupBookJob } from "@/jobs/processors"
+import { executeSetupBookJob } from "@/jobs/processors"
 
 const prisma = new PrismaClient()
 
@@ -40,21 +40,7 @@ export class JobRunner {
   }
 
   private registerDefaultProcessors() {
-    this.processors.set("transcribe", this.createTranscribeProcessor())
-    this.processors.set("vectorize", this.createVectorizeProcessor())
     this.processors.set("setupBook", this.createSetupBookProcessor())
-  }
-
-  private createTranscribeProcessor(): JobProcessor {
-    return async (data: JobData) => {
-      return executeTranscribeJob(data)
-    }
-  }
-
-  private createVectorizeProcessor(): JobProcessor {
-    return async (data: JobData) => {
-      return executeVectorizeJob(data)
-    }
   }
 
   private createSetupBookProcessor(): JobProcessor {

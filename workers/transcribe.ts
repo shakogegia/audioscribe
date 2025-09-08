@@ -162,7 +162,7 @@ function cleanUpTempFiles(files: string[]) {
   return Promise.all(files.map(file => fsPromise.unlink(file).catch(() => {})))
 }
 
-async function cleanUpOldTranscripts(bookId: string) {
+async function eraseOldTranscripts(bookId: string) {
   return await prisma.transcriptSegment.deleteMany({ where: { bookId } })
 }
 
@@ -180,9 +180,7 @@ async function transcribe() {
 
     const downloadsFolder = await folders.book(bookId).downloads()
 
-    await updateBook(bookId, { transcribed: false, model: null })
-
-    await cleanUpOldTranscripts(bookId)
+    await eraseOldTranscripts(bookId)
 
     for (const audioFile of bookFiles) {
       const localAudioFilePath = path.join(downloadsFolder, audioFile.path)
@@ -198,8 +196,6 @@ async function transcribe() {
 
       await cleanUpTempFiles([file])
     }
-
-    await updateBook(bookId, { transcribed: true, model: model })
 
     process.exit(0)
   } catch (error) {

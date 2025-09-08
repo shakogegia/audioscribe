@@ -3,14 +3,14 @@ import { spawn } from "child_process"
 export interface SpawnWorkerOptions {
   workerScript: string
   args: string[]
-  logPrefix: string
+  logPrefix?: string
   log?: (message: string) => void
   onError?: (error: Error) => void
   onComplete?: () => void
 }
 
 export async function spawnWorker(options: SpawnWorkerOptions): Promise<unknown> {
-  const { workerScript, args, logPrefix, log, onError, onComplete } = options
+  const { workerScript, args, logPrefix = workerScript, log, onError, onComplete } = options
 
   return new Promise((resolve, reject) => {
     const fullArgs = ["--project", "workers/tsconfig.json", `workers/${workerScript}`, ...args]
