@@ -48,10 +48,22 @@ ENV CHROMA_HOST="localhost"
 ENV CHROMA_PORT="8000"
 ENV CLEANUP_TEMP_FILES="true"
 
+# Create a non-root user
+RUN groupadd -g 1001 appuser && \
+    useradd -r -u 1001 -g appuser appuser
+
+# Create data directory with proper permissions
+RUN mkdir -p /app/data && \
+    chown -R appuser:appuser /app
+
 RUN npm install -g pm2
 
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh && \
+    chown appuser:appuser /app/entrypoint.sh
+
+# Switch to non-root user
+USER appuser
 
 EXPOSE 3000
 
