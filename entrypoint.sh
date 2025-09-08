@@ -1,7 +1,10 @@
 #!/bin/sh
 
-# Create data directory (env: DATA_DIR) if it doesn't exist
-mkdir -p $DATA_DIR
+# Ensure proper permissions for build directories
+# This is especially important when running with volume mounts in Portainer
+mkdir -p $DATA_DIR /app/.next
+chmod -R 755 /app/.next 2>/dev/null || true
+chmod -R 755 $DATA_DIR 2>/dev/null || true
 
 # Setup prisma client
 npx prisma generate
@@ -9,6 +12,7 @@ npx prisma db push
 npx prisma migrate dev
 
 # Build the application
+echo "Building Next.js application..."
 npm run build
 
 # Start the chroma server

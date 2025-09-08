@@ -49,20 +49,39 @@ ENV CHROMA_PORT="8000"
 ENV CLEANUP_TEMP_FILES="true"
 
 # Create a non-root user with configurable UID/GID
+# Default to 1000, but can be overridden for Portainer/Docker deployments
 ARG UID=1000
 ARG GID=1000
-RUN getent group ${GID} >/dev/null 2>&1 || groupadd -g ${GID} appuser && \
-    id -u ${UID} >/dev/null 2>&1 || useradd -r -u ${UID} -g $(getent group ${GID} | cut -d: -f1) appuser
+RUN set -e; \
+    # Handle existing group gracefully \
+    if ! getent group ${GID} >/dev/null; then \
+        groupadd -g ${GID} appuser; \
+    else \
+        existing_group=$(getent group ${GID} | cut -d: -f1); \
+        if [ "$existing_group" != "appuser" ]; then \
+            groupadd appuser; \
+        fi; \
+    fi && \
+    # Handle existing user gracefully \
+    if ! getent passwd ${UID} >/dev/null; then \
+        useradd -r -u ${UID} -g appuser -s /bin/sh appuser; \
+    else \
+        existing_user=$(getent passwd ${UID} | cut -d: -f1); \
+        if [ "$existing_user" != "appuser" ]; then \
+            useradd -r -g appuser -s /bin/sh appuser; \
+        fi; \
+    fi
 
-# Create data directory with proper permissions
-RUN mkdir -p /app/data && \
-    chown -R appuser:appuser /app
-
+# Install pm2 globally
 RUN npm install -g pm2
 
+# Copy entrypoint script
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh && \
-    chown appuser:appuser /app/entrypoint.sh
+
+# Create necessary directories and set proper permissions
+RUN mkdir -p /app/data /app/.next && \
+    chmod +x /app/entrypoint.sh && \
+    chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser
