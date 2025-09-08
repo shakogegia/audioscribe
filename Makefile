@@ -1,5 +1,5 @@
 # Docker image configuration
-IMAGE_NAME = shakogegia/audiobook-bookmark-wizard
+IMAGE_NAME = shakogegia/audioscribe
 TAG = latest
 PLATFORMS = linux/amd64,linux/arm64
 
