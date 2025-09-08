@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.10](https://github.com/shakogegia/audioscribe/compare/0.0.6...0.0.10) (2025-09-08)
+
+
+### Bug Fixes
+
+* dockerfile ([11092dd](https://github.com/shakogegia/audioscribe/commit/11092dd362f1ed3a48d0376a905ad40b65b429e5))
+
 ## [0.0.6](https://github.com/shakogegia/audioscribe/compare/0.0.5...0.0.6) (2025-09-08)
 
 ## [0.0.5](https://github.com/shakogegia/audioscribe/compare/0.0.4...0.0.5) (2025-09-08)
