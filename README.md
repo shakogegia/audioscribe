@@ -29,7 +29,7 @@ See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 ### Installation
 
 <details>
-<summary>Local</summary>
+<summary>Local (Mac)</summary>
 
 #### System Dependencies
 
@@ -38,23 +38,15 @@ brew install ffmpeg
 brew install cmake
 ```
 
-#### Ollama
+#### Setup
+
+Clone repository, install npm dependencies and set env variables
 
 ```sh
- # Embedder
-ollama pull all-minilm:latest
-
-ollama pull llama3.2:3b
-```
-
-#### Install
-
-```sh
+# Clone repo and install npm dependencies
 clone git@github.com:shakogegia/audioscribe.git
 cd audioscribe
 npm install
-
-# set env variables
 cp .env.example .env
 ```
 
@@ -64,9 +56,7 @@ cp .env.example .env
 npm run dev
 
 # or
-npm run build
-npm run start
-
+npm run build && npm run start
 ```
 
 </details>
@@ -88,29 +78,13 @@ services:
     restart: unless-stopped
     user: "1000:1000" # Match your host user UID:GID
     volumes:
-      - ./app-data:/app/data # Persist config files
+      - /path/to/data:/app/data # Persist application data including database, audio files, and configuration
 ```
 
 Then run:
 
 ```sh
 docker-compose up -d
-```
-
-### Portainer Configuration
-
-If using Portainer, create a stack with:
-
-```yaml
-audioscribe:
-  image: shakogegia/audioscribe:latest
-  container_name: audioscribe
-  ports:
-    - 3000:3000
-  restart: unless-stopped
-  volumes:
-    # Persist application data including database, audio files, and configuration
-    - /path/to/your/data:/app/data
 ```
 
 </details>
