@@ -15,9 +15,9 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment variables for whisper.cpp ARM compilation
-ENV CFLAGS="-march=armv8-a -mtune=generic -mno-outline-atomics"
-ENV CXXFLAGS="-march=armv8-a -mtune=generic -mno-outline-atomics"
+# Set environment variables for whisper.cpp compilation
+ENV CFLAGS="-mtune=generic"
+ENV CXXFLAGS="-mtune=generic"
 ENV CMAKE_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_HBM=OFF"
 ENV CC="gcc"
 ENV CXX="g++"
@@ -28,8 +28,8 @@ RUN npm ci
 
 # Pre-build whisper.cpp to avoid runtime compilation issues
 RUN cd /app/node_modules/nodejs-whisper/cpp/whisper.cpp && \
-    export CFLAGS="-march=armv8-a -mtune=generic -mno-outline-atomics" && \
-    export CXXFLAGS="-march=armv8-a -mtune=generic -mno-outline-atomics" && \
+    export CFLAGS="-mtune=generic" && \
+    export CXXFLAGS="-mtune=generic" && \
     mkdir -p build && \
     cd build && \
     cmake .. -DGGML_NATIVE=OFF -DGGML_CPU_HBM=OFF -DCMAKE_BUILD_TYPE=Release && \
