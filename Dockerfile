@@ -13,6 +13,11 @@ RUN apt-get update && apt-get install -y \
     git \
     sqlite3 \
     libsqlite3-dev \
+    pkg-config \
+    libavcodec-dev \
+    libavformat-dev \
+    libavutil-dev \
+    libswresample-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for whisper.cpp compilation
@@ -22,6 +27,13 @@ ENV CMAKE_ARGS="-DGGML_NATIVE=OFF -DGGML_CPU_HBM=OFF"
 ENV CC="gcc"
 ENV CXX="g++"
 
+# Set multi-architecture library paths (works for both Intel and ARM)
+ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig"
+ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/usr/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH"
+
+# Log detected architecture for debugging
+RUN echo "Building for architecture: $(dpkg --print-architecture)"
+
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm ci
@@ -30,10 +42,13 @@ RUN npm ci
 RUN cd /app/node_modules/nodejs-whisper/cpp/whisper.cpp && \
     export CFLAGS="-mtune=generic" && \
     export CXXFLAGS="-mtune=generic" && \
+    rm -rf build && \
     mkdir -p build && \
     cd build && \
     cmake .. -DGGML_NATIVE=OFF -DGGML_CPU_HBM=OFF -DCMAKE_BUILD_TYPE=Release && \
-    make -j$(nproc) || echo "Pre-build failed, will build at runtime"
+    make -j$(nproc) && \
+    echo "Pre-build completed successfully" || \
+    (echo "Pre-build failed, cleaning up build directory" && rm -rf /app/node_modules/nodejs-whisper/cpp/whisper.cpp/build)
 
 # Copy source code
 COPY . .
