@@ -5,6 +5,13 @@
 
 A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps to enhance audiobook experience with AI bookmark title suggestions, transcription, chat and more.
 
+> [!NOTE]  
+> This project is purely an experiment.  
+> I’m not sure where it’s headed, how it will evolve, or even if it’s useful or needed at all.  
+> For now, it’s just a playground to explore ideas around audiobooks and AI
+> Feel free to try it out or share feedback
+
+
 See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 
 ![Bookmark Editing](demo/screenshots/edit.png)
@@ -100,10 +107,3 @@ docker-compose up -d
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- [Audiobookshelf](https://www.audiobookshelf.org/) - Amazing audiobook server
-- [OpenAI Whisper](https://github.com/openai/whisper) - Speech recognition model
-- [Next.js](https://nextjs.org/) - React framework
-- [Tailwind CSS](https://tailwindcss.com/) - Styling framework
