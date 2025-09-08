@@ -3,7 +3,13 @@ name: Build and Push Docker Image
 on:
   push:
     tags:
-      - "*"
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Docker tag to use (optional, defaults to latest)"
+        required: false
+        default: "latest"
 
 jobs:
   build-and-push:
@@ -27,12 +33,13 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKER_USERNAME }}/audioscribe
-          tags: |
-            type=ref,event=tag
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest,enable={{is_default_branch}}
+        tags: |
+          type=ref,event=tag
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag != '' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
