@@ -51,8 +51,8 @@ ENV CLEANUP_TEMP_FILES="true"
 # Create a non-root user with configurable UID/GID
 ARG UID=1000
 ARG GID=1000
-RUN groupadd -g ${GID} appuser && \
-    useradd -r -u ${UID} -g appuser appuser
+RUN getent group ${GID} >/dev/null 2>&1 || groupadd -g ${GID} appuser && \
+    id -u ${UID} >/dev/null 2>&1 || useradd -r -u ${UID} -g $(getent group ${GID} | cut -d: -f1) appuser
 
 # Create data directory with proper permissions
 RUN mkdir -p /app/data && \

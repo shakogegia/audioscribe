@@ -83,7 +83,6 @@ services:
   audioscribe:
     image: shakogegia/audioscribe:latest
     container_name: audioscribe
-    user: "${UID:-1000}:${GID:-1000}"
     ports:
       - 3000:3000
     restart: unless-stopped
