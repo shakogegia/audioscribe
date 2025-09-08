@@ -29,7 +29,7 @@ See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 ### Installation
 
 <details>
-<summary>Local (Mac)</summary>
+<summary>Local</summary>
 
 #### System Dependencies
 
