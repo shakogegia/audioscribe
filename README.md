@@ -109,6 +109,7 @@ audioscribe:
     - 3000:3000
   restart: unless-stopped
   volumes:
+    # Persist application data including database, audio files, and configuration
     - /path/to/your/data:/app/data
 ```
 
