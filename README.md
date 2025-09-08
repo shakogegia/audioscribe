@@ -1,4 +1,7 @@
-# AudioScribe
+<div align="center">
+    <img src="./public/logo/logo-dark.png" width=200 height=200>
+    <h1>AudioScribe</h1>
+</div>
 
 A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps to enhance audiobook experience with AI bookmark title suggestions, transcription, chat and more.
 
