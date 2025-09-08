@@ -1,6 +1,6 @@
 {
   "name": "audioscribe",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run next:dev\" \"npm run chroma\" \"npm run jobs\"",
