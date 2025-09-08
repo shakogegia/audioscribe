@@ -48,9 +48,11 @@ ENV CHROMA_HOST="localhost"
 ENV CHROMA_PORT="8000"
 ENV CLEANUP_TEMP_FILES="true"
 
-# Create a non-root user
-RUN groupadd -g 1001 appuser && \
-    useradd -r -u 1001 -g appuser appuser
+# Create a non-root user with configurable UID/GID
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g ${GID} appuser && \
+    useradd -r -u ${UID} -g appuser appuser
 
 # Create data directory with proper permissions
 RUN mkdir -p /app/data && \
