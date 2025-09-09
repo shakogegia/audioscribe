@@ -3,10 +3,11 @@ import { useTheme } from "next-themes"
 import Image from "next/image"
 
 export default function Logo({ size = 128 }: { size?: number }) {
-  const { theme } = useTheme()
-  const src = theme === "dark" ? "/logo/logo-light.png" : "/logo/logo-dark.png"
+  const { systemTheme } = useTheme()
+  const src = systemTheme === "dark" ? "/logo/logo-light.png" : "/logo/logo-dark.png"
   return (
     <Image
+      suppressHydrationWarning
       src={src}
       alt="AudioScribe logo"
       width={size}
