@@ -32,10 +32,65 @@ function timeStampClasses() {
 
 function TranscriptContent({ segments, onTimeClick }: TranscriptProps, ref: Ref<HTMLDivElement>) {
   const text = useMemo(() => {
-    return segments
+    const mergeDuration = 10 * 1000 // 40 seconds in milliseconds
+
+    // Sort segments by start time to ensure proper order
+    const sortedSegments = [...segments].sort((a, b) => a.startTime - b.startTime)
+
+    // Merge segments within mergeDuration windows
+    const mergedSegments: Array<{
+      startTime: number
+      endTime: number
+      text: string
+    }> = []
+
+    let currentGroup: TranscriptSegment[] = []
+    let groupStartTime = 0
+
+    for (const segment of sortedSegments) {
+      // If this is the first segment or if it's within the merge duration of the group start
+      if (currentGroup.length === 0 || segment.startTime - groupStartTime <= mergeDuration) {
+        if (currentGroup.length === 0) {
+          groupStartTime = segment.startTime
+        }
+        currentGroup.push(segment)
+      } else {
+        // Process the current group and start a new one
+        if (currentGroup.length > 0) {
+          const mergedText = currentGroup.map(s => s.text).join(" ")
+          const groupEndTime = currentGroup[currentGroup.length - 1].endTime
+
+          mergedSegments.push({
+            startTime: groupStartTime,
+            endTime: groupEndTime,
+            text: mergedText,
+          })
+        }
+
+        // Start new group with current segment
+        currentGroup = [segment]
+        groupStartTime = segment.startTime
+      }
+    }
+
+    // Don't forget the last group
+    if (currentGroup.length > 0) {
+      const mergedText = currentGroup.map(s => s.text).join(" ")
+      const groupEndTime = currentGroup[currentGroup.length - 1].endTime
+
+      mergedSegments.push({
+        startTime: groupStartTime,
+        endTime: groupEndTime,
+        text: mergedText,
+      })
+    }
+
+    return mergedSegments
       .map(
         segment =>
-          `<p ${dataAttributes(segment.startTime)}><span class="${timeStampClasses()}">${formatMillisecondsToTime(
+          `<p ${dataAttributes(
+            segment.startTime
+          )} class="timestamp-button"><span class="${timeStampClasses()}">${formatMillisecondsToTime(
             segment.startTime
           )}</span><span class="text">${segment.text}</span></p>`
       )
@@ -45,17 +100,38 @@ function TranscriptContent({ segments, onTimeClick }: TranscriptProps, ref: Ref<
   return (
     <ScrollArea ref={ref} className="h-[500px] border rounded-lg px-2">
       <div className="[&_.active-line]:font-bold [&_.active-line]:text-blue-800 ">
-        <Markdown text={text} onTimeClick={onTimeClick} />
+        {/* <Markdown text={text} onTimeClick={onTimeClick} /> */}
         <div
           className={twMerge(
             "prose max-w-none prose-headings:font-semibold",
             "prose-p:py-0.5 prose-p:my-0",
             "dark:prose-invert",
             "prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-950/20 prose-blockquote:pl-4 prose-blockquote:py-2 prose-ul:list-disc prose-ol:list-decimal prose-li:text-gray-700 dark:prose-li:text-gray-300",
-            "text-sm"
+            "text-sm",
+            "[&_.timestamp-button]:flex [&_.timestamp-button]:cursor-pointer"
           )}
         >
-          <div dangerouslySetInnerHTML={{ __html: text }} />
+          <div
+            dangerouslySetInnerHTML={{ __html: text }}
+            onClick={e => {
+              const target = e.target as HTMLElement
+              if (target.classList.contains("timestamp-button")) {
+                const time = target.getAttribute("data-time")
+                if (time) {
+                  onTimeClick(time)
+                }
+              } else {
+                // parent node is a p tag
+                const p = target.parentElement
+                if (p) {
+                  const time = p.getAttribute("data-time")
+                  if (time) {
+                    onTimeClick(time)
+                  }
+                }
+              }
+            }}
+          />
         </div>
       </div>
     </ScrollArea>

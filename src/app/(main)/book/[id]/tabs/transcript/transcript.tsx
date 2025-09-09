@@ -28,6 +28,7 @@ export function Transcript({ play }: TranscriptProps) {
 
   useEffect(() => {
     if (scrollAreaRef.current && followCurrentTime) {
+      console.log("🚀 ~ Transcript ~ currentTime:", currentTime)
       const currentTimeInMilliseconds = currentTime * 1000
       const transcriptSegment = findTranscriptSegment(segments, currentTimeInMilliseconds)
       if (transcriptSegment) {
