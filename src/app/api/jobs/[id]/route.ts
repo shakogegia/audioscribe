@@ -43,7 +43,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const success = await jobQueue.deleteJob(id)
+
+    const success = await jobQueue.cancelJob(id)
 
     if (!success) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 })

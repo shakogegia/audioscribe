@@ -1,7 +1,6 @@
 "use client"
-import { ConfirmSetup } from "@/app/(main)/search/confirm-setup"
+import { BookOptionsDialog, BookOptionTab } from "@/components/dialogs/book-options-dialog"
 import { Hero } from "@/components/hero"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { SearchResult } from "@/types/api"
 import { AudioLinesIcon } from "lucide-react"
@@ -18,12 +17,16 @@ export default function BookInfo({ book }: BookProps) {
       description={[book.authors.join(", ")]}
       content={
         <div className="flex items-center gap-2">
-          <ConfirmSetup title="Re-setup book" book={book}>
+          <BookOptionsDialog
+            title="Book Options"
+            book={book}
+            tabs={[BookOptionTab.Setup, BookOptionTab.Export, BookOptionTab.Import, BookOptionTab.Remove]}
+          >
             <Button variant="outline" size="sm">
               <AudioLinesIcon className="w-4 h-4" />
               Options
             </Button>
-          </ConfirmSetup>
+          </BookOptionsDialog>
         </div>
       }
       icon={

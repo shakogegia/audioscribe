@@ -22,26 +22,27 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// TODO: remove this
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { type, data, options } = body
+    // const body = await request.json()
+    // const { type, data, options } = body
 
-    if (!type || !data) {
-      return NextResponse.json({ error: "Missing required fields: type, data" }, { status: 400 })
-    }
+    // if (!type || !data) {
+    //   return NextResponse.json({ error: "Missing required fields: type, data" }, { status: 400 })
+    // }
 
-    let jobId: string
+    // let jobId: string
 
-    // Use typed job functions for better validation
-    if (type === "setupBook") {
-      jobId = await setupBook(data, options)
-    } else {
-      // Fallback to generic add for unknown job types
-      jobId = await jobQueue.add(type, data, options)
-    }
+    // // Use typed job functions for better validation
+    // if (type === "setupBook") {
+    //   jobId = await setupBook(data, options)
+    // } else {
+    //   // Fallback to generic add for unknown job types
+    //   jobId = await jobQueue.add(type, data.bookId, data, options)
+    // }
 
-    return NextResponse.json({ jobId }, { status: 201 })
+    return NextResponse.json({ jobId: "123" }, { status: 201 })
   } catch (error) {
     console.error("Failed to create job:", error)
     return NextResponse.json({ error: "Failed to create job" }, { status: 500 })

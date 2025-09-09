@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { CircleCheckIcon, CircleDashedIcon, InfoIcon, Loader2Icon, CircleXIcon, RefreshCcwIcon } from "lucide-react"
 import useSWR from "swr"
-import { BookSetupProgress } from "@prisma/client"
+import { Book, BookSetupProgress } from "@prisma/client"
 import { useEffect } from "react"
 import { twMerge } from "tailwind-merge"
 import { toast } from "sonner"
@@ -20,6 +20,7 @@ type ProgressResponse = {
   stages: BookSetupProgress[]
   currentStage: BookSetupProgress | null
   progress: BookSetupProgress | null // Legacy support
+  book: Book | null
 }
 
 export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
@@ -28,30 +29,38 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
   const allCompleted = data?.stages.every(s => s.status === "completed")
   const hasFailed = data?.stages.some(s => s.status === "failed")
 
+  // TODO: use setup true
+  // useEffect(() => {
+  //   if (!data?.currentStage) return
+
+  //   const currentStage = data?.currentStage
+
+  //   if (allCompleted) {
+  //     toast.success("Book is ready")
+  //     revalidate(book.id)
+  //   }  else if (hasFailed) {
+  //     toast.error("Book setup failed")
+  //   } else if (currentStage.stage === "transcribe" && currentStage.status === "running") {
+  //     toast.info("Book download is complete")
+  //   } else if (currentStage.stage === "vectorize" && currentStage.status === "running") {
+  //     toast.info("Book transcription is complete")
+  //   }
+  // }, [
+  //   data?.currentStage?.stage,
+  //   data?.currentStage,
+  //   data?.currentStage?.status,
+  //   revalidate,
+  //   book.id,
+  //   allCompleted,
+  //   hasFailed,
+  // ])
+
   useEffect(() => {
-    if (!data?.currentStage) return
-
-    const currentStage = data?.currentStage
-
-    if (allCompleted) {
+    if (data?.book?.setup) {
       toast.success("Book is ready")
       revalidate(book.id)
-    } else if (hasFailed) {
-      toast.error("Book setup failed")
-    } else if (currentStage.stage === "transcribe" && currentStage.status === "running") {
-      toast.info("Book download is complete")
-    } else if (currentStage.stage === "vectorize" && currentStage.status === "running") {
-      toast.info("Book transcription is complete")
     }
-  }, [
-    data?.currentStage?.stage,
-    data?.currentStage,
-    data?.currentStage?.status,
-    revalidate,
-    book.id,
-    allCompleted,
-    hasFailed,
-  ])
+  }, [data?.book?.setup, revalidate, book.id])
 
   const runningStage = data?.currentStage?.stage
   const completedStages = data?.stages.filter(s => s.status === "completed")

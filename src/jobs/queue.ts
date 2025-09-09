@@ -23,12 +23,13 @@ export interface JobStatus {
 }
 
 export class JobQueue {
-  async add(jobType: "setupBook", data: JobData, options: JobOptions = {}): Promise<string> {
+  async add(jobType: "setupBook", bookId: string, data: JobData, options: JobOptions = {}): Promise<string> {
     const { priority = 0, delay = 0, maxAttempts = 3, processAt = new Date(Date.now() + delay * 1000) } = options
 
     const job = await prisma.job.create({
       data: {
         type: jobType,
+        bookId,
         data: JSON.stringify(data),
         priority,
         delay,
@@ -197,10 +198,25 @@ export class JobQueue {
       total: pending + running + completed + failed,
     }
   }
+
+  async cancelJob(jobId: string): Promise<boolean> {
+    const job = await prisma.job.findUnique({
+      where: { id: jobId },
+    })
+    if (!job) return false
+    await prisma.job.update({ where: { id: jobId }, data: { status: "cancelled" } })
+
+    // cancel any running processors
+
+    return true
+  }
 }
 
 export const jobQueue = new JobQueue()
 
-export async function setupBook(data: { bookId: string; model: string }, options?: JobOptions): Promise<string> {
-  return jobQueue.add("setupBook", data, options)
+export async function setupBook(
+  data: { bookId: string; model: string; stages: string[] },
+  options?: JobOptions
+): Promise<string> {
+  return jobQueue.add("setupBook", data.bookId, data, options)
 }

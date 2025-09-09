@@ -6,7 +6,7 @@ import { SearchResult } from "@/types/api"
 import { AudioLinesIcon, BookOpenCheck } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { ConfirmSetup } from "./confirm-setup"
+import { BookOptionsDialog, BookOptionTab } from "../../../components/dialogs/book-options-dialog"
 
 type Props = {
   books: SearchResult[]
@@ -53,12 +53,12 @@ export default function SearchResults({ books }: Props) {
           </Button>
         </Link>
       ) : (
-        <ConfirmSetup book={book}>
+        <BookOptionsDialog book={book} tabs={[BookOptionTab.Setup, BookOptionTab.Import]}>
           <Button variant="outline">
             <AudioLinesIcon className="w-4 h-4" />
             Setup
           </Button>
-        </ConfirmSetup>
+        </BookOptionsDialog>
       )}
     </div>
   ))

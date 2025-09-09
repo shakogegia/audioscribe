@@ -43,7 +43,7 @@ model TranscriptSegment {
 
 model Job {
   id          String    @id @default(cuid())
-  bookId      String?
+  bookId      String
   type        String
   data        String
   status      String    @default("pending")

@@ -5,12 +5,15 @@ import { Hero } from "@/components/hero"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Cog } from "lucide-react"
+import { Cog, TrashIcon } from "lucide-react"
 import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
 import dayjs from "dayjs"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useMemo, useState, useEffect, useCallback } from "react"
+import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
+import axios from "axios"
 
 dayjs.extend(relativeTime)
 
@@ -47,7 +50,11 @@ const refreshInterval = 2000
 export default function JobsListPage() {
   const [currentTime, setCurrentTime] = useState(new Date())
 
-  const { data: jobs = [], isLoading: jobsLoading } = useSWR<Job[]>("/api/jobs", {
+  const {
+    data: jobs = [],
+    isLoading: jobsLoading,
+    mutate,
+  } = useSWR<Job[]>("/api/jobs", {
     refreshInterval,
   })
 
@@ -66,6 +73,11 @@ export default function JobsListPage() {
 
     return () => clearInterval(interval)
   }, [])
+
+  async function cancelJob(jobId: string) {
+    await axios.delete(`/api/jobs/${jobId}`)
+    await mutate()
+  }
 
   const formatDate = (dateString: string) => {
     return dayjs(dateString).fromNow()
@@ -151,6 +163,7 @@ export default function JobsListPage() {
               <TableHead>Created</TableHead>
               <TableHead>Run Time</TableHead>
               <TableHead>Completed</TableHead>
+              <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -176,6 +189,20 @@ export default function JobsListPage() {
                   <TableCell>{job.runTime}</TableCell>
                   <TableCell>
                     {job.completedAt ? formatDate(job.completedAt) : job.failedAt ? formatDate(job.failedAt) : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {job.status === "running" && job.type === "pending" && (
+                      <ConfirmDialog
+                        title="Cancel Job"
+                        description="Are you sure you want to cancel this job?"
+                        onConfirm={() => cancelJob(job.id)}
+                      >
+                        <Button variant="outline" size="sm">
+                          <TrashIcon className="w-4 h-4" />
+                          Cancel
+                        </Button>
+                      </ConfirmDialog>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

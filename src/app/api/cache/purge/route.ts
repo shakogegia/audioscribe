@@ -10,8 +10,10 @@ export async function DELETE() {
     // clear all data from the database
     await prisma.transcriptSegment.deleteMany({})
     await prisma.bookSetupProgress.deleteMany({})
-    await prisma.book.deleteMany({})
     await prisma.job.deleteMany({})
+    await prisma.book.deleteMany({})
+
+    // TODO: Cancel all jobs
 
     return NextResponse.json(
       {

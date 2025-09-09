@@ -15,15 +15,17 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     }
 
     // Determine current stage
-    const currentStage = stages.find(s => s.status === "running") || 
-                        stages.find(s => s.status === "failed") ||
-                        stages[stages.length - 1]
+    const currentStage =
+      stages.find(s => s.status === "running") || stages.find(s => s.status === "failed") || stages[stages.length - 1]
 
-    return NextResponse.json({ 
+    const book = await prisma.book.findUnique({ where: { id: bookId } })
+
+    return NextResponse.json({
       stages,
       currentStage,
+      book,
       // Legacy support - return the current stage as 'progress'
-      progress: currentStage 
+      progress: currentStage,
     })
   } catch (error) {
     console.error("Setup progress API error:", error)

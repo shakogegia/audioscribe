@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/prisma"
 
+export enum SetupBookStage {
+  Download = "download",
+  Transcribe = "transcribe",
+  Vectorize = "vectorize",
+}
+
 export async function resetBook(bookId: string, model?: string) {
   return prisma.book.upsert({
     where: { id: bookId },
@@ -8,10 +14,8 @@ export async function resetBook(bookId: string, model?: string) {
   })
 }
 
-export async function resetBookStages(bookId: string, model: string) {
-  await prisma.bookSetupProgress.deleteMany({ where: { bookId } })
-
-  const stages = ["download", "transcribe", "vectorize"]
+export async function resetBookStages(bookId: string, model: string, stages: SetupBookStage[]) {
+  await prisma.bookSetupProgress.deleteMany({ where: { AND: [{ bookId }, { stage: { in: stages } }] } })
 
   for (const stage of stages) {
     await prisma.bookSetupProgress.upsert({

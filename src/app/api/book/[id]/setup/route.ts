@@ -1,4 +1,5 @@
 import { setupBook } from "@/jobs/queue"
+import { SetupBookStage } from "@/jobs/shared/book-operations"
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -7,7 +8,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params
     const body = await request.json()
 
-    const { model } = body
+    const { model, stages = [SetupBookStage.Download, SetupBookStage.Transcribe, SetupBookStage.Vectorize] } = body as {
+      model: string
+      stages?: SetupBookStage[]
+    }
 
     if (!model) {
       return NextResponse.json({ error: "Missing model" }, { status: 400 })
@@ -24,7 +28,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       })
     }
 
-    const jobId = await setupBook({ bookId, model }, { priority: 1, maxAttempts: 1 })
+    const jobId = await setupBook({ bookId, model, stages }, { priority: 1, maxAttempts: 1 })
 
     return NextResponse.json({
       jobId,
