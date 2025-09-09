@@ -8,7 +8,7 @@ export function Header() {
     <header className="flex justify-between items-center p-4">
       <div />
       <div className="flex items-center gap-2 h-5">
-        <Link href="/">
+        <Link href="/search">
           <Button variant="outline" size="icon">
             <House className="w-4 h-4" />
           </Button>
