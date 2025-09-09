@@ -6,7 +6,7 @@ import { SearchResult } from "@/types/api"
 import { AudioLinesIcon, BookOpenCheck } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { BookOptionsDialog, BookOptionTab } from "../../../components/dialogs/book-options-dialog"
+import { BookOptionsDialog, BookOptionTab } from "@/components/dialogs/book-options-dialog"
 
 type Props = {
   books: SearchResult[]
@@ -21,7 +21,7 @@ const STAGES: Record<string, { variant: "default" | "secondary" | "destructive" 
   failed: { variant: "destructive", label: "Failed" },
 }
 
-export default function SearchResults({ books }: Props) {
+export default function BookList({ books }: Props) {
   return books.map(book => (
     <div key={book.id} className="flex gap-2 items-center border rounded-lg p-4">
       <Image

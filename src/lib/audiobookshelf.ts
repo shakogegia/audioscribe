@@ -88,6 +88,41 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
   )
 }
 
+export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<SearchResult[]> {
+  const api = await getApi()
+  const response = await api.post<{ libraryItems: Audiobookshelf.LibraryItem[] }>(`/api/items/batch/get`, {
+    libraryItemIds,
+  })
+
+  const config = await load()
+
+  return Promise.all(
+    response.data.libraryItems.map(async libraryItem => {
+      const { book, progress } = await getBookFromDatabase(libraryItem.id)
+      return {
+        id: libraryItem.id,
+        title: libraryItem.media.metadata.title ?? "",
+        authors: libraryItem.media.metadata.authors.map(author => author.name),
+        series: libraryItem.media.metadata.series.map(series => series.name),
+        duration: libraryItem.media.duration ?? 0,
+        coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${
+          libraryItem.id
+        }/cover?ts=${Date.now()}&raw=1`,
+        narrators: libraryItem.media.metadata.narrators,
+        publishedYear: libraryItem.media.metadata.publishedYear ?? "",
+        libraryId: libraryItem.libraryId,
+        bookmarks: await getBookmarks(libraryItem.id),
+        chapters: libraryItem.media.chapters,
+        cacheSize: await getBookCacheSize(libraryItem.id),
+        currentTime: (await getLastSession(libraryItem.id))?.currentTime,
+        setup: book?.setup ?? false,
+        model: book?.model ?? null,
+        progress: progress,
+      }
+    })
+  )
+}
+
 export async function getBookmarks(libraryItemId: string): Promise<Audiobookshelf.AudioBookmark[]> {
   const api = await getApi()
   const response = await api.get<Audiobookshelf.User>(`/api/me`)
@@ -143,6 +178,7 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     setup: book?.setup ?? false,
     model: book?.model ?? null,
     progress: progress,
+    favorite: book?.favorite ?? false,
   }
 }
 

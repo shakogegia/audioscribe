@@ -168,7 +168,7 @@ export function Stage({ title, isRunning, isCompleted, isFailed, children, class
       {isFailed ? (
         <CircleXIcon />
       ) : isCompleted ? (
-        <CircleCheckIcon />
+        <CircleCheckIcon className="text-green-500!" />
       ) : (
         <CircleDashedIcon className={twMerge(isRunning && "animate-spin")} />
       )}

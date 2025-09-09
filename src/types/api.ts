@@ -20,6 +20,7 @@ export interface SearchResult {
   setup: boolean
   model?: string | null
   progress?: BookSetupProgress
+  favorite?: boolean
 }
 
 export interface AudioFile {

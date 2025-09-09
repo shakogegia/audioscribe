@@ -23,7 +23,9 @@ import { useForm } from "react-hook-form"
 import useSWR from "swr"
 import z from "zod"
 import SearchResults from "./search-results"
-import SearchStatus from "./status"
+import div from "./status"
+import BookList from "@/components/book-list"
+import { twMerge } from "tailwind-merge"
 
 type Props = {
   libraries: Library[]
@@ -65,13 +67,7 @@ function SearchPageContent({ libraries }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-8 w-full my-10 px-4">
-      <Hero
-        title="AudioScribe"
-        description={["Add intelligent bookmarks and transcriptions", "to enhance your audiobook experience."]}
-        icon={<Logo size={128} />}
-      />
-
+    <div className="flex flex-col items-center gap-8 w-full">
       {/* Search */}
       <Form {...form}>
         <form
@@ -126,25 +122,25 @@ function SearchPageContent({ libraries }: Props) {
       {/* Results */}
       <div className="flex flex-col gap-4 w-full max-w-4xl">
         {isLoading && searchQuery && (
-          <SearchStatus>
+          <div className={twMerge("flex items-center justify-center p-8 text-sm text-neutral-600")}>
             <Loader2 className="w-4 h-4 animate-spin mr-2" />
             <span>Searching...</span>
-          </SearchStatus>
+          </div>
         )}
 
         {error && (
-          <SearchStatus className="text-red-500">
+          <div className={twMerge("flex items-center justify-center p-8 text-sm text-neutral-600", "text-red-500")}>
             <span>Error searching books. Please try again.</span>
-          </SearchStatus>
+          </div>
         )}
 
         {data && data.length === 0 && (
-          <SearchStatus>
+          <div className={twMerge("flex items-center justify-center p-8 text-sm text-neutral-600")}>
             <span>No books found for &quot;{searchQuery}&quot;</span>
-          </SearchStatus>
+          </div>
         )}
 
-        {data && data.length > 0 && <SearchResults books={data} />}
+        {data && data.length > 0 && <BookList books={data} />}
       </div>
     </div>
   )
@@ -165,10 +161,10 @@ export function Search({ libraries }: Props) {
               />
             }
           />
-          <SearchStatus>
+          <div>
             <Loader2 className="w-4 h-4 animate-spin mr-2" />
             <span>Loading search...</span>
-          </SearchStatus>
+          </div>
         </div>
       }
     >

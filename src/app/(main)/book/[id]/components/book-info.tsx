@@ -1,5 +1,6 @@
 "use client"
 import { BookOptionsDialog, BookOptionTab } from "@/components/dialogs/book-options-dialog"
+import Favorite from "@/components/favorite"
 import { Hero } from "@/components/hero"
 import { Button } from "@/components/ui/button"
 import { SearchResult } from "@/types/api"
@@ -17,6 +18,7 @@ export default function BookInfo({ book }: BookProps) {
       description={[book.authors.join(", ")]}
       content={
         <div className="flex items-center gap-2">
+          <Favorite id={book.id} defaultFavorite={book.favorite} />
           <BookOptionsDialog
             title="Book Options"
             book={book}
