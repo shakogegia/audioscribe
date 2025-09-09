@@ -32,12 +32,13 @@ export async function spawnDownloadWorker(bookId: string): Promise<boolean> {
   }
 }
 
-export async function spawnTranscribeWorker(bookId: string, model: string): Promise<boolean> {
+export async function spawnTranscribeWorker(bookId: string, model: string, jobId?: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     spawnWorker({
       workerScript: "transcribe.ts",
       args: ["--book-id", bookId, "--model", model],
       logPrefix: "Transcribe Job",
+      jobId,
       onComplete: async () => {
         resolve(true)
       },
@@ -49,12 +50,13 @@ export async function spawnTranscribeWorker(bookId: string, model: string): Prom
   })
 }
 
-export async function spawnVectorizeWorker(bookId: string): Promise<boolean> {
+export async function spawnVectorizeWorker(bookId: string, jobId?: string): Promise<boolean> {
   return new Promise((resolve, reject) => {
     spawnWorker({
       workerScript: "vectorize.ts",
       args: ["--book-id", bookId],
       logPrefix: "Vectorize Job",
+      jobId,
       onComplete: async () => {
         resolve(true)
       },

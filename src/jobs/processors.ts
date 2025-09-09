@@ -7,7 +7,7 @@ import {
 } from "./shared/book-operations"
 import { spawnDownloadWorker, spawnTranscribeWorker, spawnVectorizeWorker } from "./shared/worker-utils"
 
-export async function executeSetupBookJob(data: unknown): Promise<unknown> {
+export async function executeSetupBookJob(data: unknown, jobId?: string): Promise<unknown> {
   const { bookId, model, stages } = data as { bookId: string; model: string; stages: SetupBookStage[] }
 
   if (!bookId || !model) {
@@ -37,7 +37,7 @@ export async function executeSetupBookJob(data: unknown): Promise<unknown> {
   if (stages.includes(SetupBookStage.Transcribe)) {
     try {
       await updateStageProgress(bookId, "transcribe", model, { status: "running", startedAt: new Date() })
-      await spawnTranscribeWorker(bookId, model)
+      await spawnTranscribeWorker(bookId, model, jobId)
       await updateStageProgress(bookId, "transcribe", model, { status: "completed", completedAt: new Date() })
     } catch (error) {
       await updateStageProgress(bookId, "transcribe", model, { status: "failed" })
@@ -49,7 +49,7 @@ export async function executeSetupBookJob(data: unknown): Promise<unknown> {
   if (stages.includes(SetupBookStage.Vectorize)) {
     try {
       await updateStageProgress(bookId, "vectorize", model, { status: "running", startedAt: new Date() })
-      await spawnVectorizeWorker(bookId)
+      await spawnVectorizeWorker(bookId, jobId)
       await updateStageProgress(bookId, "vectorize", model, { status: "completed", completedAt: new Date() })
     } catch (error) {
       await updateStageProgress(bookId, "vectorize", model, { status: "failed" })

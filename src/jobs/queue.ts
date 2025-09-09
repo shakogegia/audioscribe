@@ -204,11 +204,37 @@ export class JobQueue {
       where: { id: jobId },
     })
     if (!job) return false
-    await prisma.job.update({ where: { id: jobId }, data: { status: "cancelled" } })
 
-    // cancel any running processors
+    // Kill the running process using stored PID
+    if (job.pid) {
+      try {
+        process.kill(job.pid, 'SIGTERM')
+        console.log(`Killed process ${job.pid} for job ${jobId}`)
+      } catch (error) {
+        console.error(`Failed to kill process ${job.pid} for job ${jobId}:`, error)
+        // Process might already be dead, continue with job deletion
+      }
+    }
 
-    return true
+    // Also try the in-memory process map as fallback
+    const { killJobProcess } = await import("@/jobs/utils")
+    const memoryProcessKilled = killJobProcess(jobId)
+    
+    if (memoryProcessKilled) {
+      console.log(`Killed in-memory process for job ${jobId}`)
+    }
+
+    // Delete the job record from database
+    try {
+      await prisma.job.delete({
+        where: { id: jobId },
+      })
+      console.log(`Cancelled and deleted job ${jobId}`)
+      return true
+    } catch (error) {
+      console.error(`Failed to delete job ${jobId}:`, error)
+      return false
+    }
   }
 }
 

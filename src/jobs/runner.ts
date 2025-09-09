@@ -27,7 +27,7 @@ export interface Job {
 }
 
 export interface JobProcessor {
-  (data: JobData): Promise<unknown>
+  (data: JobData, jobId?: string): Promise<unknown>
 }
 
 export class JobRunner {
@@ -45,8 +45,8 @@ export class JobRunner {
   }
 
   private createSetupBookProcessor(): JobProcessor {
-    return async (data: JobData) => {
-      return executeSetupBookJob(data)
+    return async (data: JobData, jobId?: string) => {
+      return executeSetupBookJob(data, jobId)
     }
   }
 
@@ -117,7 +117,7 @@ export class JobRunner {
 
     try {
       const data = JSON.parse(job.data)
-      const result = await processor(data)
+      const result = await processor(data, job.id)
 
       await prisma.job.update({
         where: { id: job.id },

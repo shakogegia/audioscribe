@@ -191,7 +191,7 @@ export default function JobsListPage() {
                     {job.completedAt ? formatDate(job.completedAt) : job.failedAt ? formatDate(job.failedAt) : "-"}
                   </TableCell>
                   <TableCell>
-                    {job.status === "running" && job.type === "pending" && (
+                    {(job.status === "running" || job.status === "pending") && (
                       <ConfirmDialog
                         title="Cancel Job"
                         description="Are you sure you want to cancel this job?"
