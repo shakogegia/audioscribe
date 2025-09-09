@@ -1,5 +1,4 @@
 "use client"
-import { Markdown } from "@/components/markdown"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { TranscriptSegment } from "@prisma/client"
 import { forwardRef, memo, Ref, useMemo } from "react"
@@ -48,15 +47,16 @@ function TranscriptContent({ segments, onTimeClick }: TranscriptProps, ref: Ref<
     let groupStartTime = 0
 
     for (const segment of sortedSegments) {
-      // If this is the first segment or if it's within the merge duration of the group start
-      if (currentGroup.length === 0 || segment.startTime - groupStartTime <= mergeDuration) {
-        if (currentGroup.length === 0) {
-          groupStartTime = segment.startTime
-        }
+      // If this is the first segment, always add it
+      if (currentGroup.length === 0) {
+        groupStartTime = segment.startTime
         currentGroup.push(segment)
       } else {
-        // Process the current group and start a new one
-        if (currentGroup.length > 0) {
+        // Check if adding this segment would exceed the merge duration
+        const wouldExceedDuration = segment.startTime - groupStartTime > mergeDuration
+
+        if (wouldExceedDuration) {
+          // Process the current group and start a new one
           const mergedText = currentGroup.map(s => s.text).join(" ")
           const groupEndTime = currentGroup[currentGroup.length - 1].endTime
 
@@ -65,11 +65,14 @@ function TranscriptContent({ segments, onTimeClick }: TranscriptProps, ref: Ref<
             endTime: groupEndTime,
             text: mergedText,
           })
-        }
 
-        // Start new group with current segment
-        currentGroup = [segment]
-        groupStartTime = segment.startTime
+          // Start new group with current segment
+          currentGroup = [segment]
+          groupStartTime = segment.startTime
+        } else {
+          // Add to current group - keep building the natural text flow
+          currentGroup.push(segment)
+        }
       }
     }
 
