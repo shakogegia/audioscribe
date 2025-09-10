@@ -101,17 +101,17 @@ function TranscriptContent({ segments, onTimeClick }: TranscriptProps, ref: Ref<
   }, [segments])
 
   return (
-    <ScrollArea ref={ref} className="h-[500px] border rounded-lg px-2">
-      <div className="[&_.active-line]:font-bold [&_.active-line]:text-blue-800 ">
-        {/* <Markdown text={text} onTimeClick={onTimeClick} /> */}
+    <ScrollArea ref={ref} className="h-[500px] border rounded-lg">
+      <div className="[&_.active-line]:font-semibold [&_.active-line]:text-neutral-800 [&_.active-line]:bg-neutral-100 [&_.active-line]:dark:bg-neutral-700 [&_.active-line]:dark:text-neutral-200">
         <div
           className={twMerge(
             "prose max-w-none prose-headings:font-semibold",
             "prose-p:py-0.5 prose-p:my-0",
             "dark:prose-invert",
-            "prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-950/20 prose-blockquote:pl-4 prose-blockquote:py-2 prose-ul:list-disc prose-ol:list-decimal prose-li:text-gray-700 dark:prose-li:text-gray-300",
+            "prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-p:text-neutral-700 dark:prose-p:text-neutral-300 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-code:text-pink-600 dark:prose-code:text-pink-400 prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700 prose-blockquote:border-l-blue-500 prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-950/20 prose-blockquote:pl-4 prose-blockquote:py-2 prose-ul:list-disc prose-ol:list-decimal prose-li:text-gray-700 dark:prose-li:text-gray-300",
             "text-sm",
-            "[&_.timestamp-button]:flex [&_.timestamp-button]:cursor-pointer"
+            "[&_.timestamp-button]:flex [&_.timestamp-button]:cursor-pointer",
+            "prose-p:px-2 prose-p:hover:bg-neutral-100 prose-p:hover:dark:bg-neutral-800"
           )}
         >
           <div

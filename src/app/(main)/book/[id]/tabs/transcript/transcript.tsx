@@ -6,7 +6,7 @@ import { usePlayerStore } from "@/stores/player"
 import { SearchResult } from "@/types/api"
 import { TranscriptSegment } from "@prisma/client"
 import { Captions, CaptionsOff, Scroll } from "lucide-react"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import TranscriptContent from "./transcript-content"
 
 interface TranscriptProps {
@@ -14,6 +14,8 @@ interface TranscriptProps {
   book: SearchResult
   play?: (time?: number) => void
 }
+
+const mergeDuration = 10 * 1000 // 40 seconds in milliseconds
 
 function findTranscriptSegment(transcriptSegments: TranscriptSegment[], time: number): TranscriptSegment | null {
   return transcriptSegments.find(segment => time >= segment.startTime && time < segment.endTime) ?? null
@@ -26,16 +28,76 @@ export function Transcript({ play }: TranscriptProps) {
   const currentTime = usePlayerStore(state => state.currentTime)
   const [followCurrentTime, setFollowCurrentTime] = useState(false)
 
+  const mergedSegments = useMemo<TranscriptSegment[]>(() => {
+    // Sort segments by start time to ensure proper order
+    const sortedSegments: TranscriptSegment[] = [...segments].sort((a, b) => a.startTime - b.startTime)
+
+    // Merge segments within mergeDuration windows
+    const mergedSegments: TranscriptSegment[] = []
+
+    let currentGroup: TranscriptSegment[] = []
+    let groupStartTime = 0
+
+    for (const segment of sortedSegments) {
+      // If this is the first segment, always add it
+      if (currentGroup.length === 0) {
+        groupStartTime = segment.startTime
+        currentGroup.push(segment)
+      } else {
+        // Check if adding this segment would exceed the merge duration
+        const wouldExceedDuration = segment.startTime - groupStartTime > mergeDuration
+
+        if (wouldExceedDuration) {
+          // Process the current group and start a new one
+          const mergedText = currentGroup.map(s => s.text).join(" ")
+          const groupEndTime = currentGroup[currentGroup.length - 1].endTime
+
+          mergedSegments.push({
+            id: 0,
+            bookId: "",
+            fileIno: "",
+            model: "",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            startTime: groupStartTime,
+            endTime: groupEndTime,
+            text: mergedText,
+          })
+
+          // Start new group with current segment
+          currentGroup = [segment]
+          groupStartTime = segment.startTime
+        } else {
+          // Add to current group - keep building the natural text flow
+          currentGroup.push(segment)
+        }
+      }
+    }
+
+    // Don't forget the last group
+    if (currentGroup.length > 0) {
+      const mergedText = currentGroup.map(s => s.text).join(" ")
+      const groupEndTime = currentGroup[currentGroup.length - 1].endTime
+
+      mergedSegments.push({
+        startTime: groupStartTime,
+        endTime: groupEndTime,
+        text: mergedText,
+      })
+    }
+
+    return mergedSegments
+  }, [segments])
+
   useEffect(() => {
     if (scrollAreaRef.current && followCurrentTime) {
-      console.log("🚀 ~ Transcript ~ currentTime:", currentTime)
       const currentTimeInMilliseconds = currentTime * 1000
-      const transcriptSegment = findTranscriptSegment(segments, currentTimeInMilliseconds)
+      const transcriptSegment = findTranscriptSegment(mergedSegments, currentTimeInMilliseconds)
       if (transcriptSegment) {
         scrollToTime(formatTime(transcriptSegment.startTime / 1000))
       }
     }
-  }, [currentTime, segments, followCurrentTime]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentTime, mergedSegments, followCurrentTime]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function scrollToTime(time: string) {
     if (scrollAreaRef.current) {
@@ -44,7 +106,7 @@ export function Transcript({ play }: TranscriptProps) {
           .split(":")
           .reduce((acc, curr, index) => acc + parseInt(curr) * (index === 0 ? 3600 : index === 1 ? 60 : 1), 0) * 1000
 
-      const transcriptSegment = findTranscriptSegment(segments, timeInMilliseconds)
+      const transcriptSegment = findTranscriptSegment(mergedSegments, timeInMilliseconds)
 
       if (transcriptSegment) {
         const activeLines = scrollAreaRef.current.querySelectorAll("p.active-line")
@@ -58,9 +120,6 @@ export function Transcript({ play }: TranscriptProps) {
           lineP.classList.add("active-line")
         }
       }
-
-      // const transcriptSegment = transcriptSegments.find(segment => segment.startTime === time)
-      // const timeSpan = scrollAreaRef.current.querySelector(`span[data-time="${time}"]`)
     }
   }
 
