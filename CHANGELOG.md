@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.2](https://github.com/shakogegia/audioscribe/compare/0.2.1...0.2.2) (2025-09-10)
+
+
+### Bug Fixes
+
+* full transcript ui ([318fafa](https://github.com/shakogegia/audioscribe/commit/318fafa329264249f39361a3f994a3e6f0895b7f))
+* purga cache info ([533c419](https://github.com/shakogegia/audioscribe/commit/533c419e06aff3b47c645a7a16b931b1dc7fc28a))
+* search page loading ([232090b](https://github.com/shakogegia/audioscribe/commit/232090bc66517a5d7b3a09725f465044b948a662))
+* set player initial time from abs ([ab91503](https://github.com/shakogegia/audioscribe/commit/ab915036699df062c8b60faaf07f1e3b5a5f223b))
+* transcription button ui ([2c0a148](https://github.com/shakogegia/audioscribe/commit/2c0a1481eba3a38bec8fa478a69d52446dc9c6f9))
+
 ## [0.2.1](https://github.com/shakogegia/audioscribe/compare/0.2.0...0.2.1) (2025-09-10)
 
 
