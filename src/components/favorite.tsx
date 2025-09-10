@@ -12,6 +12,7 @@ type Props = {
 export default function Favorite({ id, defaultFavorite }: Props) {
   const { data, mutate } = useSWR<{ favorite: boolean }>(`/api/book/${id}/favorite`, {
     revalidateOnFocus: true,
+    refreshInterval: 0,
   })
 
   const favorite = data?.favorite ?? defaultFavorite ?? false
