@@ -1,4 +1,4 @@
-import { WhisperModel } from "@/ai/transcription/types/transription"
+import { WhisperModel } from "@/types/transript"
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"

@@ -28,27 +28,20 @@ import { useChat } from "@ai-sdk/react"
 import { CopyIcon, RefreshCcwIcon } from "lucide-react"
 import { Fragment, useState } from "react"
 import { suggestionIcons, suggestions } from "./suggestions"
+import { llmModels } from "@/utils/constants"
 
-const models = [
-  {
-    name: "GPT 4o",
-    value: "openai/gpt-4o",
-  },
-  {
-    name: "Deepseek R1",
-    value: "deepseek/deepseek-r1",
-  },
-]
+const models = llmModels.flatMap(provider => provider.models.map(model => ({ name: model, value: model })))
+const defaultModel = "gemini-2.5-pro"
 
-const ChatBotDemo = () => {
+const ChatBotDemo = ({ bookId }: { bookId: string }) => {
   const [input, setInput] = useState("")
-  const [model, setModel] = useState<string>(models[0].value)
+  const [model, setModel] = useState<string>(defaultModel)
   const { messages, sendMessage, status, regenerate } = useChat()
 
   function handleSubmit(message: PromptInputMessage) {
     if (!message.text) return
 
-    sendMessage({ text: message.text }, { body: { model: model } })
+    sendMessage({ text: message.text }, { body: { model: model, bookId } })
     setInput("")
   }
 

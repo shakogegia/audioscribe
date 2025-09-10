@@ -15,7 +15,7 @@ interface ChatProps {
 export function Chat({ bookId, play }: ChatProps) {
   return (
     <div>
-      <ChatBotDemo />
+      <ChatBotDemo bookId={bookId} />
     </div>
   )
 }

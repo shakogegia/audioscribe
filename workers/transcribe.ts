@@ -1,4 +1,4 @@
-import { WhisperModel } from "@/ai/transcription/types/transription"
+import { WhisperModel } from "@/types/transript"
 import { getBookFiles } from "@/lib/audiobookshelf"
 import { folders } from "@/lib/folders"
 import { prisma } from "@/lib/prisma"

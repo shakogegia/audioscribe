@@ -1,8 +1,8 @@
 import { generateBookmarkSuggestions } from "@/ai/prompts/bookmark"
 import { provider } from "@/ai/providers"
+import { getTranscriptByOffset } from "@/lib/transcript"
 import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
-import { prisma } from "@/lib/prisma"
 import { millisecondsToTime } from "@/utils/time"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -29,22 +29,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const ai = await provider(config.provider, config.model)
 
-    const timeInMilliseconds = time * 1000
-    const offsetInMilliseconds = offset * 1000
-
-    const startTimeInMilliseconds = timeInMilliseconds - offsetInMilliseconds
-    const endTimeInMilliseconds = timeInMilliseconds + offsetInMilliseconds
-
-    const segments = await prisma.transcriptSegment.findMany({
-      where: {
-        // TODO: model
-        bookId,
-        AND: [{ startTime: { gte: startTimeInMilliseconds } }, { endTime: { lte: endTimeInMilliseconds } }],
-      },
-      orderBy: {
-        startTime: "asc",
-      },
-    })
+    const segments = await getTranscriptByOffset({ bookId, time, offset })
 
     const transcript = segments.map(s => `${millisecondsToTime(s.startTime)} ${s.text}`).join("\n\n")
 
@@ -53,7 +38,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       context: {
         bookTitle: book?.title ?? "",
         authors: book?.authors ?? [],
-        time: millisecondsToTime(timeInMilliseconds),
+        time: millisecondsToTime(time * 1000),
       },
     })
 
