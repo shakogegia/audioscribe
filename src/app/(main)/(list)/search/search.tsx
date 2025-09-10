@@ -38,7 +38,7 @@ const formSchema = z.object({
   libraryId: z.string(),
 })
 
-function SearchPageContent({ libraries }: Props) {
+export function Search({ libraries }: Props) {
   const [searchQuery, setSearchQuery] = useQueryState("q")
   const [libraryId, setLibraryId] = useQueryState("libraryId")
 
@@ -140,32 +140,5 @@ function SearchPageContent({ libraries }: Props) {
         {data && data.length > 0 && <BookList books={data} />}
       </div>
     </div>
-  )
-}
-
-export function Search({ libraries }: Props) {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex flex-col items-center gap-8 w-full min-h-full py-10">
-          <Hero
-            title="Audiobook Search"
-            description={["Search for audiobooks in your library.", "Use book titles to search."]}
-            icon={
-              <GradientIcon
-                gradient="from-blue-600 to-pink-400"
-                icon={<SearchIcon className="w-10 h-10 text-white" />}
-              />
-            }
-          />
-          <div>
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            <span>Loading search...</span>
-          </div>
-        </div>
-      }
-    >
-      <SearchPageContent libraries={libraries} />
-    </Suspense>
   )
 }
