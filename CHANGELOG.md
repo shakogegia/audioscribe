@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.3.0](https://github.com/shakogegia/audioscribe/compare/0.2.3...0.3.0) (2025-09-10)
+
+
+### Bug Fixes
+
+* fetching favorite book ([1a99b8d](https://github.com/shakogegia/audioscribe/commit/1a99b8d89d20e3d11d45219e0306a2eed351b4a1))
+
+
+### Features
+
+* basic ai chat ([1e0f346](https://github.com/shakogegia/audioscribe/commit/1e0f346821fbbb7d176670f331a100f316d3e051))
+
 ## [0.2.3](https://github.com/shakogegia/audioscribe/compare/0.2.2...0.2.3) (2025-09-10)
 
 
