@@ -20,7 +20,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { favorite } = (await request.json()) as { favorite?: boolean }
 
     const book = await prisma.book.findUnique({ where: { id } })
-    const newFavorite = favorite ?? !book?.favorite ?? true
+    const newFavorite = favorite ?? !(book?.favorite ?? false)
     await prisma.book.update({ where: { id }, data: { favorite: newFavorite } })
 
     return NextResponse.json({ favorite: newFavorite }, { status: 200 })

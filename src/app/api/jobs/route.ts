@@ -1,5 +1,5 @@
+import { jobQueue } from "@/jobs/queue"
 import { NextRequest, NextResponse } from "next/server"
-import { jobQueue, setupBook } from "@/jobs/queue"
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 }
 
 // TODO: remove this
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // const body = await request.json()
     // const { type, data, options } = body

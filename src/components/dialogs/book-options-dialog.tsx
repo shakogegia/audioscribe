@@ -1,16 +1,17 @@
 import { WhisperModel } from "@/ai/transcription/types/transription"
+import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -21,17 +22,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SearchResult } from "@/types/api"
 import { whisperModels } from "@/utils/constants"
+import { TranscriptSegment } from "@prisma/client"
 import axios from "axios"
 import { AudioLinesIcon, FileDownIcon, FileUpIcon, InfoIcon, Loader2, TrashIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { TranscriptSegment } from "@prisma/client"
-import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 
 type BookOptionsProps = {
   title?: string

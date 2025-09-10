@@ -1,15 +1,15 @@
 import { SearchResult } from "@/types/api"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Separator } from "@/components/ui/separator"
-import { CircleCheckIcon, CircleDashedIcon, InfoIcon, Loader2Icon, CircleXIcon, RefreshCcwIcon } from "lucide-react"
-import useSWR from "swr"
-import { Book, BookSetupProgress } from "@prisma/client"
-import { useEffect } from "react"
-import { twMerge } from "tailwind-merge"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import { Book, BookSetupProgress } from "@prisma/client"
 import axios from "axios"
+import { CircleCheckIcon, CircleDashedIcon, CircleXIcon, InfoIcon, Loader2Icon, RefreshCcwIcon } from "lucide-react"
+import { useEffect } from "react"
+import { toast } from "sonner"
+import useSWR from "swr"
+import { twMerge } from "tailwind-merge"
 
 type ProcessingInfoProps = {
   book: SearchResult
@@ -26,7 +26,7 @@ type ProgressResponse = {
 export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
   const { data } = useSWR<ProgressResponse>(`/api/book/${book.id}/setup/progress`)
 
-  const allCompleted = data?.stages.every(s => s.status === "completed")
+  // const allCompleted = data?.stages.every(s => s.status === "completed")
   const hasFailed = data?.stages.some(s => s.status === "failed")
 
   // TODO: use setup true

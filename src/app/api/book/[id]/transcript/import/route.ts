@@ -1,11 +1,5 @@
 import { setupBook } from "@/jobs/queue"
-import {
-  resetBook,
-  resetBookStages,
-  SetupBookStage,
-  updateBookStatus,
-  updateStageProgress,
-} from "@/jobs/shared/book-operations"
+import { resetBook, resetBookStages, SetupBookStage, updateStageProgress } from "@/jobs/shared/book-operations"
 import { prisma } from "@/lib/prisma"
 import { Prisma, TranscriptSegment } from "@prisma/client"
 import { NextRequest, NextResponse } from "next/server"

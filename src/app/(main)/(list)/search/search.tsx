@@ -1,7 +1,7 @@
 "use client"
+import BookList from "@/components/book-list"
 import GradientIcon from "@/components/gradient-icon"
 import { Hero } from "@/components/hero"
-import Logo from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -21,11 +21,8 @@ import { useQueryState } from "nuqs"
 import { Suspense } from "react"
 import { useForm } from "react-hook-form"
 import useSWR from "swr"
-import z from "zod"
-import SearchResults from "./search-results"
-import div from "./status"
-import BookList from "@/components/book-list"
 import { twMerge } from "tailwind-merge"
+import z from "zod"
 
 type Props = {
   libraries: Library[]
