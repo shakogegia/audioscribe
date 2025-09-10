@@ -31,64 +31,7 @@ function timeStampClasses() {
 
 function TranscriptContent({ segments, onTimeClick }: TranscriptProps, ref: Ref<HTMLDivElement>) {
   const text = useMemo(() => {
-    const mergeDuration = 10 * 1000 // 40 seconds in milliseconds
-
-    // Sort segments by start time to ensure proper order
-    const sortedSegments = [...segments].sort((a, b) => a.startTime - b.startTime)
-
-    // Merge segments within mergeDuration windows
-    const mergedSegments: Array<{
-      startTime: number
-      endTime: number
-      text: string
-    }> = []
-
-    let currentGroup: TranscriptSegment[] = []
-    let groupStartTime = 0
-
-    for (const segment of sortedSegments) {
-      // If this is the first segment, always add it
-      if (currentGroup.length === 0) {
-        groupStartTime = segment.startTime
-        currentGroup.push(segment)
-      } else {
-        // Check if adding this segment would exceed the merge duration
-        const wouldExceedDuration = segment.startTime - groupStartTime > mergeDuration
-
-        if (wouldExceedDuration) {
-          // Process the current group and start a new one
-          const mergedText = currentGroup.map(s => s.text).join(" ")
-          const groupEndTime = currentGroup[currentGroup.length - 1].endTime
-
-          mergedSegments.push({
-            startTime: groupStartTime,
-            endTime: groupEndTime,
-            text: mergedText,
-          })
-
-          // Start new group with current segment
-          currentGroup = [segment]
-          groupStartTime = segment.startTime
-        } else {
-          // Add to current group - keep building the natural text flow
-          currentGroup.push(segment)
-        }
-      }
-    }
-
-    // Don't forget the last group
-    if (currentGroup.length > 0) {
-      const mergedText = currentGroup.map(s => s.text).join(" ")
-      const groupEndTime = currentGroup[currentGroup.length - 1].endTime
-
-      mergedSegments.push({
-        startTime: groupStartTime,
-        endTime: groupEndTime,
-        text: mergedText,
-      })
-    }
-
-    return mergedSegments
+    return segments
       .map(
         segment =>
           `<p ${dataAttributes(

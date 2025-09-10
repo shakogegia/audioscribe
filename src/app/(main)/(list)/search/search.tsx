@@ -16,6 +16,7 @@ import { SearchResult } from "@/types/api"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, Search as SearchIcon } from "lucide-react"
 import { useQueryState } from "nuqs"
+import { Suspense } from "react"
 import { useForm } from "react-hook-form"
 import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
@@ -35,7 +36,7 @@ const formSchema = z.object({
   libraryId: z.string(),
 })
 
-export function Search({ libraries }: Props) {
+function SearchContent({ libraries }: Props) {
   const [searchQuery, setSearchQuery] = useQueryState("q")
   const [libraryId, setLibraryId] = useQueryState("libraryId")
 
@@ -137,5 +138,21 @@ export function Search({ libraries }: Props) {
         {data && data.length > 0 && <BookList books={data} />}
       </div>
     </div>
+  )
+}
+
+// suspense fallback
+function SearchFallback() {
+  return (
+    <div className="flex flex-col items-center gap-8 w-full">
+      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+    </div>
+  )
+}
+export function Search({ libraries }: Props) {
+  return (
+    <Suspense fallback={<SearchFallback />}>
+      <SearchContent libraries={libraries} />
+    </Suspense>
   )
 }

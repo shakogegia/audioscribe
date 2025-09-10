@@ -80,6 +80,12 @@ export function Transcript({ play }: TranscriptProps) {
       const groupEndTime = currentGroup[currentGroup.length - 1].endTime
 
       mergedSegments.push({
+        id: 0,
+        bookId: "",
+        fileIno: "",
+        model: "",
+        createdAt: new Date(),
+        updatedAt: new Date(),
         startTime: groupStartTime,
         endTime: groupEndTime,
         text: mergedText,
@@ -136,11 +142,12 @@ export function Transcript({ play }: TranscriptProps) {
   )
 
   return (
-    <div className="flex flex-col gap-4 mt-2 mb-6">
+    <div className="flex flex-col gap-2 mb-6">
       <div className="flex items-center gap-2">
         <Button
           variant={followCurrentTime ? "secondary" : "outline"}
           onClick={() => setFollowCurrentTime(!followCurrentTime)}
+          size="sm"
         >
           {followCurrentTime ? <CaptionsOff className="w-4 h-4" /> : <Captions className="w-4 h-4" />}
           {followCurrentTime ? "Stop Following Player" : "Follow Player"}
@@ -152,7 +159,7 @@ export function Transcript({ play }: TranscriptProps) {
         </Button>
       </div>
 
-      <TranscriptContent segments={segments} onTimeClick={onTimeClick} ref={scrollAreaRef} />
+      <TranscriptContent segments={mergedSegments} onTimeClick={onTimeClick} ref={scrollAreaRef} />
     </div>
   )
 }
