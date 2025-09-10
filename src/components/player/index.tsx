@@ -121,7 +121,6 @@ function PlayerComponent({ book, files, className, controls, defaultTime }: Play
   }, [pendingSeekTime, isPlaying])
 
   useMount(() => {
-    console.log("🚀 ~ PlayerComponent ~ defaultTime:", defaultTime)
     if (defaultTime) {
       seekToTime(defaultTime)
     }
