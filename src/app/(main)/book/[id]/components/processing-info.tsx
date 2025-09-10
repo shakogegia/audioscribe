@@ -98,9 +98,9 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
           ) : (
             <>
               <p className="text-sm font-medium">Steps to process book:</p>
-              <div className="[&_div]:border-transparent border rounded-lg">
+              <div className="[&_div]:border-transparent border rounded-lg overflow-hidden">
                 <Stage
-                  title="Step 1: Download book"
+                  title="Step 1: Download"
                   className="rounded-b-none"
                   isRunning={runningStage === "download"}
                   isCompleted={completedStages?.some(s => s.stage === "download") ?? false}
@@ -112,7 +112,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                 </Stage>
                 <Separator />
                 <Stage
-                  title="Step 2: Transcript book"
+                  title="Step 2: Transcript"
                   className="rounded-none"
                   isRunning={runningStage === "transcribe"}
                   isCompleted={completedStages?.some(s => s.stage === "transcribe") ?? false}
@@ -127,7 +127,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                 </Stage>
                 <Separator />
                 <Stage
-                  title="Step 3: Vectorize book"
+                  title="Step 3: Vectorize"
                   className="rounded-t-none"
                   isRunning={runningStage === "vectorize"}
                   isCompleted={completedStages?.some(s => s.stage === "vectorize") ?? false}

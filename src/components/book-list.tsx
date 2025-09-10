@@ -12,7 +12,10 @@ type Props = {
   books: SearchResult[]
 }
 
-const STAGES: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+type Stage = "pending" | "downloading" | "transcribing" | "vectorizing" | "completed" | "failed"
+type StageVariant = "default" | "secondary" | "destructive" | "outline"
+
+const STAGES: Record<Stage, { variant: StageVariant; label: string }> = {
   pending: { variant: "outline", label: "Pending" },
   downloading: { variant: "outline", label: "Downloading" },
   transcribing: { variant: "outline", label: "Transcribing" },
@@ -40,6 +43,8 @@ export default function BookList({ books }: Props) {
           {/* {book.progress && (
             <Badge variant={STAGES[book.progress.stage].variant}>{STAGES[book.progress.stage].label}</Badge>
           )} */}
+
+          {book.setup && <Badge variant={STAGES.completed.variant}>{STAGES.completed.label}</Badge>}
 
           <Badge variant="secondary">{formatDuration(book.duration)}</Badge>
         </div>

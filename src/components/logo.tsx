@@ -8,7 +8,7 @@ export default function Logo({ size = 128 }: { size?: number }) {
   return (
     <Image
       suppressHydrationWarning
-      src={`${src}?v=${Date.now()}`}
+      src={src}
       alt="AudioScribe logo"
       width={size}
       height={size}
