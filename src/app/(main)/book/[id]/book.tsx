@@ -44,7 +44,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
   const showProcessingInfo = !book.setup
 
   return (
-    <div className="w-full min-h-full flex flex-col items-center gap-8 mb-10 px-4">
+    <div className="w-full min-h-full flex flex-col items-center gap-8 my-10 px-4">
       <BookInfo book={book} />
 
       <div className="w-full max-w-xl mx-auto flex flex-col gap-8">
