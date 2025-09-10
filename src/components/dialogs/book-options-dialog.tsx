@@ -148,9 +148,6 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{title || "Setup book"}</DialogTitle>
-            <DialogDescription>
-              This will download the book locally and starts the transcription process.
-            </DialogDescription>
           </DialogHeader>
 
           <Tabs defaultValue={activeTab} onValueChange={value => setActiveTab(value as BookOptionTab)}>

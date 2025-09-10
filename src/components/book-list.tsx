@@ -46,6 +46,8 @@ export default function BookList({ books }: Props) {
 
           {book.setup && <Badge variant={STAGES.completed.variant}>{STAGES.completed.label}</Badge>}
 
+          {book.model && <Badge variant="secondary">{book.model}</Badge>}
+
           <Badge variant="secondary">{formatDuration(book.duration)}</Badge>
         </div>
       </div>
