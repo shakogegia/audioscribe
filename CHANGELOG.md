@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3](https://github.com/shakogegia/audioscribe/compare/0.2.2...0.2.3) (2025-09-10)
+
+
+### Bug Fixes
+
+* build errors ([5ce3404](https://github.com/shakogegia/audioscribe/commit/5ce3404c50c7946a8dcc0f6a7b2392f9e77ec997))
+* remove console log ([18d94a2](https://github.com/shakogegia/audioscribe/commit/18d94a2c9232b2a0562b61e8e29b32c8cbe014ef))
+
 ## [0.2.2](https://github.com/shakogegia/audioscribe/compare/0.2.1...0.2.2) (2025-09-10)
 
 
