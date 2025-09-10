@@ -21,19 +21,21 @@ import { usePlayerStore } from "@/stores/player"
 import useBookmarksStore from "@/stores/bookmarks"
 import { Captions } from "./captions"
 import { useTranscript } from "@/hooks/use-transcript"
+import { useMount } from "react-use"
 
 interface PlayerProps {
   book: SearchResult
   files: AudioFile[]
   className?: string
   controls: "full" | "compact"
+  defaultTime?: number
 }
 
 export interface PlayerRef {
   play: (time?: number) => void
 }
 
-function PlayerComponent({ book, files, className, controls }: PlayerProps, ref: Ref<PlayerRef>) {
+function PlayerComponent({ book, files, className, controls, defaultTime }: PlayerProps, ref: Ref<PlayerRef>) {
   const { segments } = useTranscript()
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentFileIndex, setCurrentFileIndex] = useState(0)
@@ -117,6 +119,13 @@ function PlayerComponent({ book, files, className, controls }: PlayerProps, ref:
       audio.removeEventListener("canplay", handleCanPlay)
     }
   }, [pendingSeekTime, isPlaying])
+
+  useMount(() => {
+    console.log("🚀 ~ PlayerComponent ~ defaultTime:", defaultTime)
+    if (defaultTime) {
+      seekToTime(defaultTime)
+    }
+  })
 
   // Audio event handlers
   useEffect(() => {

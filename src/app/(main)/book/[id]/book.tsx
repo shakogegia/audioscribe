@@ -54,7 +54,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
 
         {!showProcessingInfo && (
           <>
-            <Player book={book} files={files} ref={playerRef} controls="full" />
+            <Player book={book} files={files} ref={playerRef} controls="full" defaultTime={book.currentTime} />
 
             <Tabs defaultValue={activeTab} onValueChange={value => setActiveTab(value as BookTab)}>
               <TabsList className="self-center">
