@@ -138,7 +138,10 @@ export function Transcript({ play }: TranscriptProps) {
   return (
     <div className="flex flex-col gap-4 mt-2 mb-6">
       <div className="flex items-center gap-2">
-        <Button variant="outline" onClick={() => setFollowCurrentTime(!followCurrentTime)}>
+        <Button
+          variant={followCurrentTime ? "secondary" : "outline"}
+          onClick={() => setFollowCurrentTime(!followCurrentTime)}
+        >
           {followCurrentTime ? <CaptionsOff className="w-4 h-4" /> : <Captions className="w-4 h-4" />}
           {followCurrentTime ? "Stop Following Player" : "Follow Player"}
         </Button>
