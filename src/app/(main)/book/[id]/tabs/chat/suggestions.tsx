@@ -1,15 +1,23 @@
-import { BookmarkIcon, BookmarkPlusIcon, BookOpenIcon, TimerResetIcon } from "lucide-react"
+import { BookmarkIcon, UserIcon, BookOpenIcon, TimerIcon, MessageSquareQuoteIcon, MapIcon } from "lucide-react"
 
 export const suggestionIcons: React.ReactNode[] = [
-  <TimerResetIcon key="timer-reset" />,
-  <BookmarkIcon key="bookmark" />,
-  <BookmarkPlusIcon key="bookmark-plus" />,
+  <TimerIcon key="timer" />,
+  <UserIcon key="user" />,
   <BookOpenIcon key="book-open" />,
+  <MessageSquareQuoteIcon key="quote" />,
+  <MapIcon key="map" />,
+  <BookmarkIcon key="bookmark" />,
+  <BookmarkIcon key="bookmark" />,
+  <BookmarkIcon key="bookmark" />,
 ]
 
 export const suggestions = [
-  "Recap the last 10 minutes",
-  "What happened in the last chapter?",
-  "What's coming up in the next chapter?",
-  "What is this book about?",
+  "Summerize the last 10 minutes",
+  "Summerize the current chapter",
+  "Summerize the last chapter",
+  "Who are the main characters?",
+  "Summarize what just happened",
+  "What are the key themes so far?",
+  "Explain what I just heard",
+  "What's the significance of this scene?",
 ]

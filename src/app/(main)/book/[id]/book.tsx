@@ -13,6 +13,7 @@ import Bookmarks from "./tabs/bookmarks/bookmarks"
 import Chapters from "./tabs/chapters/chapters"
 import { Chat } from "./tabs/chat/chat"
 import { Transcript } from "./tabs/transcript/transcript"
+import useBookmarksStore from "@/stores/bookmarks"
 
 interface BookProps {
   id: string
@@ -34,11 +35,13 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
     parse: parseAsStringEnum(Object.values(BookTab)).withDefault(BookTab.Bookmarks).parse,
   })
   const playerRef = useRef<PlayerRef>(null)
+  const setBookmarks = useBookmarksStore(state => state.setBookmarks)
 
   const { fetchTranscript } = useTranscript()
 
   useMount(() => {
     fetchTranscript(id)
+    setBookmarks(book.bookmarks || [])
   })
 
   const showProcessingInfo = !book.setup

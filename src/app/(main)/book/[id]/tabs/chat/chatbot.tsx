@@ -29,24 +29,68 @@ import { CopyIcon, RefreshCcwIcon } from "lucide-react"
 import { Fragment, useState } from "react"
 import { suggestionIcons, suggestions } from "./suggestions"
 import { llmModels } from "@/utils/constants"
+import { usePlayerStore } from "@/stores/player"
+import { SearchResult } from "@/types/api"
 
 const models = llmModels.flatMap(provider => provider.models.map(model => ({ name: model, value: model })))
 const defaultModel = "gemini-2.5-pro"
 
-const ChatBotDemo = ({ bookId }: { bookId: string }) => {
+// Parse time stamps from user messages (e.g., "at 15:30", "around 1:23:45", "at 2:30:15")
+function parseTimeFromMessage(message: string): number | null {
+  // Match patterns like "at 15:30", "around 1:23:45", etc.
+  const timeRegex = /(?:at|around|about)\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/i
+  const match = message.match(timeRegex)
+
+  if (match) {
+    const hours = parseInt(match[1], 10) || 0
+    const minutes = parseInt(match[2], 10) || 0
+    const seconds = parseInt(match[3], 10) || 0
+
+    // Convert to total seconds
+    return hours * 3600 + minutes * 60 + seconds
+  }
+
+  return null
+}
+
+type RequestBody = {
+  model: string
+  bookId: string
+  time?: number
+}
+
+type ChatBotDemoProps = {
+  bookId: string
+  book: SearchResult
+  play?: (time?: number) => void
+}
+
+const ChatBotDemo = ({ bookId }: ChatBotDemoProps) => {
   const [input, setInput] = useState("")
   const [model, setModel] = useState<string>(defaultModel)
   const { messages, sendMessage, status, regenerate } = useChat()
+  const currentTime = usePlayerStore(state => state.currentTime)
 
   function handleSubmit(message: PromptInputMessage) {
     if (!message.text) return
 
-    sendMessage({ text: message.text }, { body: { model: model, bookId } })
+    // Parse time from message if present (e.g., "at 15:30", "around 1:23:45")
+    const parsedTime = parseTimeFromMessage(message.text)
+    const requestBody: RequestBody = { model: model, bookId, time: currentTime }
+
+    if (parsedTime !== null) {
+      requestBody.time = parsedTime
+    }
+
+    requestBody.time = currentTime
+
+    sendMessage({ text: message.text }, { body: requestBody })
     setInput("")
   }
 
   function onSuggestionClick(suggestion: string) {
-    sendMessage({ text: suggestion })
+    const requestBody: RequestBody = { model: model, bookId, time: currentTime }
+    sendMessage({ text: suggestion }, { body: requestBody })
   }
 
   return (

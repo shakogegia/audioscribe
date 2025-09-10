@@ -1,9 +1,16 @@
 import { convertToModelMessages, LanguageModel, streamText, StreamTextResult, ToolSet, type UIMessage } from "ai"
+import { createAudiobookChatPrompt, type ChatContext } from "@/ai/prompts/chat"
 
-export async function stream(model: LanguageModel, messages: UIMessage[]): Promise<StreamTextResult<ToolSet, never>> {
+export async function stream(
+  model: LanguageModel, 
+  messages: UIMessage[], 
+  bookContext: ChatContext
+): Promise<StreamTextResult<ToolSet, never>> {
+  const systemPrompt = await createAudiobookChatPrompt(bookContext)
+
   return streamText({
     model: model,
-    system: "You are a helpful assistant.",
+    system: systemPrompt,
     messages: convertToModelMessages(messages),
   })
 }

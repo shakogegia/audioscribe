@@ -12,10 +12,10 @@ interface ChatProps {
   play?: (time?: number) => void
 }
 
-export function Chat({ bookId, play }: ChatProps) {
+export function Chat({ bookId, book, play }: ChatProps) {
   return (
     <div>
-      <ChatBotDemo bookId={bookId} />
+      <ChatBotDemo bookId={bookId} book={book} play={play} />
     </div>
   )
 }
