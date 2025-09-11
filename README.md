@@ -14,7 +14,8 @@ A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps
 
 See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 
-![Bookmark Editing](demo/screenshots/edit.png)
+<img width="1489" height="1237" alt="screenshot" src="https://github.com/user-attachments/assets/bb617e0a-310c-4235-9d7b-49bf59cd6506" />
+
 
 ## Features
 
