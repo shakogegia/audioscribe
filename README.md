@@ -92,18 +92,6 @@ docker-compose up -d
 
 </details>
 
-## Demo
-
-<details>
-<summary>Screenshots</summary>
-
-![Book Search](demo/screenshots/search.png)
-![Book Management](demo/screenshots/book.png)
-![ASR Transcription](demo/screenshots/asr.png)
-![Audiobookshelf](demo/screenshots/audiobookshelf.png)
-
-</details>
-
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
