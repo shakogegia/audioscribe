@@ -12,8 +12,7 @@ A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that lever
 
 See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 
-<img width="1489" height="1237" alt="screenshot" src="https://github.com/user-attachments/assets/bb617e0a-310c-4235-9d7b-49bf59cd6506" />
-
+<img alt="screenshot" src="https://github.com/user-attachments/assets/bb617e0a-310c-4235-9d7b-49bf59cd6506" />
 
 ## Features
 
