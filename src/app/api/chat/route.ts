@@ -1,27 +1,28 @@
 import { stream } from "@/ai/helpers/stream"
 import { provider } from "@/ai/providers"
-import { getTranscriptRangeByTime } from "@/lib/transcript"
-import { GeminiModel } from "@/ai/types/ai"
+import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
+import { getTranscriptRangeByTime } from "@/lib/transcript"
 import { UIMessage } from "ai"
 
 interface ChatRequestBody {
   messages: UIMessage[]
   bookId: string
-  model: GeminiModel
+  model: AiModel
+  provider: AiProvider
   time?: number // Optional: specific time to get context for, defaults to book.currentTime
 }
 
 export async function POST(request: Request) {
   const requestBody = await request.json()
-  const { messages, bookId, model, time } = requestBody as ChatRequestBody
+  const { messages, bookId, time, ...body } = requestBody as ChatRequestBody
 
   if (!bookId) {
     return new Response(JSON.stringify({ error: "bookId is required" }), { status: 400 })
   }
 
-  if (!model) {
-    return new Response(JSON.stringify({ error: "model is required" }), { status: 400 })
+  if (!body.model || !body.provider) {
+    return new Response(JSON.stringify({ error: "model and provider are required" }), { status: 400 })
   }
 
   const book = await getBook(bookId)
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
     after: contextWindow.after || 0,
   })
 
-  const ai = await provider("google", model)
+  const ai = await provider(body.provider, body.model)
 
   // Build book context from available data
   const bookContext = {

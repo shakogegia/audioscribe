@@ -24,16 +24,14 @@ import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-e
 import { Response } from "@/components/ai-elements/response"
 import { Source, Sources, SourcesContent, SourcesTrigger } from "@/components/ai-elements/sources"
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion"
-import { useChat } from "@ai-sdk/react"
-import { CopyIcon, RefreshCcwIcon } from "lucide-react"
-import { Fragment, useState } from "react"
-import { suggestionIcons, suggestions } from "./suggestions"
-import { llmModels } from "@/utils/constants"
+import { SelectGroup, SelectLabel } from "@/components/ui/select"
+import { useLLMModels } from "@/hooks/use-llm-models"
 import { usePlayerStore } from "@/stores/player"
 import { SearchResult } from "@/types/api"
-
-const models = llmModels.flatMap(provider => provider.models.map(model => ({ name: model, value: model })))
-const defaultModel = "gemini-2.5-pro"
+import { useChat } from "@ai-sdk/react"
+import { CopyIcon, Loader2Icon, RefreshCcwIcon } from "lucide-react"
+import { Fragment, useState } from "react"
+import { suggestionIcons, suggestions } from "./suggestions"
 
 // Parse time stamps from user messages (e.g., "at 15:30", "around 1:23:45", "at 2:30:15")
 function parseTimeFromMessage(message: string): number | null {
@@ -55,6 +53,7 @@ function parseTimeFromMessage(message: string): number | null {
 
 type RequestBody = {
   model: string
+  provider: string
   bookId: string
   time?: number
 }
@@ -67,16 +66,16 @@ type ChatBotDemoProps = {
 
 const ChatBotDemo = ({ bookId }: ChatBotDemoProps) => {
   const [input, setInput] = useState("")
-  const [model, setModel] = useState<string>(defaultModel)
   const { messages, sendMessage, status, regenerate } = useChat()
   const currentTime = usePlayerStore(state => state.currentTime)
+  const { models, model, setModel, isLoading: isLoadingModels, provider } = useLLMModels()
 
   function handleSubmit(message: PromptInputMessage) {
-    if (!message.text) return
+    if (!message.text || !model || !provider) return
 
     // Parse time from message if present (e.g., "at 15:30", "around 1:23:45")
     const parsedTime = parseTimeFromMessage(message.text)
-    const requestBody: RequestBody = { model: model, bookId, time: currentTime }
+    const requestBody: RequestBody = { model: model, provider, bookId, time: currentTime }
 
     if (parsedTime !== null) {
       requestBody.time = parsedTime
@@ -89,7 +88,8 @@ const ChatBotDemo = ({ bookId }: ChatBotDemoProps) => {
   }
 
   function onSuggestionClick(suggestion: string) {
-    const requestBody: RequestBody = { model: model, bookId, time: currentTime }
+    if (!model || !provider) return
+    const requestBody: RequestBody = { model: model, provider, bookId, time: currentTime }
     sendMessage({ text: suggestion }, { body: requestBody })
   }
 
@@ -183,15 +183,25 @@ const ChatBotDemo = ({ bookId }: ChatBotDemoProps) => {
                   <PromptInputActionAddAttachments />
                 </PromptInputActionMenuContent>
               </PromptInputActionMenu> */}
+
               <PromptInputModelSelect onValueChange={value => setModel(value)} value={model}>
                 <PromptInputModelSelectTrigger>
-                  <PromptInputModelSelectValue />
+                  {isLoadingModels ? (
+                    <Loader2Icon className="size-4 animate-spin text-muted-foreground" />
+                  ) : (
+                    <PromptInputModelSelectValue />
+                  )}
                 </PromptInputModelSelectTrigger>
                 <PromptInputModelSelectContent>
-                  {models.map(model => (
-                    <PromptInputModelSelectItem key={model.value} value={model.value}>
-                      {model.name}
-                    </PromptInputModelSelectItem>
+                  {models.map(provider => (
+                    <SelectGroup key={provider.provider}>
+                      <SelectLabel>{provider.provider}</SelectLabel>
+                      {provider.models.map(model => (
+                        <PromptInputModelSelectItem key={model.value} value={model.value}>
+                          {model.name}
+                        </PromptInputModelSelectItem>
+                      ))}
+                    </SelectGroup>
                   ))}
                 </PromptInputModelSelectContent>
               </PromptInputModelSelect>

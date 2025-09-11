@@ -3,9 +3,9 @@ import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { useLLMModels } from "@/hooks/use-llm-models"
 import { formatTime } from "@/lib/format"
 import useBookmarksStore from "@/stores/bookmarks"
-import useLLMStore from "@/stores/llm"
 import type * as Audiobookshelf from "@/types/audiobookshelf"
 import axios from "axios"
 import { Loader2, Trash, WandSparkles } from "lucide-react"
@@ -20,7 +20,7 @@ interface BookmarksProps {
 }
 
 export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
-  const { provider, model } = useLLMStore()
+  const { provider, model } = useLLMModels()
 
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
 
