@@ -12,6 +12,8 @@ import { Brain, ExternalLink } from "lucide-react"
 import { useMount } from "react-use"
 import { toast } from "sonner"
 import useLLMStore from "./store"
+import { twMerge } from "tailwind-merge"
+import { Separator } from "@/components/ui/separator"
 
 type Props = {
   config: AppConfig | null
@@ -48,10 +50,11 @@ export default function LLMSetup({ config, updateConfig }: Props) {
         icon={<GradientIcon icon={<Brain className="w-10 h-10 text-white" />} />}
       />
 
-      <div className="w-full max-w-2xl space-y-6">
+      <div className="w-full max-w-2xl">
         <AiCard
           title="Gemini"
           description="Requires a Google AI API key (free or paid tier)."
+          className="rounded-b-none border-b-0"
           enabled={llmConfig.aiProviders.google.enabled}
           onCheckedChange={enabled =>
             update({
@@ -79,9 +82,12 @@ export default function LLMSetup({ config, updateConfig }: Props) {
           ]}
         />
 
+        <Separator />
+
         <AiCard
           title="OpenAI"
           description="Requires an OpenAI account with prepaid API credits."
+          className="rounded-none border-y-0 [&>div]:opacity-10 [&>div]:cursor-not-allowed"
           enabled={llmConfig.aiProviders.openai.enabled}
           onCheckedChange={enabled =>
             update({
@@ -109,9 +115,12 @@ export default function LLMSetup({ config, updateConfig }: Props) {
           ]}
         />
 
+        <Separator />
+
         <AiCard
           title="Ollama"
           description="Free and private access to local LLMs when you self-host Ollama. Be aware that small models may not produce usable results."
+          className="rounded-t-none border-t-0"
           enabled={llmConfig.aiProviders.ollama.enabled}
           onCheckedChange={enabled =>
             update({
@@ -136,7 +145,9 @@ export default function LLMSetup({ config, updateConfig }: Props) {
             },
           ]}
         />
+      </div>
 
+      <div className="w-full max-w-2xl space-y-6">
         <Button className="w-full" onClick={save}>
           Save Configuration
         </Button>
@@ -158,10 +169,11 @@ type AiCardProps = {
     help?: { href: string; text: string }
     placeholder?: string
   }[]
+  className?: string
 }
-function AiCard({ title, description, enabled, onCheckedChange, fields }: AiCardProps) {
+function AiCard({ title, description, enabled, onCheckedChange, fields, className }: AiCardProps) {
   return (
-    <Card className="w-full">
+    <Card className={twMerge("w-full", className)}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
