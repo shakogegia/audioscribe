@@ -6,9 +6,8 @@
 A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps to enhance audiobook experience with AI bookmark title suggestions, transcription, chat and more.
 
 > [!NOTE]  
-> This project is purely an experiment.  
-> I’m not sure where it’s headed, how it will evolve, or even if it’s useful or needed at all.  
-> For now, it’s just a playground to explore ideas around audiobooks and AI
+> This project is purely an experiment. I’m not sure where it’s headed, how it will evolve, or even if it’s useful or needed at all.  
+> For now, it’s just a playground to explore ideas around audiobooks + AI assistance
 > Feel free to try it out or share feedback
 
 
