@@ -31,8 +31,8 @@ enum BookTab {
 
 export default function Book({ id, book, files, revalidate }: BookProps) {
   const [activeTab, setActiveTab] = useQueryState<BookTab>("tab", {
-    defaultValue: BookTab.Bookmarks,
-    parse: parseAsStringEnum(Object.values(BookTab)).withDefault(BookTab.Bookmarks).parse,
+    defaultValue: BookTab.Chat,
+    parse: parseAsStringEnum(Object.values(BookTab)).withDefault(BookTab.Chat).parse,
   })
   const playerRef = useRef<PlayerRef>(null)
   const setBookmarks = useBookmarksStore(state => state.setBookmarks)
@@ -61,10 +61,10 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
 
             <Tabs defaultValue={activeTab} onValueChange={value => setActiveTab(value as BookTab)}>
               <TabsList className="self-center">
+                <TabsTrigger value={BookTab.Chat}>Chat</TabsTrigger>
                 <TabsTrigger value={BookTab.Bookmarks}>Bookmarks</TabsTrigger>
                 <TabsTrigger value={BookTab.Chapters}>Chapters</TabsTrigger>
                 <TabsTrigger value={BookTab.Transcript}>Transcript</TabsTrigger>
-                <TabsTrigger value={BookTab.Chat}>Chat</TabsTrigger>
               </TabsList>
 
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
