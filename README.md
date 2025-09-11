@@ -3,13 +3,12 @@
     <h1>AudioScribe</h1>
 </div>
 
-A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that helps to enhance audiobook experience with AI bookmark title suggestions, transcription, chat and more.
+A companion app for [Audiobookshelf](https://www.audiobookshelf.org/) that leverages multiple AI providers to enhance audiobook experiences through transcription, intelligent bookmarking, and contextual chat.
 
 > [!NOTE]  
 > This project is purely an experiment. I’m not sure where it’s headed, how it will evolve, or even if it’s useful or needed at all.  
 > For now, it’s just a playground to explore ideas around audiobooks + AI assistance
 > Feel free to try it out or share feedback
-
 
 See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 
@@ -18,11 +17,21 @@ See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 
 ## Features
 
-- **Bookmark Suggestions**: Generate meaningful bookmark titles using LLM's
-- **Transcription**: Transcribe audiobook
-- **Captions**: View generated captions for your audiobooks
-- **Multiple AI Providers**: Support for OpenAI, Google Gemini, Claude, and local Ollama models
-- **Manual Bookmarking**: Easily rename and manage your own bookmarks
+- **Library Integration**: Seamless connection with Audiobookshelf servers for book management and progress syncing
+- **Transcription**: Automatic speech recognition (ASR) with Whisper for high-quality audiobook
+  transcription
+- **Chat Assistant**: Interactive chat with contextual understanding of audiobook content, supporting
+  time-based and chapter-based queries
+- **Bookmark Title Suggestions**: AI-generated meaningful bookmark titles using transcript analysis and
+  context awareness
+- **Real-time Captions**: View synchronized captions during audiobook playback with transcript navigation
+- **Multiple AI Providers**: Comprehensive support for OpenAI, Google Gemini, Anthropic Claude, xAI, and
+  local Ollama models
+- **Context Management**: Dynamic transcript context windows with chapter boundary awareness for
+  optimal AI responses
+- **Search & Discovery**: Full-text search across your audiobook library with transcript-based results
+- **Export/Import**: Transcript export in multiple formats and import capabilities for existing
+  transcriptions
 
 ## Prerequisites
 
