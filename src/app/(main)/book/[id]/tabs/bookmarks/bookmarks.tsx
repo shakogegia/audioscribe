@@ -20,8 +20,8 @@ type BookmarksProps = {
 }
 
 export default function Bookmarks({ id, play }: BookmarksProps) {
-  const bookmarks = useBookmarksStore(state => state.bookmarks)
   const currentTime = usePlayerStore(state => state.currentTime)
+  const bookmarks = useBookmarksStore(state => state.bookmarks.sort((a, b) => a.time - b.time))
   const addBookmark = useBookmarksStore(state => state.add)
   const { findCaption } = useTranscript()
   const [isSaving, setIsSaving] = useState(false)

@@ -54,14 +54,14 @@ export default function BookList({ books }: Props) {
 
       {book.progress ? (
         <Link href={`/book/${book.id}`}>
-          <Button variant="default">
+          <Button size="default" variant="default">
             <BookOpenCheck className="w-4 h-4" />
             Open
           </Button>
         </Link>
       ) : (
         <BookOptionsDialog book={book} tabs={[BookOptionTab.Setup, BookOptionTab.Import]}>
-          <Button variant="outline">
+          <Button size="default" variant="outline">
             <AudioLinesIcon className="w-4 h-4" />
             Setup
           </Button>

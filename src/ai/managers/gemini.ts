@@ -29,6 +29,7 @@ export async function getModels() {
   const models = response.data.models
     .filter(model => SUPPORTED_GENERATION_METHODS.every(method => model.supportedGenerationMethods.includes(method)))
     .map(model => ({ name: model.displayName, value: model.name }))
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   return models
 }
