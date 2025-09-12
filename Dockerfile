@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     libavformat-dev \
     libavutil-dev \
     libswresample-dev \
+    libc6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for whisper.cpp compilation

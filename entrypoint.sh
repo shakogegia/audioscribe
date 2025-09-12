@@ -16,7 +16,7 @@ echo "Starting ChromaDB server..."
 pm2 start npm --name "chroma" -- run chroma
 
 echo "Starting audioscribe application..."
-pm2 start npm --name "audioscribe" -- run next:start
+pm2 start npm --name "audioscribe" -- run start
 
 # Show status and keep container running
 pm2 status
