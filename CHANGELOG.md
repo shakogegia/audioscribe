@@ -1,5 +1,21 @@
 # Changelog
 
+# [0.4.0](https://github.com/shakogegia/audioscribe/compare/0.3.0...0.4.0) (2025-09-12)
+
+
+### Bug Fixes
+
+* disable open ai for now ([e71a1a5](https://github.com/shakogegia/audioscribe/commit/e71a1a54b2524ebf3c3315e96f29742216db5563))
+* fetch models ([83abc97](https://github.com/shakogegia/audioscribe/commit/83abc979c8fd84b65276d81595b285c411b3a78c))
+* home suspense fallback ([81e4fd1](https://github.com/shakogegia/audioscribe/commit/81e4fd198c763302c8d66b90b107266cf43f3d40))
+* show chat as first tab ([9d11424](https://github.com/shakogegia/audioscribe/commit/9d114247043e45b8033fd0c9d1f090b1ad3b8c47))
+* ui elements ([8d59084](https://github.com/shakogegia/audioscribe/commit/8d59084933be65310e7605c6c61738576d32d012))
+
+
+### Features
+
+* customizable chat context ([aee90b9](https://github.com/shakogegia/audioscribe/commit/aee90b966ae5cee5dde79f4c06db8ff0a9326763))
+
 # [0.3.0](https://github.com/shakogegia/audioscribe/compare/0.2.3...0.3.0) (2025-09-10)
 
 
