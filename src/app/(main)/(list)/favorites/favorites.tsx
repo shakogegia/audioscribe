@@ -5,11 +5,6 @@ import { Loader2 } from "lucide-react"
 import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
 
-type Library = {
-  id: string
-  name: string
-}
-
 export function Favorites() {
   const { data, error, isLoading } = useSWR<SearchResult[]>(`/api/favorites?limit=20`, {
     revalidateOnFocus: true,

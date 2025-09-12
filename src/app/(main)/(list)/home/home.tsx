@@ -12,6 +12,7 @@ import {
 import { SearchResult } from "@/types/api"
 import { Loader2 } from "lucide-react"
 import { useQueryState } from "nuqs"
+import { Suspense } from "react"
 import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
 
@@ -24,7 +25,7 @@ type Library = {
   name: string
 }
 
-export function Home({ libraries }: Props) {
+function HomeContent({ libraries }: Props) {
   const [libraryId, setLibraryId] = useQueryState("libraryId", { defaultValue: libraries[0].id })
 
   const { data, error, isLoading } = useSWR<SearchResult[]>(`/api/library/${libraryId}`, {
@@ -79,5 +80,21 @@ export function Home({ libraries }: Props) {
         )}
       </div>
     </div>
+  )
+}
+
+function HomeFallback() {
+  return (
+    <div className="flex flex-col items-center gap-8 w-full">
+      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+    </div>
+  )
+}
+
+export function Home({ libraries }: Props) {
+  return (
+    <Suspense fallback={<HomeFallback />}>
+      <HomeContent libraries={libraries} />
+    </Suspense>
   )
 }
