@@ -153,7 +153,12 @@ export function Transcript({ play }: TranscriptProps) {
           {followCurrentTime ? "Stop Following Player" : "Follow Player"}
         </Button>
 
-        <Button variant="outline" onClick={() => scrollToTime(formatTime(currentTime))} disabled={followCurrentTime}>
+        <Button
+          variant="outline"
+          onClick={() => scrollToTime(formatTime(currentTime))}
+          disabled={followCurrentTime}
+          size="sm"
+        >
           <Scroll className="w-4 h-4" />
           Scroll to Current Time
         </Button>

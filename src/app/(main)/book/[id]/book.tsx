@@ -50,7 +50,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
     <div className="w-full min-h-full flex flex-col items-center gap-8 my-10 px-4">
       <BookInfo book={book} />
 
-      <div className="w-full max-w-xl mx-auto flex flex-col gap-8">
+      <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 justify-center">
         {showProcessingInfo && <ProcessingInfo book={book} revalidate={revalidate} />}
 
         {/* {!hasDownloaded && <Downloader bookId={id} onComplete={onDownloadComplete} />} */}

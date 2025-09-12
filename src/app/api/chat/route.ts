@@ -11,6 +11,7 @@ interface ChatRequestBody {
   model: AiModel
   provider: AiProvider
   time?: number // Optional: specific time to get context for, defaults to book.currentTime
+  custom?: { time: number; before: number; after: number } | null
 }
 
 export async function POST(request: Request) {
@@ -30,11 +31,12 @@ export async function POST(request: Request) {
 
   // Get intelligent context window - more for important sections
   const contextWindow = getContextWindow(contextTime, book.chapters)
+
   const transcriptSegments = await getTranscriptRangeByTime({
     bookId,
-    time: contextTime,
-    before: contextWindow.before,
-    after: contextWindow.after || 0,
+    time: body.custom?.time || contextTime,
+    before: body.custom?.before || contextWindow.before,
+    after: body.custom?.after || contextWindow.after || 0,
   })
 
   const ai = await provider(body.provider, body.model)
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
   const bookContext = {
     title: book.title,
     authors: book.authors,
-    currentTime: contextTime,
+    currentTime: body.custom?.time || contextTime,
     duration: book.duration,
     chapters: book.chapters,
     recentTranscript: transcriptSegments.map(seg => seg.text).join(" "),

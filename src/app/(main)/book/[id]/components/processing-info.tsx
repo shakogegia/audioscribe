@@ -80,7 +80,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
   }
 
   return (
-    <div>
+    <div className="mx-auto">
       <div className="grid w-full max-w-xl items-start gap-8">
         <Alert>
           <InfoIcon />
