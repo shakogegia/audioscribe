@@ -15,9 +15,6 @@ npm run build
 echo "Starting ChromaDB server..."
 pm2 start npm --name "chroma" -- run chroma
 
-echo "Starting job processor..."
-pm2 start npm --name "jobs" -- run jobs
-
 echo "Starting audioscribe application..."
 pm2 start npm --name "audioscribe" -- run next:start
 

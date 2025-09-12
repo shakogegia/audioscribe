@@ -35,6 +35,26 @@ export async function getAllLibraries(): Promise<Library[]> {
   }
 }
 
+export async function getLibraryItems(libraryId: string): Promise<SearchResult[]> {
+  const api = await getApi()
+  type ApiResponse = {
+    total: number
+    limit: number
+    page: number
+    sortDesc: boolean
+    mediaType: string
+    minified: false
+    collapseseries: false
+    include: string
+    offset: number
+    results: Audiobookshelf.LibraryItem[]
+  }
+  const response = await api.get<ApiResponse>(`/api/libraries/${libraryId}/items`)
+  const libraryItemIds = response.data.results.map(x => x.id)
+  const books = await getBatchLibraryItems(libraryItemIds)
+  return books
+}
+
 async function getBookFromDatabase(
   libraryItemId: string
 ): Promise<{ book: Book | null; progress?: BookSetupProgress }> {

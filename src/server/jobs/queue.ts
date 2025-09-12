@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client"
-import { JobData } from "@/jobs/runner"
+import { JobData } from "@/server/jobs/runner"
 
 const prisma = new PrismaClient()
 
@@ -208,7 +208,7 @@ export class JobQueue {
     // Kill the running process using stored PID
     if (job.pid) {
       try {
-        process.kill(job.pid, 'SIGTERM')
+        process.kill(job.pid, "SIGTERM")
         console.log(`Killed process ${job.pid} for job ${jobId}`)
       } catch (error) {
         console.error(`Failed to kill process ${job.pid} for job ${jobId}:`, error)
@@ -217,9 +217,9 @@ export class JobQueue {
     }
 
     // Also try the in-memory process map as fallback
-    const { killJobProcess } = await import("@/jobs/utils")
+    const { killJobProcess } = await import("@/server/utils/workers")
     const memoryProcessKilled = killJobProcess(jobId)
-    
+
     if (memoryProcessKilled) {
       console.log(`Killed in-memory process for job ${jobId}`)
     }

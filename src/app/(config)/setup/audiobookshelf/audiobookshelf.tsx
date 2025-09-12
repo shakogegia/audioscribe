@@ -22,7 +22,7 @@ const formSchema = z.object({
 
 type Props = {
   config: AppConfig
-  updateConfig: (config: AppConfig) => void
+  updateConfig: (config: AppConfig) => Promise<void>
 }
 
 export default function AudiobookshelfPage({ config, updateConfig }: Props) {

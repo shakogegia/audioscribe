@@ -1,4 +1,4 @@
-import { jobQueue } from "@/jobs/queue"
+import { jobQueue } from "@/server/jobs/queue"
 import { clearFolder, folders } from "@/lib/folders"
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"

@@ -1,14 +1,16 @@
-import { WhisperModel } from "@/types/transript"
+import "dotenv/config"
 import { getBookFiles } from "@/lib/audiobookshelf"
 import { folders } from "@/lib/folders"
 import { prisma } from "@/lib/prisma"
+import { WhisperModel } from "@/types/transript"
 import { type Prisma } from "@prisma/client"
 import { program } from "commander"
-import "dotenv/config"
 import fs from "fs"
 import fsPromise from "fs/promises"
 import { nodewhisper } from "nodejs-whisper"
 import path from "path"
+import { AudioFile } from "@/types/api"
+import { preprocessAudio, stitchAudioFiles } from "./audio"
 
 interface Props {
   bookId: string
@@ -137,6 +139,7 @@ async function saveTranscriptions({
     if (!match) {
       throw new Error(`Invalid timestamp format: ${timestamp}`)
     }
+
     const [, hours, minutes, seconds, milliseconds] = match
     return (
       parseInt(hours, 10) * 60 * 60 * 1000 +
@@ -166,12 +169,22 @@ async function eraseOldTranscripts(bookId: string) {
   return await prisma.transcriptSegment.deleteMany({ where: { bookId } })
 }
 
-async function updateBook(bookId: string, data: Prisma.BookUncheckedCreateInput) {
-  await prisma.book.upsert({
-    where: { id: bookId },
-    update: data,
-    create: { id: bookId, ...data },
-  })
+async function processAudioFiles(
+  bookFiles: AudioFile[],
+  downloadsFolder: string,
+  outputFolder: string
+): Promise<string> {
+  const files = [] as string[]
+  const _sortedBookFiles = bookFiles.sort((a, b) => a.index - b.index)
+  for (const audioFile of _sortedBookFiles) {
+    const localAudioFilePath = path.join(downloadsFolder, audioFile.path)
+    files.push(localAudioFilePath)
+  }
+
+  const stitched = await stitchAudioFiles(files, outputFolder)
+  const processed = await preprocessAudio(stitched, outputFolder)
+
+  return processed
 }
 
 async function transcribe() {
@@ -179,23 +192,24 @@ async function transcribe() {
     const bookFiles = (await getBookFiles(bookId)).sort((a, b) => a.index - b.index)
 
     const downloadsFolder = await folders.book(bookId).downloads()
+    const outputFolder = await folders.book(bookId).audio()
 
     await eraseOldTranscripts(bookId)
 
-    for (const audioFile of bookFiles) {
-      const localAudioFilePath = path.join(downloadsFolder, audioFile.path)
+    console.log(outputFolder)
 
-      const { result, file } = await transcribeAudioFile(localAudioFilePath)
+    const processedAudioFilePath = await processAudioFiles(bookFiles, downloadsFolder, outputFolder)
 
-      await saveTranscriptions({
-        bookId,
-        fileIno: audioFile.ino,
-        transcription: result,
-        offset: audioFile.start * 1000,
-      })
+    const { result, file } = await transcribeAudioFile(processedAudioFilePath)
 
-      await cleanUpTempFiles([file])
-    }
+    await saveTranscriptions({
+      bookId,
+      fileIno: "ino",
+      transcription: result,
+      offset: 0,
+    })
+
+    await cleanUpTempFiles([file, processedAudioFilePath])
 
     process.exit(0)
   } catch (error) {

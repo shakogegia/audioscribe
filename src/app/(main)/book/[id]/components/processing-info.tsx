@@ -10,6 +10,7 @@ import { useEffect } from "react"
 import { toast } from "sonner"
 import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
+import { Progress } from "@/components/ui/progress"
 
 type ProcessingInfoProps = {
   book: SearchResult
@@ -24,7 +25,10 @@ type ProgressResponse = {
 }
 
 export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
-  const { data } = useSWR<ProgressResponse>(`/api/book/${book.id}/setup/progress`)
+  const { data } = useSWR<ProgressResponse>(`/api/book/${book.id}/setup/progress`, {
+    refreshInterval: 1000,
+    revalidateOnFocus: false,
+  })
 
   // const allCompleted = data?.stages.every(s => s.status === "completed")
   const hasFailed = data?.stages.some(s => s.status === "failed")
@@ -80,8 +84,8 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
   }
 
   return (
-    <div className="mx-auto">
-      <div className="grid w-full max-w-xl items-start gap-8">
+    <div className="mx-auto w-full">
+      <div className="grid w-full max-w-xl items-start gap-8 mx-auto">
         <Alert>
           <InfoIcon />
           <AlertTitle>Book is being processed</AlertTitle>
@@ -105,6 +109,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                   isRunning={runningStage === "download"}
                   isCompleted={completedStages?.some(s => s.stage === "download") ?? false}
                   isFailed={failedStages?.some(s => s.stage === "download") ?? false}
+                  progress={data?.stages?.find(s => s.stage === "download")?.progress}
                 >
                   Download book from Audiobookshelf and save it to the local cache folder.
                   <br />
@@ -117,6 +122,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                   isRunning={runningStage === "transcribe"}
                   isCompleted={completedStages?.some(s => s.stage === "transcribe") ?? false}
                   isFailed={failedStages?.some(s => s.stage === "transcribe") ?? false}
+                  progress={data?.stages?.find(s => s.stage === "transcribe")?.progress}
                 >
                   <p>
                     Transcribe the whole book using <span className="font-medium inline">{data?.progress?.model}</span>{" "}
@@ -132,6 +138,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                   isRunning={runningStage === "vectorize"}
                   isCompleted={completedStages?.some(s => s.stage === "vectorize") ?? false}
                   isFailed={failedStages?.some(s => s.stage === "vectorize") ?? false}
+                  progress={data?.stages?.find(s => s.stage === "vectorize")?.progress}
                 >
                   Vectorize the book and save the chunks to the vector database. This will allow you to ask questions
                   about the book.
@@ -161,8 +168,9 @@ type StageProps = {
   isFailed: boolean
   children: React.ReactNode
   className: string
+  progress?: number
 }
-export function Stage({ title, isRunning, isCompleted, isFailed, children, className }: StageProps) {
+export function Stage({ title, isRunning, isCompleted, isFailed, children, className, progress }: StageProps) {
   return (
     <Alert className={twMerge("rounded-b-none", className)} variant={isFailed ? "destructive" : "default"}>
       {isFailed ? (
@@ -173,7 +181,11 @@ export function Stage({ title, isRunning, isCompleted, isFailed, children, class
         <CircleDashedIcon className={twMerge(isRunning && "animate-spin")} />
       )}
       <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>{children}</AlertDescription>
+      <AlertDescription>
+        {children}
+        {/* {progress && <p className="text-sm text-muted-foreground">Progress: {progress}%</p>} */}
+        {Boolean(progress) && isRunning && <Progress value={progress} />}
+      </AlertDescription>
     </Alert>
   )
 }

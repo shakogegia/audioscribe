@@ -1,28 +1,22 @@
-require("dotenv").config()
-const { program } = require("commander")
-const { chunkTranscript } = require("./lib/chunk-transcript")
-const { AudiobookVectorDB } = require("./lib/chroma-db")
-const fs = require("fs")
-const path = require("path")
-const os = require("os")
-const axios = require("axios")
+import "dotenv/config"
+import { vectorDb } from "@/ai/lib/vector"
+import { prisma } from "@/lib/prisma"
+import { chunkTranscript } from "@/server/workers/chunk-transcript"
+import { program } from "commander"
 
 program.requiredOption("-b, --book-id <string>", "The ID of the book").parse(process.argv)
 
-program.parse()
+program.parse(process.argv)
 
 const { bookId } = program.opts()
 
-async function setupNewBook(bookId) {
+async function setupNewBook(bookId: string) {
   console.log("Setting up audiobook:", bookId)
 
   // Fetch segments from API
-  const response = await axios.get(`http://localhost:3000/api/book/${bookId}/transcript`, {
-    params: {
-      model: "tiny.en",
-    },
+  const segments = await prisma.transcriptSegment.findMany({
+    where: { bookId },
   })
-  const { segments } = response.data
 
   // Chunk transcript
   console.log("Chunking transcript...")
@@ -30,7 +24,6 @@ async function setupNewBook(bookId) {
   console.log(`Created ${chunks.length} chunks`)
 
   // Initialize vector database
-  const vectorDb = new AudiobookVectorDB()
   await vectorDb.clearCollection(bookId)
   await vectorDb.initialize(bookId)
 

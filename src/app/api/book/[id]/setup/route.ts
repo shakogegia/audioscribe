@@ -1,5 +1,5 @@
-import { setupBook } from "@/jobs/queue"
-import { SetupBookStage } from "@/jobs/shared/book-operations"
+import { setupBook } from "@/server/jobs/queue"
+import { SetupBookStage } from "@/server/utils/book-operations"
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
 

@@ -1,11 +1,12 @@
-"use client";
-import { useTheme } from "next-themes";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { Toaster } from "sonner";
-import { SWRConfig } from "swr";
+"use client"
+import { CommandPalette } from "@/components/command-palette"
+import { useTheme } from "next-themes"
+import { NuqsAdapter } from "nuqs/adapters/next/app"
+import { Toaster } from "sonner"
+import { SWRConfig } from "swr"
 
 export default function AppProviders({ children }: Readonly<{ children: React.ReactNode }>) {
-  const { theme } = useTheme();
+  const { theme } = useTheme()
 
   return (
     <>
@@ -20,6 +21,7 @@ export default function AppProviders({ children }: Readonly<{ children: React.Re
         </SWRConfig>
       </NuqsAdapter>
       <Toaster position="top-left" theme={theme as "light" | "dark"} duration={1000} />
+      <CommandPalette />
     </>
-  );
+  )
 }

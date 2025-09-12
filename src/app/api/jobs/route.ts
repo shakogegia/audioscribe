@@ -1,4 +1,4 @@
-import { jobQueue } from "@/jobs/queue"
+import { jobQueue } from "@/server/jobs/queue"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: NextRequest) {

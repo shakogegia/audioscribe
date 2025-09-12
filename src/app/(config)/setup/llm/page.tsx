@@ -4,7 +4,7 @@ import LLMSetup from "./llm"
 import { revalidatePath } from "next/cache"
 
 // Move updateConfig to a server action and export it
-export async function updateConfig(config: AppConfig) {
+async function updateConfig(config: AppConfig) {
   "use server"
   await save(config)
   revalidatePath("/", "layout")

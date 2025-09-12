@@ -2,12 +2,12 @@ import { getBook, getBookFiles } from "@/lib/audiobookshelf"
 import Book from "./book"
 import { revalidatePath } from "next/cache"
 
-export async function revalidateBook(id: string) {
+async function revalidateBook(id: string) {
   "use server"
   revalidatePath(`/book/${id}`)
 }
 
-export default async function BookPage({ params }: { params: { id: string } }) {
+export default async function BookPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
   const book = await getBook(id)

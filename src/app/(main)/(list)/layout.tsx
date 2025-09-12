@@ -27,6 +27,7 @@ export default function ListLayout({ children }: Props) {
         <div className="w-fit mx-auto">
           <Tabs defaultValue={pathname} onValueChange={onValueChange}>
             <TabsList>
+              <TabsTrigger value="/home">Home</TabsTrigger>
               <TabsTrigger value="/search">Search</TabsTrigger>
               <TabsTrigger value="/favorites">Favorites</TabsTrigger>
             </TabsList>

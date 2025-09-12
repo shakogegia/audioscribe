@@ -16,7 +16,6 @@ interface BookmarkSuggestionsRequestBody {
 }
 
 // disable cache
-export const maxAge = 0
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

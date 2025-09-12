@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { jobQueue } from "@/jobs/queue"
+import { jobQueue } from "@/server/jobs/queue"
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

@@ -56,7 +56,7 @@ model Job {
   processAt   DateTime  @default(now())
   completedAt DateTime?
   failedAt    DateTime?
-  pid         Int?      // Process ID for cancellation
+  pid         Int? // Process ID for cancellation
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -67,12 +67,13 @@ model Job {
 }
 
 model BookSetupProgress {
-  id     String  @id @default(cuid())
-  bookId String
-  stage  String // "download", "transcribe", "vectorize"
-  status String  @default("pending") // pending, running, completed, failed
-  model  String?
-  error  String?
+  id       String  @id @default(cuid())
+  bookId   String
+  stage    String // "download", "transcribe", "vectorize"
+  status   String  @default("pending") // pending, running, completed, failed
+  progress Float   @default(0)
+  model    String?
+  error    String?
 
   startedAt   DateTime?
   completedAt DateTime?

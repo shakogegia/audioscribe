@@ -54,6 +54,47 @@ export class AudiobookVectorDB {
     }
   }
 
+  async addChunks(
+    chunks: {
+      text: string
+      cleanText: string
+      startTime: number
+      endTime: number
+      chapterIndex: number
+      wordCount: number
+      keyPhrases: string[]
+    }[]
+  ) {
+    if (!this.collection) {
+      throw new Error("Collection not initialized")
+    }
+
+    for (let i = 0; i < chunks.length; i++) {
+      console.info(`Adding chunk ${i + 1} of ${chunks.length}`)
+      const chunk = chunks[i]
+      const embedding = await (await this.embedder()).generate([chunk.text])
+      console.info(`Chunk ${i + 1}: generated embedding`)
+
+      await this.collection.add({
+        ids: [`chunk_${i}`],
+        documents: [chunk.cleanText || chunk.text], // Use cleaned text for embeddings
+        embeddings: embedding,
+        metadatas: [
+          {
+            startTime: chunk.startTime,
+            endTime: chunk.endTime,
+            chapterIndex: chunk.chapterIndex,
+            originalText: chunk.text, // Store original for display
+            wordCount: chunk.wordCount,
+            keyPhrases: chunk.keyPhrases?.join(", ") || "",
+          },
+        ],
+      })
+
+      console.info(`Chunk ${i + 1}: added to database`)
+    }
+  }
+
   async searchSimilar(query: string, nResults = 3) {
     if (!this.collection) {
       throw new Error("Collection not initialized")

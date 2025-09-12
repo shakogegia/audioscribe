@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client"
-import { executeSetupBookJob } from "@/jobs/processors"
-import { jobQueue } from "@/jobs/queue"
+import { executeSetupBookJob } from "@/server/jobs/processors"
+import { jobQueue } from "@/server/jobs/queue"
 
 const prisma = new PrismaClient()
 
