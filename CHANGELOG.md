@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/shakogegia/audioscribe/compare/0.4.0...0.4.1) (2025-09-12)
+
+
+### Bug Fixes
+
+* entrypoint ([b0d1b05](https://github.com/shakogegia/audioscribe/commit/b0d1b054818fc47afcebb7732e8e4d0ac7cea8c0))
+
 # [0.4.0](https://github.com/shakogegia/audioscribe/compare/0.3.0...0.4.0) (2025-09-12)
 
 
