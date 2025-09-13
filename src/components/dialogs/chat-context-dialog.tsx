@@ -137,7 +137,7 @@ export function ChatContextDialog({ book, children, onApply }: ChatContextDialog
               <div className="grid gap-4">
                 <div className="grid grid-cols-2 gap-4 items-center">
                   <div className="flex flex-col">
-                    <Label>Progress</Label>
+                    <Label>Playback progress</Label>
                   </div>
 
                   <Tabs
@@ -147,10 +147,11 @@ export function ChatContextDialog({ book, children, onApply }: ChatContextDialog
                   >
                     <TabsList>
                       <TabsTrigger value="abs">
-                        Audiobookshelf <span className="text-xs text-muted-foreground">{formatTime(absTime ?? 0)}</span>
+                        From Audiobookshelf{" "}
+                        <span className="text-xs text-muted-foreground">{formatTime(absTime ?? 0)}</span>
                       </TabsTrigger>
                       <TabsTrigger value="player">
-                        Player <span className="text-xs text-muted-foreground">{formatTime(playerTime ?? 0)}</span>
+                        From Player <span className="text-xs text-muted-foreground">{formatTime(playerTime ?? 0)}</span>
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>

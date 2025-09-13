@@ -14,6 +14,7 @@ import Chapters from "./tabs/chapters/chapters"
 import { Chat } from "./tabs/chat/chat"
 import { Transcript } from "./tabs/transcript/transcript"
 import useBookmarksStore from "@/stores/bookmarks"
+import { BookmarkIcon, BookOpenIcon, CaptionsIcon, SparklesIcon } from "lucide-react"
 
 interface BookProps {
   id: string
@@ -61,10 +62,22 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
 
             <Tabs defaultValue={activeTab} onValueChange={value => setActiveTab(value as BookTab)}>
               <TabsList className="self-center">
-                <TabsTrigger value={BookTab.Chat}>Chat</TabsTrigger>
-                <TabsTrigger value={BookTab.Bookmarks}>Bookmarks</TabsTrigger>
-                <TabsTrigger value={BookTab.Chapters}>Chapters</TabsTrigger>
-                <TabsTrigger value={BookTab.Transcript}>Transcript</TabsTrigger>
+                <TabsTrigger value={BookTab.Chat}>
+                  <SparklesIcon />
+                  Chat
+                </TabsTrigger>
+                <TabsTrigger value={BookTab.Bookmarks}>
+                  <BookmarkIcon />
+                  Bookmarks
+                </TabsTrigger>
+                <TabsTrigger value={BookTab.Chapters}>
+                  <BookOpenIcon />
+                  Chapters
+                </TabsTrigger>
+                <TabsTrigger value={BookTab.Transcript}>
+                  <CaptionsIcon />
+                  Transcript
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
