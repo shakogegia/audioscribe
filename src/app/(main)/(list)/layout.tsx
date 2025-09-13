@@ -2,6 +2,7 @@
 import { Hero } from "@/components/hero"
 import Logo from "@/components/logo"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { HomeIcon, SearchIcon, StarIcon } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 
 type Props = Readonly<{
@@ -25,11 +26,20 @@ export default function ListLayout({ children }: Props) {
       />
       <div className="w-full flex flex-col gap-10">
         <div className="w-fit mx-auto">
-          <Tabs defaultValue={pathname} onValueChange={onValueChange}>
+          <Tabs key={pathname} defaultValue={pathname} onValueChange={onValueChange}>
             <TabsList>
-              <TabsTrigger value="/home">Home</TabsTrigger>
-              <TabsTrigger value="/search">Search</TabsTrigger>
-              <TabsTrigger value="/favorites">Favorites</TabsTrigger>
+              <TabsTrigger value="/home">
+                <HomeIcon />
+                Home
+              </TabsTrigger>
+              <TabsTrigger value="/search">
+                <SearchIcon />
+                Search
+              </TabsTrigger>
+              <TabsTrigger value="/favorites">
+                <StarIcon />
+                Favorites
+              </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

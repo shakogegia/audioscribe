@@ -7,6 +7,7 @@ import { SearchResult } from "@/types/api"
 import { AudioLinesIcon, BookOpenCheck } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import BookCover from "./book-cover"
 
 type Props = {
   books: SearchResult[]
@@ -27,13 +28,7 @@ const STAGES: Record<Stage, { variant: StageVariant; label: string }> = {
 export default function BookList({ books }: Props) {
   return books.map(book => (
     <div key={book.id} className="flex flex-col sm:flex-row gap-2 items-center border rounded-lg p-4">
-      <Image
-        src={book.coverPath ?? ""}
-        alt="Audiobook"
-        className="w-16 h-16 object-cover rounded-md"
-        width={64}
-        height={64}
-      />
+      <BookCover src={book.coverPath} size={64} />
       <div className="flex flex-col flex-1 text-center sm:text-left">
         <h3 className="text-md font-semibold">{book.title}</h3>
         <div className="flex gap-2 justify-center sm:justify-start">

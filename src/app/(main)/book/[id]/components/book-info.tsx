@@ -1,11 +1,11 @@
 "use client"
+import BookCover from "@/components/book-cover"
 import { BookOptionsDialog, BookOptionTab } from "@/components/dialogs/book-options-dialog"
 import Favorite from "@/components/favorite"
 import { Hero } from "@/components/hero"
 import { Button } from "@/components/ui/button"
 import { SearchResult } from "@/types/api"
 import { AudioLinesIcon } from "lucide-react"
-import Image from "next/image"
 
 interface BookProps {
   book: SearchResult
@@ -32,12 +32,11 @@ export default function BookInfo({ book }: BookProps) {
         </div>
       }
       icon={
-        <Image
+        <BookCover
           src={book.coverPath ?? ""}
           alt={book.title}
           className="w-32 h-32 object-cover rounded-md shadow-md"
-          width={128}
-          height={128}
+          size={128}
         />
       }
     />

@@ -1,4 +1,4 @@
-import { Calculator, Calendar, Settings, Smile } from "lucide-react"
+import { CogIcon, HomeIcon, MoonIcon, SearchIcon, StarIcon, SunIcon } from "lucide-react"
 
 import {
   CommandDialog,
@@ -9,12 +9,15 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command"
+import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export function CommandPalette() {
+  const [query, setQuery] = useState("")
   const [open, setOpen] = useState(false)
   const router = useRouter()
+  const { systemTheme, setTheme } = useTheme()
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -32,49 +35,69 @@ export function CommandPalette() {
     setOpen(false)
   }
 
+  function updateTheme(theme: string) {
+    setTheme(theme)
+    setOpen(false)
+  }
+
   return (
     <CommandDialog className="rounded-lg border shadow-md md:min-w-[450px] md:h-96" open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Type a command or search..." />
+      <CommandInput placeholder="Type a command or search..." onValueChange={setQuery} />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Pages">
           <CommandItem onSelect={() => navigateTo("/home")}>
-            <Calendar />
+            <HomeIcon />
             <span>Home</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/search")}>
-            <Smile />
+            <SearchIcon />
             <span>Search</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/favorites")}>
-            <Calculator />
+            <StarIcon />
             <span>Favorites</span>
+          </CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Appearance">
+          <CommandItem onSelect={() => updateTheme("dark")}>
+            <MoonIcon />
+            <span>Dark theme</span>
+          </CommandItem>
+          <CommandItem onSelect={() => updateTheme("light")}>
+            <SunIcon />
+            <span>Light theme</span>
+          </CommandItem>
+          <CommandItem onSelect={() => updateTheme("system")}>
+            {systemTheme === "dark" ? <MoonIcon /> : <SunIcon />}
+            <span>System theme</span>
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Settings">
           <CommandItem onSelect={() => navigateTo("/setup/audiobookshelf")}>
-            <Settings />
+            <CogIcon />
             <span>Audiobookshelf Settings</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/setup/llm")}>
-            <Settings />
+            <CogIcon />
             <span>LLM Settings</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/setup/asr")}>
-            <Settings />
+            <CogIcon />
             <span>ASR Settings</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/setup/embedding")}>
-            <Settings />
+            <CogIcon />
             <span>Embedding Settings</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/jobs")}>
-            <Settings />
+            <CogIcon />
             <span>Jobs</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/cache")}>
-            <Settings />
+            <CogIcon />
             <span>Cache</span>
           </CommandItem>
         </CommandGroup>
