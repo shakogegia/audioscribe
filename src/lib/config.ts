@@ -20,7 +20,7 @@ export const defaultConfig: AppConfig = {
     anthropic: { enabled: false, apiKey: null },
     ollama: { enabled: false, baseUrl: null },
   },
-  embeddingModel: null,
+  embeddingModel: "sentence-transformers/all-MiniLM-L6-v2",
 }
 
 const configPath = join(process.env.DATA_DIR!, "config.json")

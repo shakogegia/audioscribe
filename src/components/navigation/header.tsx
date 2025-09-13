@@ -1,5 +1,5 @@
 "use client"
-import { Cog, CommandIcon, House } from "lucide-react"
+import { BadgeInfo, Cog, CommandIcon, House } from "lucide-react"
 import Link from "next/link"
 import { Button } from "../ui/button"
 import { ThemeSwitcher } from "./theme-switcher"
@@ -33,6 +33,12 @@ export function Header() {
         <Link href="/setup/audiobookshelf">
           <Button variant="outline" size="icon">
             <Cog className="w-4 h-4" />
+          </Button>
+        </Link>
+
+        <Link href="/about">
+          <Button variant="outline" size="icon">
+            <BadgeInfo className="w-4 h-4" />
           </Button>
         </Link>
       </div>

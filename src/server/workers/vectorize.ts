@@ -20,7 +20,7 @@ async function setupNewBook(bookId: string) {
 
   // Chunk transcript
   console.log("Chunking transcript...")
-  const chunks = chunkTranscript(segments, { maxChunkDuration: 120, maxChunkLines: 25, minChunkDuration: 30 })
+  const chunks = chunkTranscript(segments, { maxChunkDuration: 5 * 60, maxChunkLines: 250, minChunkDuration: 300 })
   console.log(`Created ${chunks.length} chunks`)
 
   // Initialize vector database

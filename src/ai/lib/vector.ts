@@ -1,6 +1,5 @@
-import { ChromaClient, EmbeddingFunction, type Collection } from "chromadb"
-import { OllamaEmbeddingFunction } from "@chroma-core/ollama"
-import { load } from "@/lib/config"
+import { ChromaClient, type Collection } from "chromadb"
+import { embedder } from "./embedder"
 
 export class AudiobookVectorDB {
   private client: ChromaClient
@@ -21,27 +20,13 @@ export class AudiobookVectorDB {
       this.collection = await this.client.getOrCreateCollection({
         name: `audiobook_${bookId}`,
         metadata: { "hnsw:space": "cosine" },
-        embeddingFunction: await this.embedder(),
+        embeddingFunction: embedder(),
       })
 
       console.info(`Collection initialized: ${this.collection?.name}`)
     } catch (error) {
       console.error("Vector DB initialization failed:", error)
     }
-  }
-
-  async embedder(): Promise<EmbeddingFunction> {
-    const embedder = await this.ollamaEmbeddingFunction()
-    return embedder
-  }
-
-  async ollamaEmbeddingFunction(): Promise<OllamaEmbeddingFunction> {
-    const config = await load()
-    const baseUrl = config?.aiProviders.ollama.baseUrl ?? "http://localhost:11434"
-    return new OllamaEmbeddingFunction({
-      url: baseUrl,
-      model: config?.embeddingModel ?? "all-minilm:latest",
-    })
   }
 
   async clearCollection(bookId: string) {
@@ -57,7 +42,6 @@ export class AudiobookVectorDB {
   async addChunks(
     chunks: {
       text: string
-      cleanText: string
       startTime: number
       endTime: number
       chapterIndex: number
@@ -72,19 +56,15 @@ export class AudiobookVectorDB {
     for (let i = 0; i < chunks.length; i++) {
       console.info(`Adding chunk ${i + 1} of ${chunks.length}`)
       const chunk = chunks[i]
-      const embedding = await (await this.embedder()).generate([chunk.text])
-      console.info(`Chunk ${i + 1}: generated embedding`)
 
       await this.collection.add({
         ids: [`chunk_${i}`],
-        documents: [chunk.cleanText || chunk.text], // Use cleaned text for embeddings
-        embeddings: embedding,
+        documents: [chunk.text], // ChromaDB will auto-generate embeddings
         metadatas: [
           {
             startTime: chunk.startTime,
             endTime: chunk.endTime,
             chapterIndex: chunk.chapterIndex,
-            originalText: chunk.text, // Store original for display
             wordCount: chunk.wordCount,
             keyPhrases: chunk.keyPhrases?.join(", ") || "",
           },
@@ -100,11 +80,8 @@ export class AudiobookVectorDB {
       throw new Error("Collection not initialized")
     }
 
-    const embedder = await this.embedder()
-    const queryEmbedding = await embedder.generate([query])
-
     const results = await this.collection.query({
-      queryEmbeddings: queryEmbedding,
+      queryTexts: [query], // ChromaDB will auto-generate embeddings using the collection's embedding function
       nResults,
       include: ["documents", "metadatas", "distances"],
     })

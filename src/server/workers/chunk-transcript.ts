@@ -47,8 +47,6 @@ export function chunkTranscript(
       const chunk = createChunk(currentChunk, chunkStartTime, chunkEndTime, chunks.length)
       chunks.push(chunk)
 
-      console.log(`✅ Created chunk ${chunks.length}: ${chunk.duration}s, ${currentChunk.length} lines`)
-
       // Reset for next chunk
       currentChunk = []
       chunkStartTime = null
@@ -81,25 +79,18 @@ export function chunkTranscript(
 function createChunk(lines: string[], startTime: number, endTime: number, index: number) {
   const rawText = lines.join(" ")
 
-  // Clean text for better embeddings
-  const cleanText = rawText
-    .replace(/\s+/g, " ") // Normalize whitespace
-    .replace(/[^\w\s.,!?-]/g, " ") // Remove special chars but keep punctuation
-    .trim()
-
   const duration = (endTime - startTime) / 1000 // Convert from milliseconds to seconds
 
   return {
     text: rawText, // Keep original for display
-    cleanText: cleanText, // Use this for embeddings
     startTime,
     endTime,
     duration: Math.round(duration),
     lineCount: lines.length,
     chapterIndex: Math.floor(index / 15),
-    wordCount: cleanText.split(/\s+/).length,
+    wordCount: rawText.split(/\s+/).length,
     id: `chunk_${index}`,
-    keyPhrases: extractKeyPhrases(cleanText),
+    keyPhrases: extractKeyPhrases(rawText),
   }
 }
 
