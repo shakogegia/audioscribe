@@ -1,19 +1,18 @@
 import { TranscriptSegment } from "@prisma/client"
 
-export function chunkTranscript(
-  segments: TranscriptSegment[],
-  options: { maxChunkDuration?: number; maxChunkLines?: number; minChunkDuration?: number } = {}
-) {
-  const {
-    maxChunkDuration = 180, // 3 minutes
-    maxChunkLines = 50, // Maximum lines per chunk
-    minChunkDuration = 30, // Minimum 30 seconds per chunk
-  } = options
+export interface TranscriptChunk {
+  text: string
+  startTime: number
+  endTime: number
+}
+
+export function chunkTranscript(segments: TranscriptSegment[], options: { maxChunkDuration?: number } = {}): TranscriptChunk[] {
+  const { maxChunkDuration = 180 } = options
 
   console.log("🔄 Starting transcript chunking...")
 
-  const chunks = []
-  let currentChunk = []
+  const chunks: TranscriptChunk[] = []
+  let currentChunk: string[] = []
   let chunkStartTime = null
   let chunkEndTime = null
   let lastValidEndTime = null
@@ -34,23 +33,36 @@ export function chunkTranscript(
     // Add segment text to current chunk
     currentChunk.push(segment.text.trim())
 
-    // Check if we should end this chunk
+    // Check if we should end this chunk based only on duration
     const duration = (chunkEndTime - chunkStartTime) / 1000 // Convert from milliseconds to seconds
-    const shouldEndChunk =
-      duration >= maxChunkDuration ||
-      currentChunk.length >= maxChunkLines ||
-      (duration >= minChunkDuration && isNaturalBreak(segment, segments[i + 1]))
 
-    if (shouldEndChunk && currentChunk.length > 5) {
-      // Ensure minimum chunk size
-      // Create chunk
-      const chunk = createChunk(currentChunk, chunkStartTime, chunkEndTime, chunks.length)
-      chunks.push(chunk)
+    if (duration >= maxChunkDuration && currentChunk.length > 0) {
+      // Look for sentence boundary to avoid splitting sentences
+      const chunkEndIndex = findSentenceBreakPoint(currentChunk)
 
-      // Reset for next chunk
-      currentChunk = []
-      chunkStartTime = null
-      chunkEndTime = null
+      if (chunkEndIndex !== -1) {
+        // Create chunk up to the sentence boundary
+        const chunkSegments = currentChunk.slice(0, chunkEndIndex + 1)
+        const chunk = createChunk(
+          chunkSegments,
+          chunkStartTime,
+          segments[i - (currentChunk.length - chunkEndIndex - 1)].endTime
+        )
+        chunks.push(chunk)
+
+        // Keep remaining segments for next chunk
+        currentChunk = currentChunk.slice(chunkEndIndex + 1)
+        chunkStartTime = segments[i - (currentChunk.length - 1)]?.startTime || segment.startTime
+      } else if (currentChunk.length > 1) {
+        // Fallback: create chunk without the last segment to avoid splitting
+        const chunkSegments = currentChunk.slice(0, -1)
+        const chunk = createChunk(chunkSegments, chunkStartTime, segments[i - 1].endTime)
+        chunks.push(chunk)
+
+        // Keep last segment for next chunk
+        currentChunk = [currentChunk[currentChunk.length - 1]]
+        chunkStartTime = segment.startTime
+      }
     }
   }
 
@@ -59,136 +71,35 @@ export function chunkTranscript(
     const finalChunk = createChunk(
       currentChunk,
       chunkStartTime || 0,
-      chunkEndTime || lastValidEndTime || 0,
-      chunks.length
+      chunkEndTime || lastValidEndTime || 0
     )
     chunks.push(finalChunk)
-    console.log(`✅ Created final chunk ${chunks.length}: ${finalChunk.duration}s, ${currentChunk.length} lines`)
+    console.log(`✅ Created final chunk ${chunks.length}: ${currentChunk.length} segments`)
   }
 
   console.log(`🎉 Chunking complete! Generated ${chunks.length} chunks`)
 
-  // Log chunk statistics
-  const avgDuration = chunks.reduce((sum, chunk) => sum + chunk.duration, 0) / chunks.length
-  const avgLines = chunks.reduce((sum, chunk) => sum + chunk.lineCount, 0) / chunks.length
-  console.log(`📊 Average chunk: ${Math.round(avgDuration)}s duration, ${Math.round(avgLines)} lines`)
-
   return chunks
 }
 
-function createChunk(lines: string[], startTime: number, endTime: number, index: number) {
+function findSentenceBreakPoint(currentChunk: string[]): number {
+  // Look backwards from the end of the current chunk to find a sentence ending
+  for (let i = currentChunk.length - 1; i >= 0; i--) {
+    const text = currentChunk[i]
+    // Check if this segment ends with sentence-ending punctuation
+    if (/[.!?]\s*$/.test(text.trim())) {
+      return i
+    }
+  }
+  return -1 // No sentence boundary found
+}
+
+function createChunk(lines: string[], startTime: number, endTime: number): TranscriptChunk {
   const rawText = lines.join(" ")
 
-  const duration = (endTime - startTime) / 1000 // Convert from milliseconds to seconds
-
   return {
-    text: rawText, // Keep original for display
+    text: rawText,
     startTime,
     endTime,
-    duration: Math.round(duration),
-    lineCount: lines.length,
-    chapterIndex: Math.floor(index / 15),
-    wordCount: rawText.split(/\s+/).length,
-    id: `chunk_${index}`,
-    keyPhrases: extractKeyPhrases(rawText),
   }
-}
-
-function isNaturalBreak(currentSegment: TranscriptSegment, nextSegment: TranscriptSegment) {
-  if (!nextSegment) return true
-
-  // Look for natural breaking points
-  const breakIndicators = [
-    "Chapter",
-    "CHAPTER",
-    "Part",
-    "PART",
-    "***",
-    "---",
-    "Meanwhile",
-    "Later",
-    "The next day",
-    "Hours later",
-  ]
-
-  return breakIndicators.some(
-    indicator => nextSegment.text.includes(indicator) || currentSegment.text.includes(indicator)
-  )
-}
-
-function extractKeyPhrases(text: string) {
-  // Simple key phrase extraction for better search
-  const commonWords = new Set([
-    "the",
-    "and",
-    "or",
-    "but",
-    "in",
-    "on",
-    "at",
-    "to",
-    "for",
-    "of",
-    "with",
-    "by",
-    "a",
-    "an",
-    "is",
-    "are",
-    "was",
-    "were",
-    "be",
-    "been",
-    "have",
-    "has",
-    "had",
-    "do",
-    "does",
-    "did",
-    "will",
-    "would",
-    "could",
-    "should",
-    "may",
-    "might",
-    "can",
-    "must",
-    "i",
-    "you",
-    "he",
-    "she",
-    "it",
-    "we",
-    "they",
-    "me",
-    "him",
-    "her",
-    "us",
-    "them",
-    "my",
-    "your",
-    "his",
-    "her",
-    "its",
-    "our",
-    "their",
-  ])
-
-  const words = text
-    .toLowerCase()
-    .replace(/[^\w\s]/g, " ")
-    .split(/\s+/)
-    .filter(word => word.length > 3 && !commonWords.has(word))
-
-  // Get word frequency
-  const wordFreq: Record<string, number> = {}
-  words.forEach(word => {
-    wordFreq[word] = (wordFreq[word] || 0) + 1
-  })
-
-  // Return top 10 most frequent meaningful words
-  return Object.entries(wordFreq)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10)
-    .map(([word]) => word)
 }

@@ -1,5 +1,6 @@
 import { ChromaClient, type Collection } from "chromadb"
 import { embedder } from "./embedder"
+import { TranscriptChunk } from "../../server/workers/chunk-transcript"
 
 export class AudiobookVectorDB {
   private client: ChromaClient
@@ -39,16 +40,7 @@ export class AudiobookVectorDB {
     }
   }
 
-  async addChunks(
-    chunks: {
-      text: string
-      startTime: number
-      endTime: number
-      chapterIndex: number
-      wordCount: number
-      keyPhrases: string[]
-    }[]
-  ) {
+  async addChunks(chunks: TranscriptChunk[]) {
     if (!this.collection) {
       throw new Error("Collection not initialized")
     }
@@ -64,9 +56,6 @@ export class AudiobookVectorDB {
           {
             startTime: chunk.startTime,
             endTime: chunk.endTime,
-            chapterIndex: chunk.chapterIndex,
-            wordCount: chunk.wordCount,
-            keyPhrases: chunk.keyPhrases?.join(", ") || "",
           },
         ],
       })
