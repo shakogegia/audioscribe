@@ -8,7 +8,6 @@ import { twMerge } from "tailwind-merge"
 
 interface CaptionsProps {
   book: SearchResult
-  time: number
 }
 
 export function Captions({ book }: CaptionsProps) {

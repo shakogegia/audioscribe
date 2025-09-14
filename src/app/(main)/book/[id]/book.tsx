@@ -106,7 +106,7 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
                 <Chat bookId={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
 
-              <TabsContent value="captions" forceMount className={twMerge("data-[state=inactive]:hidden")}>
+              <TabsContent value="captions" className={twMerge("data-[state=inactive]:hidden")}>
                 <Captions book={book} />
               </TabsContent>
             </Tabs>

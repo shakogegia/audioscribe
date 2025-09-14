@@ -59,6 +59,7 @@ export default function Chapters({ play, book }: ChaptersProps) {
                   type="text"
                   className="font-normal outline-none w-full hover:underline"
                   defaultValue={chapter.title}
+                  tabIndex={index}
                 />
 
                 <div className="flex items-center gap-2">
