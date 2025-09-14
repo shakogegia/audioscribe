@@ -1,5 +1,23 @@
 # Changelog
 
+# [0.5.0](https://github.com/shakogegia/audioscribe/compare/0.4.2...0.5.0) (2025-09-14)
+
+
+### Bug Fixes
+
+* book tab icons ([98fd1ff](https://github.com/shakogegia/audioscribe/commit/98fd1ffdb9e9f44c2fc31fcd8c04cff60bd8f506))
+* build errors ([8c5f7cc](https://github.com/shakogegia/audioscribe/commit/8c5f7cc4c44864508b6d95759f49165d02672729))
+* captions ([0db66e1](https://github.com/shakogegia/audioscribe/commit/0db66e1eab23b2f932cbb003716926632413c681))
+* command palette icons ([2937bb0](https://github.com/shakogegia/audioscribe/commit/2937bb0313c089e94d18c2017830e89d3ed05212))
+* tab index for chapters ([4d1e18b](https://github.com/shakogegia/audioscribe/commit/4d1e18b87093b800365923fbd3caa11df3b65b30))
+* use xenova embedder ([a6edceb](https://github.com/shakogegia/audioscribe/commit/a6edcebdbc506adc369eb188913e42a5ba24fd01))
+
+
+### Features
+
+* captions ([a956861](https://github.com/shakogegia/audioscribe/commit/a9568617461d49dce12e4c675479395878561516))
+* show book hasnt been processed alert for empty books ([1eb7e81](https://github.com/shakogegia/audioscribe/commit/1eb7e815d54b0421a86884b8f3f92984051e62f8))
+
 ## [0.4.2](https://github.com/shakogegia/audioscribe/compare/0.4.1...0.4.2) (2025-09-12)
 
 
