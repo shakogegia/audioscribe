@@ -15,6 +15,8 @@ export function Captions({ book }: CaptionsProps) {
   const { findMergedCaption, fetchTranscript } = useTranscript()
   const [fullScreen, setFullScreen] = useState(false)
   const caption = findMergedCaption(0)
+  const currentTime = usePlayerStore(state => state.currentTime)
+  const [lastKnownTime, setLastKnownTime] = useState(0)
 
   useEffect(() => {
     if (book.id) {
@@ -33,6 +35,7 @@ export function Captions({ book }: CaptionsProps) {
 
   const [isAnimating, setIsAnimating] = useState(false)
   const [currentSegmentId, setCurrentSegmentId] = useState("")
+  const [forceReset, setForceReset] = useState(false)
 
   // Refs for each carousel element (not positions)
   const elem1Ref = useRef<HTMLDivElement>(null)
@@ -46,9 +49,24 @@ export function Captions({ book }: CaptionsProps) {
     [elem1Ref, elem2Ref, elem3Ref, elem4Ref, elem5Ref]
   )
 
-  // Initialize carousel elements on first load
+  // Detect seeking (significant time jumps) and reset animation state
   useEffect(() => {
-    if (!currentSegmentId && caption.current?.text) {
+    const timeDiff = Math.abs(currentTime - lastKnownTime)
+    const SEEK_THRESHOLD = 2 // seconds - if time jumps more than 2 seconds, it's likely a seek
+
+    if (lastKnownTime > 0 && timeDiff > SEEK_THRESHOLD) {
+      // Seeking detected - reset animation state
+      setForceReset(true)
+      setCurrentSegmentId("")
+      setIsAnimating(false)
+    }
+
+    setLastKnownTime(currentTime)
+  }, [currentTime, lastKnownTime])
+
+  // Initialize carousel elements on first load or after seeking
+  useEffect(() => {
+    if ((!currentSegmentId && caption.current?.text) || forceReset) {
       const newElements = [
         {
           id: "elem1",
@@ -73,8 +91,12 @@ export function Captions({ book }: CaptionsProps) {
       ]
       setCarouselElements(newElements)
       setCurrentSegmentId(caption.current?.id?.toString() || "")
+
+      if (forceReset) {
+        setForceReset(false)
+      }
     }
-  }, [caption, currentSegmentId])
+  }, [caption, currentSegmentId, forceReset])
 
   // Get position styles based on position index
   const getPositionStyles = (position: number) => {
@@ -166,16 +188,16 @@ export function Captions({ book }: CaptionsProps) {
 
   // Detect when content should flow and trigger animation
   useEffect(() => {
-    if (isAnimating) return
+    if (isAnimating || forceReset) return
 
     const newCurrentId = caption.current?.id?.toString() || ""
 
-    // Check if we have a new current caption
+    // Check if we have a new current caption (but not during a reset)
     if (newCurrentId && newCurrentId !== currentSegmentId && currentSegmentId) {
       animateCarousel()
       setCurrentSegmentId(newCurrentId)
     }
-  }, [caption.current?.id, isAnimating, currentSegmentId, animateCarousel, caption])
+  }, [caption.current?.id, isAnimating, currentSegmentId, animateCarousel, caption, forceReset])
 
   useEffect(() => {
     // on exit full screen, remove the fullscreen class
