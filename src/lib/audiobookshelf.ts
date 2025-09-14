@@ -1,7 +1,7 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf"
 import { Book, BookSetupProgress } from "@prisma/client"
 import axios from "axios"
-import { AudioFile, BookBasicInfo } from "../types/api"
+import { AudioFile, BookBasicInfo, SearchResult } from "../types/api"
 import { load } from "./config"
 import { getBookCacheSize } from "./folders"
 import { prisma } from "./prisma"
@@ -57,14 +57,14 @@ export async function getLibraryItems(libraryId: string): Promise<BookBasicInfo[
 
 async function getBookFromDatabase(
   libraryItemId: string
-): Promise<{ book: Book | null; progress?: BookSetupProgress }> {
+): Promise<{ book: Book | null; progress?: BookSetupProgress[] }> {
   const book = await prisma.book.findUnique({
     where: { id: libraryItemId },
     include: {
       bookSetupProgress: true,
     },
   })
-  return { book, progress: book?.bookSetupProgress[0] }
+  return { book, progress: book?.bookSetupProgress }
 }
 
 export async function searchBook(libraryId: string, query: string): Promise<BookBasicInfo[]> {
@@ -109,7 +109,7 @@ export async function searchBook(libraryId: string, query: string): Promise<Book
         libraryId: libraryId,
         setup: book?.setup ?? false,
         model: book?.model ?? null,
-        progress: book?.bookSetupProgress?.[0] ?? null,
+        progress: book?.bookSetupProgress,
       }
     })
   )
@@ -151,7 +151,7 @@ export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<Bo
         libraryId: libraryItem.libraryId,
         setup: bookMap.get(libraryItem.id)?.setup ?? false,
         model: bookMap.get(libraryItem.id)?.model ?? null,
-        progress: bookMap.get(libraryItem.id)?.bookSetupProgress?.[0] ?? null,
+        progress: bookMap.get(libraryItem.id)?.bookSetupProgress,
       }
     })
   )

@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export function CommandPalette() {
-  const [query, setQuery] = useState("")
+  const [_, setQuery] = useState<string>("")
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const { systemTheme, setTheme } = useTheme()

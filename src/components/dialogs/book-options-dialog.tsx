@@ -1,4 +1,3 @@
-import { WhisperModel } from "@/types/transript"
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -23,7 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { SearchResult } from "@/types/api"
+import { BookBasicInfo } from "@/types/api"
+import { WhisperModel } from "@/types/transript"
 import { whisperModels } from "@/utils/constants"
 import { TranscriptSegment } from "@prisma/client"
 import axios from "axios"
@@ -35,7 +35,7 @@ import { toast } from "sonner"
 type BookOptionsProps = {
   title?: string
   children: React.ReactNode
-  book: SearchResult
+  book: BookBasicInfo
   tabs: BookOptionTab[]
   defaultTab?: BookOptionTab
 }

@@ -76,7 +76,7 @@ export function useTranscript(): Response {
     return caption
   }
 
-  function findMergedCaption(_seconds: number): Caption {
+  function findMergedCaption(): Caption {
     const milliseconds = currentTime * 1000
 
     const index = mergedSegments.findIndex(

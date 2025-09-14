@@ -19,7 +19,7 @@ export interface SearchResult {
   currentTime?: number
   setup: boolean
   model?: string | null
-  progress?: BookSetupProgress
+  progress?: BookSetupProgress[]
   favorite?: boolean
 }
 
@@ -47,4 +47,5 @@ export interface BookBasicInfo {
   setup: boolean
   model?: string | null
   favorite?: boolean
+  progress?: BookSetupProgress[]
 }

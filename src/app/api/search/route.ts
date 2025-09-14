@@ -1,10 +1,10 @@
-import { SearchResult } from "@/types/api"
 import { searchBook } from "@/lib/audiobookshelf"
+import { BookBasicInfo } from "@/types/api"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
   request: NextRequest
-): Promise<NextResponse<SearchResult[]> | NextResponse<{ error: string }>> {
+): Promise<NextResponse<BookBasicInfo[]> | NextResponse<{ error: string }>> {
   try {
     const searchParams = request.nextUrl.searchParams
     const query = searchParams.get("q")
