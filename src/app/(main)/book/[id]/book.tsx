@@ -15,6 +15,7 @@ import { Chat } from "./tabs/chat/chat"
 import { Transcript } from "./tabs/transcript/transcript"
 import useBookmarksStore from "@/stores/bookmarks"
 import { BookmarkIcon, BookOpenIcon, CaptionsIcon, SparklesIcon } from "lucide-react"
+import { Captions } from "./tabs/captions/captions"
 
 interface BookProps {
   id: string
@@ -28,6 +29,7 @@ enum BookTab {
   Chapters = "chapters",
   Chat = "chat",
   Transcript = "transcript",
+  Captions = "captions",
 }
 
 export default function Book({ id, book, files, revalidate }: BookProps) {
@@ -78,6 +80,10 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
                   <CaptionsIcon />
                   Transcript
                 </TabsTrigger>
+                <TabsTrigger value={BookTab.Captions}>
+                  <CaptionsIcon />
+                  Captions
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
@@ -94,6 +100,10 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
 
               <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <Chat bookId={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
+              </TabsContent>
+
+              <TabsContent value="captions" forceMount className={twMerge("data-[state=inactive]:hidden")}>
+                <Captions book={book} />
               </TabsContent>
             </Tabs>
           </>

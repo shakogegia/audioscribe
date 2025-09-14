@@ -89,13 +89,9 @@ export function ChatContextDialog({ book, children, onApply }: ChatContextDialog
   }
 
   function apply() {
-    onApply({ time: currentTime, before, after })
-
     if (contextType === "by-chapter") {
-      if (!customChapterId) return
-      const chapter = book.chapters.find(chapter => chapter.id?.toString() === customChapterId)
-      if (!chapter) return
-      onApply({ time: currentTime, before: chapter.start, after: chapter.end })
+      if (!selectedChapter) return
+      onApply({ time: currentTime, before: selectedChapter.start, after: selectedChapter.end })
     } else {
       onApply({ time: currentTime, before, after })
     }
@@ -103,7 +99,11 @@ export function ChatContextDialog({ book, children, onApply }: ChatContextDialog
     setOpen(false)
   }
 
-  const showTimeSource = absTime !== playerTime
+  const showTimeSource =
+    absTime &&
+    playerTime &&
+    parseInt(absTime.toString()) !== parseInt(playerTime.toString()) &&
+    Math.abs(absTime - playerTime) > 5
 
   const selectedChapter = useMemo(() => {
     if (chapterToUse === "current") return currentChapter
