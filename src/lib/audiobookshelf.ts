@@ -1,7 +1,7 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf"
 import { Book, BookSetupProgress } from "@prisma/client"
 import axios from "axios"
-import { AudioFile, SearchResult } from "../types/api"
+import { AudioFile, BookBasicInfo } from "../types/api"
 import { load } from "./config"
 import { getBookCacheSize } from "./folders"
 import { prisma } from "./prisma"
@@ -35,7 +35,7 @@ export async function getAllLibraries(): Promise<Library[]> {
   }
 }
 
-export async function getLibraryItems(libraryId: string): Promise<SearchResult[]> {
+export async function getLibraryItems(libraryId: string): Promise<BookBasicInfo[]> {
   const api = await getApi()
   type ApiResponse = {
     total: number
@@ -67,7 +67,7 @@ async function getBookFromDatabase(
   return { book, progress: book?.bookSetupProgress[0] }
 }
 
-export async function searchBook(libraryId: string, query: string): Promise<SearchResult[]> {
+export async function searchBook(libraryId: string, query: string): Promise<BookBasicInfo[]> {
   const api = await getApi()
   const response = await api.get<{ book: { libraryItem: Audiobookshelf.LibraryItem }[] }>(
     `/api/libraries/${libraryId}/search`,
@@ -81,34 +81,41 @@ export async function searchBook(libraryId: string, query: string): Promise<Sear
 
   const config = await load()
 
+  const books = await prisma.book.findMany({
+    where: {
+      id: {
+        in: response.data.book.map(book => book.libraryItem.id),
+      },
+    },
+    include: {
+      bookSetupProgress: true,
+    },
+  })
+
+  const bookMap = new Map(books.map(book => [book.id, book]))
+
   return Promise.all(
     response.data.book.map(async ({ libraryItem }) => {
-      const { book, progress } = await getBookFromDatabase(libraryItem.id)
+      const book = bookMap.get(libraryItem.id)
       return {
         id: libraryItem.id,
         title: libraryItem.media.metadata.title ?? "",
         authors: libraryItem.media.metadata.authors.map(author => author.name),
         series: libraryItem.media.metadata.series.map(series => series.name),
         duration: libraryItem.media.duration ?? 0,
-        coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${
-          libraryItem.id
-        }/cover?ts=${Date.now()}&raw=1`,
+        cover: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItem.id}/cover?ts=${Date.now()}&raw=1`,
         narrators: libraryItem.media.metadata.narrators,
         publishedYear: libraryItem.media.metadata.publishedYear ?? "",
         libraryId: libraryId,
-        bookmarks: await getBookmarks(libraryItem.id),
-        chapters: libraryItem.media.chapters,
-        cacheSize: await getBookCacheSize(libraryItem.id),
-        currentTime: (await getLastSession(libraryItem.id))?.currentTime,
         setup: book?.setup ?? false,
         model: book?.model ?? null,
-        progress: progress,
+        progress: book?.bookSetupProgress?.[0] ?? null,
       }
     })
   )
 }
 
-export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<SearchResult[]> {
+export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<BookBasicInfo[]> {
   const api = await getApi()
   const response = await api.post<{ libraryItems: Audiobookshelf.LibraryItem[] }>(`/api/items/batch/get`, {
     libraryItemIds,
@@ -116,28 +123,35 @@ export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<Se
 
   const config = await load()
 
+  const books = await prisma.book.findMany({
+    where: {
+      id: {
+        in: libraryItemIds,
+      },
+    },
+    include: {
+      bookSetupProgress: true,
+    },
+  })
+
+  const bookMap = new Map(books.map(book => [book.id, book]))
+
   return Promise.all(
-    response.data.libraryItems.map(async libraryItem => {
-      const { book, progress } = await getBookFromDatabase(libraryItem.id)
+    response.data.libraryItems.map(libraryItem => {
       return {
         id: libraryItem.id,
         title: libraryItem.media.metadata.title ?? "",
         authors: libraryItem.media.metadata.authors.map(author => author.name),
         series: libraryItem.media.metadata.series.map(series => series.name),
         duration: libraryItem.media.duration ?? 0,
-        coverPath: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${
-          libraryItem.id
-        }/cover?ts=${Date.now()}&raw=1`,
+        subtitle: libraryItem.media.metadata.subtitle ?? "",
+        cover: `${config?.audiobookshelf.url}/audiobookshelf/api/items/${libraryItem.id}/cover?ts=${Date.now()}&raw=1`,
         narrators: libraryItem.media.metadata.narrators,
         publishedYear: libraryItem.media.metadata.publishedYear ?? "",
         libraryId: libraryItem.libraryId,
-        bookmarks: await getBookmarks(libraryItem.id),
-        chapters: libraryItem.media.chapters,
-        cacheSize: await getBookCacheSize(libraryItem.id),
-        currentTime: (await getLastSession(libraryItem.id))?.currentTime,
-        setup: book?.setup ?? false,
-        model: book?.model ?? null,
-        progress: progress,
+        setup: bookMap.get(libraryItem.id)?.setup ?? false,
+        model: bookMap.get(libraryItem.id)?.model ?? null,
+        progress: bookMap.get(libraryItem.id)?.bookSetupProgress?.[0] ?? null,
       }
     })
   )

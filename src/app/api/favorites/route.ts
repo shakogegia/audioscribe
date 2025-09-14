@@ -1,9 +1,9 @@
 import { getBatchLibraryItems } from "@/lib/audiobookshelf"
 import { prisma } from "@/lib/prisma"
-import { SearchResult } from "@/types/api"
+import { BookBasicInfo } from "@/types/api"
 import { NextResponse } from "next/server"
 
-export async function GET(): Promise<NextResponse<SearchResult[]> | NextResponse<{ error: string }>> {
+export async function GET(): Promise<NextResponse<BookBasicInfo[]> | NextResponse<{ error: string }>> {
   try {
     const books = await prisma.book.findMany({ where: { favorite: true } })
     const libraryItemIds = books.map(book => book.id)

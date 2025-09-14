@@ -9,9 +9,10 @@ import { AudioLinesIcon } from "lucide-react"
 
 interface BookProps {
   book: SearchResult
+  showOptions?: boolean
 }
 
-export default function BookInfo({ book }: BookProps) {
+export default function BookInfo({ book, showOptions = true }: BookProps) {
   return (
     <Hero
       title={book.title}
@@ -19,16 +20,18 @@ export default function BookInfo({ book }: BookProps) {
       content={
         <div className="flex items-center gap-2">
           <Favorite id={book.id} defaultFavorite={book.favorite} />
-          <BookOptionsDialog
-            title="Book Options"
-            book={book}
-            tabs={[BookOptionTab.Setup, BookOptionTab.Export, BookOptionTab.Import, BookOptionTab.Remove]}
-          >
-            <Button variant="outline" size="sm">
-              <AudioLinesIcon className="w-4 h-4" />
-              Options
-            </Button>
-          </BookOptionsDialog>
+          {showOptions && (
+            <BookOptionsDialog
+              title="Book Options"
+              book={book}
+              tabs={[BookOptionTab.Setup, BookOptionTab.Export, BookOptionTab.Import, BookOptionTab.Remove]}
+            >
+              <Button variant="outline" size="sm">
+                <AudioLinesIcon className="w-4 h-4" />
+                Options
+              </Button>
+            </BookOptionsDialog>
+          )}
         </div>
       }
       icon={

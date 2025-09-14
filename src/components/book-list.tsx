@@ -3,14 +3,13 @@ import { BookOptionsDialog, BookOptionTab } from "@/components/dialogs/book-opti
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { formatDuration } from "@/lib/format"
-import { SearchResult } from "@/types/api"
+import { BookBasicInfo } from "@/types/api"
 import { AudioLinesIcon, BookOpenCheck } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 import BookCover from "./book-cover"
 
 type Props = {
-  books: SearchResult[]
+  books: BookBasicInfo[]
 }
 
 type Stage = "pending" | "downloading" | "transcribing" | "vectorizing" | "completed" | "failed"
@@ -28,7 +27,7 @@ const STAGES: Record<Stage, { variant: StageVariant; label: string }> = {
 export default function BookList({ books }: Props) {
   return books.map(book => (
     <div key={book.id} className="flex flex-col sm:flex-row gap-2 items-center border rounded-lg p-4">
-      <BookCover src={book.coverPath} size={64} />
+      <BookCover src={book.cover} size={64} />
       <div className="flex flex-col flex-1 text-center sm:text-left">
         <h3 className="text-md font-semibold">{book.title}</h3>
         <div className="flex gap-2 justify-center sm:justify-start">

@@ -250,7 +250,7 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
             {activeTab === BookOptionTab.Setup && (
               <Button type="submit" onClick={() => onConfirm(model)} disabled={isLoading}>
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <AudioLinesIcon className="w-4 h-4" />}
-                Confirm
+                Start Setup
               </Button>
             )}
 

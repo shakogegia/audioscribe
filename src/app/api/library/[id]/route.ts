@@ -1,11 +1,11 @@
 import { getLibraryItems } from "@/lib/audiobookshelf"
-import { SearchResult } from "@/types/api"
+import { BookBasicInfo } from "@/types/api"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-): Promise<NextResponse<SearchResult[]> | NextResponse<{ error: string }>> {
+): Promise<NextResponse<BookBasicInfo[]> | NextResponse<{ error: string }>> {
   try {
     const { id } = await params
     const libraryId = id

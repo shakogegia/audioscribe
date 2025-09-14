@@ -33,3 +33,18 @@ export interface AudioFile {
   size: number
   fileName: string
 }
+
+export interface BookBasicInfo {
+  id: string
+  title: string
+  subtitle?: string
+  authors: string[]
+  publishedYear?: string
+  description?: string
+  cover?: string
+  duration: number
+  libraryId: string
+  setup: boolean
+  model?: string | null
+  favorite?: boolean
+}

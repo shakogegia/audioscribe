@@ -16,6 +16,7 @@ import { Transcript } from "./tabs/transcript/transcript"
 import useBookmarksStore from "@/stores/bookmarks"
 import { BookmarkIcon, BookOpenIcon, CaptionsIcon, SparklesIcon } from "lucide-react"
 import { Captions } from "./tabs/captions/captions"
+import { ProcessBookAlert } from "./components/process-book-alert"
 
 interface BookProps {
   id: string
@@ -47,18 +48,21 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
     setBookmarks(book.bookmarks || [])
   })
 
-  const showProcessingInfo = !book.setup
+  const showProcessingInfo = !book.setup && book.progress
+  const isEmpty = !showProcessingInfo && !book.progress
+  const showContent = isEmpty && !showProcessingInfo
 
   return (
     <div className="w-full min-h-full flex flex-col items-center gap-8 my-10 px-4">
-      <BookInfo book={book} />
+      <BookInfo book={book} showOptions={!showContent} />
 
       <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 justify-center">
         {showProcessingInfo && <ProcessingInfo book={book} revalidate={revalidate} />}
+        {isEmpty && <ProcessBookAlert book={book} />}
 
         {/* {!hasDownloaded && <Downloader bookId={id} onComplete={onDownloadComplete} />} */}
 
-        {!showProcessingInfo && (
+        {!showContent && (
           <>
             <Player book={book} files={files} ref={playerRef} controls="full" defaultTime={book.currentTime} />
 
