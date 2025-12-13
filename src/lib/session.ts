@@ -8,6 +8,10 @@ import { cache } from "react"
 const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey)
 
+// Use secure cookies only when explicitly enabled (for HTTPS deployments)
+// Default to false for local NAS/IP address deployments over HTTP
+const useSecureCookies = process.env.SECURE_COOKIES === "true"
+
 export async function encrypt(payload: SessionPayload) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
@@ -22,7 +26,7 @@ export async function decrypt(session: string | undefined = "") {
       algorithms: ["HS256"],
     })
     return payload
-  } catch {
+  } catch (error) {
     console.log("Failed to verify session")
   }
 }
@@ -34,7 +38,7 @@ export async function createSession(userId: string) {
 
   cookieStore.set("session", session, {
     httpOnly: true,
-    secure: true,
+    secure: useSecureCookies,
     expires: expiresAt,
     sameSite: "lax",
     path: "/",
@@ -54,7 +58,7 @@ export async function updateSession() {
   const cookieStore = await cookies()
   cookieStore.set("session", session, {
     httpOnly: true,
-    secure: true,
+    secure: useSecureCookies,
     expires: expires,
     sameSite: "lax",
     path: "/",
