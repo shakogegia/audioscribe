@@ -1,5 +1,6 @@
 "use server"
 
+import { load } from "@/lib/config"
 import { SigninFormSchema, SigninFormState } from "@/lib/definitions"
 import { createSession } from "@/lib/session"
 import { redirect } from "next/navigation"
@@ -42,5 +43,17 @@ export async function signin(state: SigninFormState, formData: FormData) {
   await createSession(email)
 
   // Redirect user to home
-  redirect("/")
+  const config = await load()
+
+  const isAudiobookshelfConfigured = Object.values(config.audiobookshelf).every(value => Boolean(value))
+  if (!isAudiobookshelfConfigured) {
+    return redirect("/setup/audiobookshelf")
+  }
+
+  const aiProviders = Object.values(config.aiProviders).filter(provider => provider.enabled)
+  if (aiProviders.length === 0) {
+    return redirect("/setup/llm")
+  }
+
+  redirect("/home")
 }

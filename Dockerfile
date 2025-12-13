@@ -80,6 +80,6 @@ ENV REDIS_PORT="6379"
 
 USER root
 
-EXPOSE 3000
+EXPOSE 3000 8000 6379
 
 ENTRYPOINT ["/app/entrypoint.sh"]
