@@ -115,6 +115,7 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
 
       await axios.post(`/api/book/${book.id}/transcript/import`, { data })
       toast.success("Transcript imported", { id: "import-transcript" })
+      setOpen(false)
 
       router.push(`/book/${book.id}`)
     } catch (error) {

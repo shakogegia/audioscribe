@@ -1,37 +1,28 @@
 // import { setupBook } from "@/server/jobs/queue"
-import { prisma } from "@/lib/prisma"
+import { getBook } from "@/lib/audiobookshelf"
+import { importTranscriptFlow } from "@/server/jobs/workers/import-transcript.worker"
 import { NextRequest, NextResponse } from "next/server"
-import { TranscriptSegment, Prisma } from "../../../../../../../generated/prisma"
+import { TranscriptSegment } from "../../../../../../../generated/prisma"
+import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+  try {
+    const { id } = await params
 
-  const body = await request.json()
-  const { data } = body as { data: string }
+    const body = await request.json()
+    const { data } = body as { data: string }
 
-  const transcript = JSON.parse(data) as { segments: TranscriptSegment[] }
+    const { segments } = JSON.parse(data) as { segments: TranscriptSegment[] }
 
-  const segments: Prisma.TranscriptSegmentUncheckedCreateInput[] = transcript.segments.map(segment => ({
-    bookId: id,
-    model: segment.model,
-    fileIno: segment.fileIno,
-    text: segment.text,
-    startTime: segment.startTime,
-    endTime: segment.endTime,
-  }))
+    const book = await getBook(id)
 
-  const model = transcript.segments[0].model
+    const model = segments[0].model
 
-  // await resetBook(id, model)
+    await importTranscriptFlow({ book, model, segments })
 
-  // clean up existing segments
-  // await resetBookStages(id, model, [SetupBookStage.Transcribe])
-  await prisma.transcriptSegment.deleteMany({ where: { bookId: id } })
-  await prisma.transcriptSegment.createMany({ data: segments })
-  // await updateStageProgress(id, "transcribe", model, { status: "completed", completedAt: new Date() })
-
-  // TODO: Implement this
-  // await setupBook({ bookId: id, model, stages: [SetupBookStage.Download, SetupBookStage.Vectorize] })
-
-  return NextResponse.json({ segments })
+    return NextResponse.json({ segments })
+  } catch (error) {
+    console.error("Import transcript API error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }

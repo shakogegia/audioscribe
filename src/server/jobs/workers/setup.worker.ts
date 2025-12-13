@@ -40,7 +40,7 @@ export async function setupBookFlow({ book, model }: { book: { id: string; title
   const notificationJob: FlowChildJob = {
     name: book.title,
     queueName: "notification",
-    data: { bookId: book.id, model },
+    data: { bookId: book.id, model, action: "setup" },
     opts: { continueParentOnFailure: false },
     children: [vectorizeJob],
   }

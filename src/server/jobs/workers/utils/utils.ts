@@ -26,8 +26,9 @@ export async function updateStageProgress(bookId: string, stage: BookSetupStage,
 export async function completeStageProgress(bookId: string, stage: BookSetupStage) {
   await prisma.book.update({ where: { id: bookId }, data: { [stageToField[stage]]: true } })
 
-  await prisma.bookSetupProgress.update({
+  await prisma.bookSetupProgress.upsert({
     where: { bookId_stage: { bookId, stage } },
-    data: { status: BookSetupStatus.Completed, completedAt: new Date(), progress: 100 },
+    update: { status: BookSetupStatus.Completed, completedAt: new Date(), progress: 100 },
+    create: { bookId, stage, status: BookSetupStatus.Completed, completedAt: new Date(), progress: 100 },
   })
 }
