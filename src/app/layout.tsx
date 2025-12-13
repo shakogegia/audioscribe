@@ -35,10 +35,7 @@ export default async function RootLayout({ children }: Props) {
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AppProviders>
-            <div className="font-sans min-h-screen">
-              <Header />
-              <main>{children}</main>
-            </div>
+            <div className="font-sans min-h-screen">{children}</div>
           </AppProviders>
         </ThemeProvider>
       </body>

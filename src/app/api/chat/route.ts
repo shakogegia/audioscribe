@@ -4,6 +4,7 @@ import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
 import { getTranscriptRangeByTime } from "@/lib/transcript"
 import { UIMessage } from "ai"
+import { NextResponse } from "next/server"
 
 interface ChatRequestBody {
   messages: UIMessage[]

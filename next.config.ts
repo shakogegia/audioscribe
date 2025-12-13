@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "**" },
-      { protocol: "http", hostname: "**" },
+      { protocol: "https", hostname: "*" },
+      { protocol: "http", hostname: "*" },
     ],
   },
   webpack: config => {

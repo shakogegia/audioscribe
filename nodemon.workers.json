@@ -1,0 +1,5 @@
+{
+  "watch": ["src/server/jobs/**/*.ts", "src/server/redis.ts"],
+  "exec": "node --import=tsx ./src/server/jobs/index.ts",
+  "ext": "js ts"
+}

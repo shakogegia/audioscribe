@@ -1,8 +1,9 @@
 "use client"
-import { BadgeInfo, Cog, CommandIcon, House } from "lucide-react"
+import { BadgeInfo, Cog, CommandIcon, House, List, LogOut } from "lucide-react"
 import Link from "next/link"
 import { Button } from "../ui/button"
 import { ThemeSwitcher } from "./theme-switcher"
+import { logout } from "@/actions/auth"
 
 export function Header() {
   function triggerCommandPalette() {
@@ -41,6 +42,19 @@ export function Header() {
             <BadgeInfo className="w-4 h-4" />
           </Button>
         </Link>
+
+        {/* Jobs */}
+        <Link href="/jobs" target="audioscribe-jobs">
+          <Button variant="outline" size="icon">
+            <List className="w-4 h-4" />
+          </Button>
+        </Link>
+
+        <form action={logout}>
+          <Button variant="outline" size="icon" type="submit">
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </form>
       </div>
     </header>
   )

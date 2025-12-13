@@ -1,6 +1,10 @@
 import { ChromaClient, type Collection } from "chromadb"
 import { embedder } from "./embedder"
-import { TranscriptChunk } from "../../server/workers/chunk-transcript"
+interface TranscriptChunk {
+  text: string
+  startTime: number
+  endTime: number
+}
 
 export class AudiobookVectorDB {
   private client: ChromaClient

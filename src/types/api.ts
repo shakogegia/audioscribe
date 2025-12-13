@@ -1,5 +1,5 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf"
-import { BookSetupProgress } from "@prisma/client"
+import { BookSetupProgress } from "../../generated/prisma"
 
 export interface SearchResult {
   id: string
@@ -18,6 +18,7 @@ export interface SearchResult {
   cacheSize: { size: number; humanReadableSize: string }
   currentTime?: number
   setup: boolean
+  ready: boolean
   model?: string | null
   progress?: BookSetupProgress[]
   favorite?: boolean

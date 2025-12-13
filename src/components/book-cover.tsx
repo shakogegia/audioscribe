@@ -42,6 +42,7 @@ export default function BookCover({ src, alt, size = 64, className }: Props) {
         height={size}
         onLoad={handleLoad}
         onError={handleError}
+        unoptimized
       />
     </div>
   )

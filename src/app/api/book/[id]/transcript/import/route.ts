@@ -1,8 +1,7 @@
-import { setupBook } from "@/server/jobs/queue"
-import { resetBook, resetBookStages, SetupBookStage, updateStageProgress } from "@/server/utils/book-operations"
+// import { setupBook } from "@/server/jobs/queue"
 import { prisma } from "@/lib/prisma"
-import { Prisma, TranscriptSegment } from "@prisma/client"
 import { NextRequest, NextResponse } from "next/server"
+import { TranscriptSegment, Prisma } from "../../../../../../../generated/prisma"
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -23,15 +22,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   const model = transcript.segments[0].model
 
-  await resetBook(id, model)
+  // await resetBook(id, model)
 
   // clean up existing segments
-  await resetBookStages(id, model, [SetupBookStage.Transcribe])
+  // await resetBookStages(id, model, [SetupBookStage.Transcribe])
   await prisma.transcriptSegment.deleteMany({ where: { bookId: id } })
   await prisma.transcriptSegment.createMany({ data: segments })
-  await updateStageProgress(id, "transcribe", model, { status: "completed", completedAt: new Date() })
+  // await updateStageProgress(id, "transcribe", model, { status: "completed", completedAt: new Date() })
 
-  await setupBook({ bookId: id, model, stages: [SetupBookStage.Download, SetupBookStage.Vectorize] })
+  // TODO: Implement this
+  // await setupBook({ bookId: id, model, stages: [SetupBookStage.Download, SetupBookStage.Vectorize] })
 
   return NextResponse.json({ segments })
 }

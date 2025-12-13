@@ -3,25 +3,31 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 model Book {
-  id        String   @id @default(cuid())
-  setup     Boolean  @default(false)
-  model     String?
-  favorite  Boolean  @default(false)
+  id       String  @id @default(cuid())
+  favorite Boolean @default(false)
+
+  model String?
+  setup Boolean @default(false)
+
+  downloaded     Boolean @default(false)
+  audioProcessed Boolean @default(false)
+  transcribed    Boolean @default(false)
+  vectorized     Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relations
   transcriptSegment TranscriptSegment[]
   bookSetupProgress BookSetupProgress[]
-  jobs              Job[]
 }
 
 model TranscriptSegment {
@@ -41,38 +47,12 @@ model TranscriptSegment {
   @@index([bookId])
 }
 
-model Job {
-  id          String    @id @default(cuid())
-  bookId      String
-  type        String
-  data        String
-  status      String    @default("pending")
-  result      String?
-  error       String?
-  attempts    Int       @default(0)
-  maxAttempts Int       @default(3)
-  delay       Int       @default(0)
-  priority    Int       @default(0)
-  processAt   DateTime  @default(now())
-  completedAt DateTime?
-  failedAt    DateTime?
-  pid         Int? // Process ID for cancellation
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  // relations
-  book Book? @relation(fields: [bookId], references: [id])
-
-  @@index([status, processAt, priority])
-}
-
 model BookSetupProgress {
-  id       String  @id @default(cuid())
+  id       String          @id @default(cuid())
   bookId   String
-  stage    String // "download", "transcribe", "vectorize"
-  status   String  @default("pending") // pending, running, completed, failed
-  progress Float   @default(0)
-  model    String?
+  stage    BookSetupStage
+  status   BookSetupStatus @default(Pending)
+  progress Float           @default(0)
   error    String?
 
   startedAt   DateTime?
@@ -86,4 +66,18 @@ model BookSetupProgress {
 
   @@unique([bookId, stage])
   @@index([bookId])
+}
+
+enum BookSetupStage {
+  Download
+  ProcessAudio
+  Transcribe
+  Vectorize
+}
+
+enum BookSetupStatus {
+  Pending
+  Running
+  Completed
+  Failed
 }

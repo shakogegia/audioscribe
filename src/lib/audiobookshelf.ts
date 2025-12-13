@@ -1,5 +1,5 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf"
-import { Book, BookSetupProgress } from "@prisma/client"
+import { Book, BookSetupProgress } from "../../generated/prisma"
 import axios from "axios"
 import { AudioFile, BookBasicInfo, SearchResult } from "../types/api"
 import { load } from "./config"
@@ -55,9 +55,7 @@ export async function getLibraryItems(libraryId: string): Promise<BookBasicInfo[
   return books
 }
 
-async function getBookFromDatabase(
-  libraryItemId: string
-): Promise<{ book: Book | null; progress?: BookSetupProgress[] }> {
+async function getBookFromDatabase(libraryItemId: string) {
   const book = await prisma.book.findUnique({
     where: { id: libraryItemId },
     include: {
@@ -213,6 +211,7 @@ export async function getBook(libraryItemId: string): Promise<SearchResult> {
     model: book?.model ?? null,
     progress: progress,
     favorite: book?.favorite ?? false,
+    ready: book?.ready ?? false,
   }
 }
 
