@@ -49,3 +49,25 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Send success pushover notification
+        if: success()
+        uses: umahmood/pushover-actions@main
+        env:
+          PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+          PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
+        with:
+          status: ${{ job.status }}
+          title: "AudioScribe Docker Image Built Successfully"
+          message: "AudioScribe Docker image built successfully and pushed to Docker Hub"
+
+      - name: Send failure pushover notification
+        if: failure()
+        uses: umahmood/pushover-actions@main
+        env:
+          PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+          PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
+        with:
+          status: ${{ job.status }}
+          title: "AudioScribe Docker Image Build Failed"
+          message: "AudioScribe Docker image build failed. Check the build logs for more details."
