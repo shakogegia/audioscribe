@@ -5,7 +5,7 @@ mkdir -p $DATA_DIR /app/.next
 
 # Setup database
 npx prisma generate
-npx prisma db push
+npx prisma db push --accept-data-loss
 
 # Build the application
 echo "Building Next.js application..."
