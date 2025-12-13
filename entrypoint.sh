@@ -18,6 +18,9 @@ pm2 start redis-server --name "redis" -- --bind 127.0.0.1 --port ${REDIS_PORT:-6
 echo "Starting ChromaDB server..."
 pm2 start npm --name "chroma" -- run chroma
 
+echo "Starting workers..."
+pm2 start npm --name "workers" -- run workers
+
 echo "Starting audioscribe application..."
 pm2 start npm --name "audioscribe" -- run start
 
