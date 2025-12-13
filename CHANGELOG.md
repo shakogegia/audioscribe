@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.6.0](/compare/0.5.2...0.6.0) (2025-12-13)
+
+
+### Bug Fixes
+
+* sign in f51c145
+
+
+### Features
+
+* add pushover notifications for Docker image build success and failure 47798ca
+
 ## [0.5.2](/compare/0.5.1...0.5.2) (2025-12-13)
 
 
