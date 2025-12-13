@@ -31,15 +31,7 @@ export function PreviouslyOn({ book }: { book: SearchResult }) {
         config: { provider, model },
       })
 
-      const { summary, metadata } = response.data
-
-      console.log("=== Previously On Summary ===")
-      console.log(`Book: ${metadata.bookTitle}`)
-      console.log(`Time Range: Last 10 minutes (${metadata.timeRange.start}s - ${metadata.timeRange.end}s)`)
-      console.log(`Transcript Length: ${metadata.transcriptLength} characters`)
-      console.log(`Segments: ${metadata.segmentCount}`)
-      console.log(`\nSummary:\n${summary}`)
-      console.log("============================")
+      const { summary } = response.data
 
       // Automatically speak the summary
       speak(summary)
@@ -72,13 +64,7 @@ export function PreviouslyOn({ book }: { book: SearchResult }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="w-10"
-          onClick={handleClick}
-          disabled={isGenerating}
-        >
+        <Button variant="outline" size="icon" className="w-10" onClick={handleClick} disabled={isGenerating}>
           {getIcon()}
         </Button>
       </TooltipTrigger>
