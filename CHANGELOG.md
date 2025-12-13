@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.1](/compare/0.6.0...0.6.1) (2025-12-13)
+
+
+### Bug Fixes
+
+* db push 258e87e
+* update session cookie security configuration 93a110b
+
 # [0.6.0](/compare/0.5.2...0.6.0) (2025-12-13)
 
 
