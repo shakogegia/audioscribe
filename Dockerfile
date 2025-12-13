@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     libavutil-dev \
     libswresample-dev \
     libc6 \
+    redis-server \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for whisper.cpp compilation
@@ -74,6 +75,8 @@ ENV CLEANUP_TEMP_FILES="true"
 ENV CHROMA_SERVER_CORS_ALLOW_ORIGINS="*"
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
+ENV REDIS_HOST="localhost"
+ENV REDIS_PORT="6379"
 
 USER root
 

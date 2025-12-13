@@ -25,12 +25,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BookBasicInfo } from "@/types/api"
 import { WhisperModel } from "@/types/transript"
 import { whisperModels } from "@/utils/constants"
-import { TranscriptSegment } from "@prisma/client"
 import axios from "axios"
 import { AudioLinesIcon, FileDownIcon, FileUpIcon, InfoIcon, Loader2, TrashIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
+import { TranscriptSegment } from "../../../generated/prisma"
 
 type BookOptionsProps = {
   title?: string

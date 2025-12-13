@@ -12,6 +12,9 @@ echo "Building Next.js application..."
 npm run build
 
 # Start services with PM2
+echo "Starting Redis server..."
+pm2 start redis-server --name "redis" -- --bind 127.0.0.1 --port ${REDIS_PORT:-6379}
+
 echo "Starting ChromaDB server..."
 pm2 start npm --name "chroma" -- run chroma
 

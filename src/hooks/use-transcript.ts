@@ -2,9 +2,9 @@
 import { usePlayerStore } from "@/stores/player"
 import { useTranscriptStore } from "@/stores/transcript"
 import { secondsToMilliseconds } from "@/utils/time"
-import { TranscriptSegment } from "@prisma/client"
 import axios from "axios"
 import { useCallback, useState } from "react"
+import { TranscriptSegment } from "../../generated/prisma"
 
 interface Response {
   isLoading: boolean

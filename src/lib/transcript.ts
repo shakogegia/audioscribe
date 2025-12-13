@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { TranscriptSegment } from "@prisma/client"
+import { TranscriptSegment } from "../../generated/prisma"
 
 export async function getTranscriptByOffset({
   bookId,

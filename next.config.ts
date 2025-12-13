@@ -8,11 +8,6 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "*" },
     ],
   },
-  webpack: config => {
-    // Suppress handlebars require.extensions warning
-    config.ignoreWarnings = [/require\.extensions/]
-    return config
-  },
 }
 
 export default nextConfig

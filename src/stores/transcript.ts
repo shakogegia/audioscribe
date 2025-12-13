@@ -1,5 +1,5 @@
-import { TranscriptSegment } from "@prisma/client"
 import { create } from "zustand"
+import { TranscriptSegment } from "../../generated/prisma"
 
 interface TranscriptState {
   segments: TranscriptSegment[]

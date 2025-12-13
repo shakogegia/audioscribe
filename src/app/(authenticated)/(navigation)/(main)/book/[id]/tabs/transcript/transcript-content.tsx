@@ -1,8 +1,8 @@
 "use client"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { TranscriptSegment } from "@prisma/client"
 import { forwardRef, memo, Ref, useMemo } from "react"
 import { twMerge } from "tailwind-merge"
+import { TranscriptSegment } from "../../../../../../../../../generated/prisma"
 
 interface TranscriptProps {
   segments: TranscriptSegment[]
