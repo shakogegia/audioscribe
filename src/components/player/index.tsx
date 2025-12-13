@@ -22,6 +22,7 @@ import useBookmarksStore from "@/stores/bookmarks"
 import { Captions } from "./captions"
 import { useTranscript } from "@/hooks/use-transcript"
 import { useMount } from "react-use"
+import { PreviouslyOn } from "./previously-on"
 
 interface PlayerProps {
   book: SearchResult
@@ -369,6 +370,8 @@ function PlayerComponent({ book, files, className, controls, defaultTime }: Play
               </TooltipTrigger>
               <TooltipContent>Go to Audiobookshelf position</TooltipContent>
             </Tooltip>
+
+            <PreviouslyOn book={book} />
           </div>
 
           <div className="flex items-center gap-1">

@@ -2,7 +2,7 @@ import fs from "fs/promises"
 import handlebars from "handlebars"
 import path from "path"
 
-type TemplateName = "bookmark-suggestions" | "audiobook-chat"
+type TemplateName = "bookmark-suggestions" | "audiobook-chat" | "previously-on"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function createPrompt(template: TemplateName, params: any): Promise<string> {
