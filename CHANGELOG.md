@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1](/compare/0.5.0...0.5.1) (2025-12-13)
+
+
+### Bug Fixes
+
+* import transcript job aff0e75
+* remove unused code d5b7bfc
+
 # [0.5.0](https://github.com/shakogegia/audioscribe/compare/0.4.2...0.5.0) (2025-09-14)
 
 
