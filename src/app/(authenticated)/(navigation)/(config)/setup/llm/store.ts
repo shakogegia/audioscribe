@@ -16,6 +16,7 @@ const useLLMStore = create<LLMState>(set => ({
       ollama: { enabled: false, baseUrl: null },
     },
     embeddingModel: null,
+    pushover: { token: null, user: null },
   },
   update: (config: AppConfig) =>
     set(state => ({
