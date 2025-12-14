@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
 import { CircleCheckIcon, CircleDashedIcon, CircleXIcon, InfoIcon, Loader2Icon, RefreshCcwIcon } from "lucide-react"
-import { Fragment, useEffect } from "react"
+import { Fragment, useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
@@ -147,6 +147,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                       isCompleted={completedStages?.some(s => s.stage === stage.stage) ?? false}
                       isFailed={failedStages?.some(s => s.stage === stage.stage) ?? false}
                       progress={data?.stages?.find(s => s.stage === stage.stage)?.progress}
+                      startedAt={data?.stages?.find(s => s.stage === stage.stage)?.startedAt}
                       isFirst={index === 0}
                       isLast={index === stages.length - 1}
                     >
@@ -180,8 +181,52 @@ type StageProps = {
   progress?: number
   isFirst: boolean
   isLast: boolean
+  startedAt?: Date | null
 }
-export function Stage({ title, isRunning, isCompleted, isFailed, children, progress, isFirst, isLast }: StageProps) {
+export function Stage({
+  title,
+  isRunning,
+  isCompleted,
+  isFailed,
+  children,
+  progress,
+  isFirst,
+  isLast,
+  startedAt,
+}: StageProps) {
+  const estimated = useMemo(() => {
+    if (!startedAt || !progress || progress <= 0) return null
+
+    const now = Date.now()
+    const startTime = new Date(startedAt).getTime()
+    const elapsed = now - startTime
+
+    // Calculate remaining time based on progress
+    const totalEstimated = elapsed / (progress / 100)
+    const remaining = Math.max(0, totalEstimated - elapsed)
+
+    const seconds = Math.floor(remaining / 1000)
+    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(minutes / 60)
+    const days = Math.floor(hours / 24)
+
+    if (seconds < 60) {
+      return `${seconds}s`
+    } else if (minutes < 60) {
+      const remainingSeconds = seconds % 60
+      return `${minutes}m ${remainingSeconds}s`
+    } else if (hours < 24) {
+      const remainingMinutes = minutes % 60
+      const remainingSeconds = seconds % 60
+      return `${hours}h ${remainingMinutes}m ${remainingSeconds}s`
+    } else {
+      const remainingHours = hours % 24
+      const remainingMinutes = minutes % 60
+      const remainingSeconds = seconds % 60
+      return `${days}d ${remainingHours}h ${remainingMinutes}m ${remainingSeconds}s`
+    }
+  }, [startedAt, progress])
+
   return (
     <Alert
       className={twMerge(
@@ -207,7 +252,10 @@ export function Stage({ title, isRunning, isCompleted, isFailed, children, progr
             <TooltipTrigger asChild>
               <Progress value={progress} />
             </TooltipTrigger>
-            <TooltipContent>Progress: {progress}%</TooltipContent>
+            <TooltipContent>
+              <p>Progress: {progress}%</p>
+              {estimated && <p>Estimated time to complete in: {estimated}</p>}
+            </TooltipContent>
           </Tooltip>
         )}
       </AlertDescription>
