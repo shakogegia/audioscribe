@@ -4,7 +4,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
-import { CircleCheckIcon, CircleDashedIcon, CircleXIcon, InfoIcon, Loader2Icon, RefreshCcwIcon } from "lucide-react"
+import {
+  BugIcon,
+  CircleCheckIcon,
+  CircleDashedIcon,
+  CircleXIcon,
+  InfoIcon,
+  Loader2Icon,
+  RefreshCcwIcon,
+} from "lucide-react"
 import { Fragment, useEffect, useMemo } from "react"
 import { toast } from "sonner"
 import useSWR from "swr"
@@ -148,6 +156,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                       isFailed={failedStages?.some(s => s.stage === stage.stage) ?? false}
                       progress={data?.stages?.find(s => s.stage === stage.stage)?.progress}
                       startedAt={data?.stages?.find(s => s.stage === stage.stage)?.startedAt}
+                      error={data?.stages?.find(s => s.stage === stage.stage)?.error}
                       isFirst={index === 0}
                       isLast={index === stages.length - 1}
                     >
@@ -193,6 +202,7 @@ export function Stage({
   isFirst,
   isLast,
   startedAt,
+  error,
 }: StageProps) {
   const estimated = useMemo(() => {
     if (!startedAt || !progress || progress <= 0) return null
@@ -257,6 +267,12 @@ export function Stage({
               {estimated && <p>Estimated time to complete in: {estimated}</p>}
             </TooltipContent>
           </Tooltip>
+        )}
+
+        {error && (
+          <div className="text-sm font-medium text-destructive">
+            <p>{error}</p>
+          </div>
         )}
       </AlertDescription>
     </Alert>

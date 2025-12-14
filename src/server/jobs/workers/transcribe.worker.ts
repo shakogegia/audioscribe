@@ -5,7 +5,7 @@ import { spawn } from "child_process"
 import "dotenv/config"
 import path from "path"
 import { BookSetupStage, Prisma } from "../../../../generated/prisma"
-import { completeStageProgress, resetStageProgress, updateStageProgress } from "./utils/utils"
+import { completeStageProgress, failStageProgress, resetStageProgress, updateStageProgress } from "./utils/utils"
 import { getBook } from "@/lib/audiobookshelf"
 import { prisma } from "@/lib/prisma"
 import fsPromise from "fs/promises"
@@ -60,43 +60,49 @@ export const transcribeWorker = new Worker(
     // Reset stage progress
     await resetStageProgress(bookId, BookSetupStage.Transcribe)
 
-    const audioFolder = await folders.book(bookId).audio()
-    const processedAudioFilePath = path.join(audioFolder, "processed.wav")
+    try {
+      const audioFolder = await folders.book(bookId).audio()
+      const processedAudioFilePath = path.join(audioFolder, "processed.wav")
 
-    const book = await getBook(bookId)
+      const book = await getBook(bookId)
 
-    await eraseTranscripts(bookId)
+      await eraseTranscripts(bookId)
 
-    await spawnTranscribeScript({
-      file: processedAudioFilePath,
-      model,
-      log: message => {
-        const lastTimestamp = parseLastTimestamp(message)
-        if (lastTimestamp) {
-          const processedDuration = lastTimestamp / 1000
-          const totalDuration = book.duration
-          const progress = Math.round((processedDuration / totalDuration) * 100 * 100) / 100
-          updateStageProgress(bookId, BookSetupStage.Transcribe, progress)
-          console.log(`Transcribe Job Progress: ${progress}%`)
-        }
-      },
-    })
+      await spawnTranscribeScript({
+        file: processedAudioFilePath,
+        model,
+        log: message => {
+          const lastTimestamp = parseLastTimestamp(message)
+          if (lastTimestamp) {
+            const processedDuration = lastTimestamp / 1000
+            const totalDuration = book.duration
+            const progress = Math.round((processedDuration / totalDuration) * 100 * 100) / 100
+            updateStageProgress(bookId, BookSetupStage.Transcribe, progress)
+            console.log(`Transcribe Job Progress: ${progress}%`)
+          }
+        },
+      })
 
-    // save transcript segments to database
-    const wavAudioFilePath = processedAudioFilePath.replace(/\.[^/.]+$/, ".wav")
-    const outputJsonPath = `${wavAudioFilePath}.json`
-    const outputContent = await fsPromise.readFile(outputJsonPath, "utf8")
-    const result = JSON.parse(outputContent) as WhisperTranscriptionResult
-    await saveTranscriptions({
-      bookId,
-      model,
-      fileIno: "ino",
-      transcription: result,
-      offset: 0,
-    })
+      // save transcript segments to database
+      const wavAudioFilePath = processedAudioFilePath.replace(/\.[^/.]+$/, ".wav")
+      const outputJsonPath = `${wavAudioFilePath}.json`
+      const outputContent = await fsPromise.readFile(outputJsonPath, "utf8")
+      const result = JSON.parse(outputContent) as WhisperTranscriptionResult
+      await saveTranscriptions({
+        bookId,
+        model,
+        fileIno: "ino",
+        transcription: result,
+        offset: 0,
+      })
 
-    // Complete stage progress
-    await completeStageProgress(bookId, BookSetupStage.Transcribe)
+      // Complete stage progress
+      await completeStageProgress(bookId, BookSetupStage.Transcribe)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error"
+      await failStageProgress(bookId, BookSetupStage.Transcribe, message)
+      throw error
+    }
   },
   { connection: redis }
 )

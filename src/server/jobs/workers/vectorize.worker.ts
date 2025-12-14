@@ -1,6 +1,6 @@
 import { Worker } from "bullmq"
 import { redis } from "../../redis"
-import { completeStageProgress, resetStageProgress } from "./utils/utils"
+import { completeStageProgress, failStageProgress, resetStageProgress } from "./utils/utils"
 import { BookSetupStage, TranscriptSegment } from "../../../../generated/prisma"
 import { prisma } from "@/lib/prisma"
 import { vectorDb } from "@/ai/lib/vector"
@@ -12,24 +12,30 @@ export const vectorizeWorker = new Worker(
     // Reset stage progress
     await resetStageProgress(bookId, BookSetupStage.Vectorize)
 
-    // Fetch segments from API
-    const segments = await prisma.transcriptSegment.findMany({ where: { bookId } })
+    try {
+      // Fetch segments from API
+      const segments = await prisma.transcriptSegment.findMany({ where: { bookId } })
 
-    // Chunk transcript
-    console.log("Chunking transcript...")
-    const chunks = chunkTranscript(segments, { maxChunkDuration: 5 * 60 })
-    console.log(`Created ${chunks.length} chunks`)
+      // Chunk transcript
+      console.log("Chunking transcript...")
+      const chunks = chunkTranscript(segments, { maxChunkDuration: 5 * 60 })
+      console.log(`Created ${chunks.length} chunks`)
 
-    // Initialize vector database
-    await vectorDb.clearCollection(bookId)
-    await vectorDb.initialize(bookId)
+      // Initialize vector database
+      await vectorDb.clearCollection(bookId)
+      await vectorDb.initialize(bookId)
 
-    // Add chunks to vector database
-    console.log("Creating embeddings and storing in vector database...")
-    await vectorDb.addChunks(chunks)
+      // Add chunks to vector database
+      console.log("Creating embeddings and storing in vector database...")
+      await vectorDb.addChunks(chunks)
 
-    // Complete stage progress
-    await completeStageProgress(bookId, BookSetupStage.Vectorize)
+      // Complete stage progress
+      await completeStageProgress(bookId, BookSetupStage.Vectorize)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error"
+      await failStageProgress(bookId, BookSetupStage.Vectorize, message)
+      throw error
+    }
   },
   { connection: redis }
 )

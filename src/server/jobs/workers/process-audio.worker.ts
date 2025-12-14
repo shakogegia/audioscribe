@@ -4,7 +4,7 @@ import { Worker } from "bullmq"
 import path from "node:path"
 import { BookSetupStage } from "../../../../generated/prisma"
 import { redis } from "@/server/redis"
-import { completeStageProgress, resetStageProgress } from "./utils/utils"
+import { completeStageProgress, failStageProgress, resetStageProgress } from "./utils/utils"
 import { promises as fs } from "fs"
 import ffmpeg from "fluent-ffmpeg"
 import audioconcat from "audioconcat"
@@ -17,32 +17,38 @@ export const processAudioWorker = new Worker(
     // Reset stage progress
     await resetStageProgress(bookId, BookSetupStage.ProcessAudio)
 
-    const audioFolder = await folders.book(bookId).audio()
-    const processedAudioFilePath = path.join(audioFolder, "processed.wav")
+    try {
+      const audioFolder = await folders.book(bookId).audio()
+      const processedAudioFilePath = path.join(audioFolder, "processed.wav")
 
-    const processedAudioFileExists = await fs
-      .access(processedAudioFilePath, fs.constants.F_OK)
-      .then(() => true)
-      .catch(() => false)
+      const processedAudioFileExists = await fs
+        .access(processedAudioFilePath, fs.constants.F_OK)
+        .then(() => true)
+        .catch(() => false)
 
-    if (!processedAudioFileExists) {
-      const bookFiles = (await getBookFiles(bookId)).sort((a, b) => a.index - b.index)
-      const downloadsFolder = await folders.book(bookId).downloads()
-      const outputFolder = await folders.book(bookId).audio()
+      if (!processedAudioFileExists) {
+        const bookFiles = (await getBookFiles(bookId)).sort((a, b) => a.index - b.index)
+        const downloadsFolder = await folders.book(bookId).downloads()
+        const outputFolder = await folders.book(bookId).audio()
 
-      const files = [] as string[]
-      const _sortedBookFiles = bookFiles.sort((a, b) => a.index - b.index)
-      for (const audioFile of _sortedBookFiles) {
-        const localAudioFilePath = path.join(downloadsFolder, audioFile.path)
-        files.push(localAudioFilePath)
+        const files = [] as string[]
+        const _sortedBookFiles = bookFiles.sort((a, b) => a.index - b.index)
+        for (const audioFile of _sortedBookFiles) {
+          const localAudioFilePath = path.join(downloadsFolder, audioFile.path)
+          files.push(localAudioFilePath)
+        }
+
+        const audioFilePath = files.length > 1 ? await stitchAudioFiles(files, outputFolder) : files[0]
+        await preprocessAudio(audioFilePath, outputFolder)
       }
 
-      const audioFilePath = files.length > 1 ? await stitchAudioFiles(files, outputFolder) : files[0]
-      await preprocessAudio(audioFilePath, outputFolder)
+      // Complete stage progress
+      await completeStageProgress(bookId, BookSetupStage.ProcessAudio)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error"
+      await failStageProgress(bookId, BookSetupStage.ProcessAudio, message)
+      throw error
     }
-
-    // Complete stage progress
-    await completeStageProgress(bookId, BookSetupStage.ProcessAudio)
   },
   { connection: redis }
 )
