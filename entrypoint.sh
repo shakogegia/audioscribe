@@ -1,7 +1,15 @@
 #!/bin/sh
 
 # Create necessary directories
-mkdir -p $DATA_DIR /app/.next
+mkdir -p $DATA_DIR /app/.next /app/data/redis
+
+# Stop any existing Redis instance and start with persistence
+echo "Starting Redis server..."
+redis-cli shutdown 2>/dev/null || true
+redis-server --daemonize yes \
+    --dir /app/data/redis \
+    --appendonly yes \
+    --appendfilename "appendonly.aof"
 
 # Setup database
 npx prisma generate
