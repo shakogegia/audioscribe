@@ -17,7 +17,7 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
     "release": "dotenv release-it",
-    "publish": "docker buildx build --platform linux/amd64,linux/arm64 --push .  -t shakogegia/audioscribe"
+    "publish": "docker buildx build --platform linux/amd64,linux/arm64 --push . -t shakogegia/audioscribe"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.56",
