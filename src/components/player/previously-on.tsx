@@ -13,8 +13,8 @@ import { useState } from "react"
 export function PreviouslyOn({ book }: { book: SearchResult }) {
   const playerTime = usePlayerStore(state => state.currentTime)
   const { provider, model } = useLLMModels()
-  const { speak, stop, isSpeaking } = useTextToSpeech()
-  const [isGenerating, setIsGenerating] = useState(false)
+  const { speak, stop, isSpeaking, isGenerating: isTTSGenerating } = useTextToSpeech()
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
 
   const handleClick = async () => {
     // If speaking, stop the speech
@@ -24,7 +24,7 @@ export function PreviouslyOn({ book }: { book: SearchResult }) {
     }
 
     // Otherwise, generate and speak the summary
-    setIsGenerating(true)
+    setIsGeneratingSummary(true)
     try {
       const response = await axios.post(`/api/book/${book.id}/previously-on`, {
         currentTime: playerTime,
@@ -33,20 +33,23 @@ export function PreviouslyOn({ book }: { book: SearchResult }) {
 
       const { summary } = response.data
 
-      // Automatically speak the summary
-      speak(summary)
+      // Automatically speak the summary with Piper TTS
+      await speak(book.id, summary)
     } catch (error) {
       console.error("Failed to generate summary:", error)
       if (axios.isAxiosError(error) && error.response?.data?.error) {
         console.error("Error:", error.response.data.error)
       }
     } finally {
-      setIsGenerating(false)
+      setIsGeneratingSummary(false)
     }
   }
 
   const getIcon = () => {
-    if (isGenerating) {
+    if (isGeneratingSummary) {
+      return <Loader2 className="w-5 h-5 animate-spin" />
+    }
+    if (isTTSGenerating) {
       return <Loader2 className="w-5 h-5 animate-spin" />
     }
     if (isSpeaking) {
@@ -56,15 +59,18 @@ export function PreviouslyOn({ book }: { book: SearchResult }) {
   }
 
   const getTooltipText = () => {
-    if (isGenerating) return "Generating..."
+    if (isGeneratingSummary) return "Generating summary..."
+    if (isTTSGenerating) return "Generating audio..."
     if (isSpeaking) return "Speaking... (click to stop)"
     return `Previously on ${book.title}`
   }
 
+  const isDisabled = isGeneratingSummary || isTTSGenerating
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button variant="outline" size="icon" className="w-10" onClick={handleClick} disabled={isGenerating}>
+        <Button variant="outline" size="icon" className="w-10" onClick={handleClick} disabled={isDisabled}>
           {getIcon()}
         </Button>
       </TooltipTrigger>

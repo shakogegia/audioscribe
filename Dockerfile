@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     build-essential \
     python3 \
+    python3-pip \
     make \
     wget \
     cmake \
@@ -41,6 +42,9 @@ RUN echo "deb http://deb.debian.org/debian testing main" >> /etc/apt/sources.lis
 
 # Log detected architecture for debugging
 RUN echo "Building for architecture: $(dpkg --print-architecture)"
+
+# Install Piper TTS
+RUN pip3 install --no-cache-dir piper-tts==1.2.0 --break-system-packages
 
 # Copy package files and install dependencies
 COPY package*.json ./
@@ -77,6 +81,7 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV REDIS_HOST="localhost"
 ENV REDIS_PORT="6379"
+ENV PIPER_MODELS_DIR="/app/data/piper-models"
 
 USER root
 

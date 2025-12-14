@@ -44,6 +44,12 @@ export const folders = {
       await ensureFolder(path)
       return join(folder, "audio")
     },
+    async tts() {
+      const folder = await this.folder()
+      const path = join(folder, "tts")
+      await ensureFolder(path)
+      return join(folder, "tts")
+    },
   }),
 }
 

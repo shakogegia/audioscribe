@@ -1,81 +1,93 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import axios from "axios"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 interface UseTextToSpeechReturn {
-  speak: (text: string) => void
+  speak: (bookId: string, text: string) => Promise<void>
   stop: () => void
   isSpeaking: boolean
-  isSupported: boolean
+  isGenerating: boolean
 }
 
 export function useTextToSpeech(): UseTextToSpeechReturn {
   const [isSpeaking, setIsSpeaking] = useState(false)
-  const [isSupported, setIsSupported] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  useEffect(() => {
-    // Check if browser supports speech synthesis
-    setIsSupported(typeof window !== "undefined" && "speechSynthesis" in window)
-  }, [])
+  const speak = useCallback(async (bookId: string, text: string) => {
+    if (!text.trim()) {
+      console.warn("Empty text provided for TTS")
+      return
+    }
 
-  const speak = useCallback(
-    (text: string) => {
-      if (!isSupported || !text.trim()) {
-        console.warn("Speech synthesis not supported or empty text provided")
-        return
+    try {
+      setIsGenerating(true)
+
+      // Call API to generate TTS audio
+      const response = await axios.post(`/api/book/${bookId}/tts/generate`, {
+        text,
+      })
+
+      const { audioId } = response.data
+
+      // Create audio element if it doesn't exist
+      if (!audioRef.current) {
+        audioRef.current = new Audio()
+
+        // Set up event listeners
+        audioRef.current.onplay = () => {
+          setIsSpeaking(true)
+          setIsGenerating(false)
+        }
+
+        audioRef.current.onended = () => {
+          setIsSpeaking(false)
+        }
+
+        audioRef.current.onerror = error => {
+          console.error("Audio playback error:", error)
+          setIsSpeaking(false)
+          setIsGenerating(false)
+        }
+
+        audioRef.current.onpause = () => {
+          setIsSpeaking(false)
+        }
       }
 
-      // Stop any ongoing speech
-      window.speechSynthesis.cancel()
-
-      // Create utterance
-      const utterance = new SpeechSynthesisUtterance(text)
-
-      // Configure voice settings
-      utterance.rate = 1.0 // Normal speed
-      utterance.pitch = 1.0 // Normal pitch
-      utterance.volume = 1.0 // Full volume
-
-      // Event handlers
-      utterance.onstart = () => {
-        setIsSpeaking(true)
-      }
-
-      utterance.onend = () => {
-        setIsSpeaking(false)
-      }
-
-      utterance.onerror = error => {
-        console.error("Speech synthesis error:", error)
-        setIsSpeaking(false)
-      }
-
-      // Start speaking
-      window.speechSynthesis.speak(utterance)
-    },
-    [isSupported]
-  )
-
-  const stop = useCallback(() => {
-    if (isSupported && window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel()
+      // Set audio source and play
+      audioRef.current.src = `/api/book/${bookId}/tts/${audioId}`
+      await audioRef.current.play()
+    } catch (error) {
+      console.error("TTS generation error:", error)
+      setIsGenerating(false)
       setIsSpeaking(false)
     }
-  }, [isSupported])
+  }, [])
+
+  const stop = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      setIsSpeaking(false)
+    }
+  }, [])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (isSupported) {
-        window.speechSynthesis.cancel()
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current.src = ""
       }
     }
-  }, [isSupported])
+  }, [])
 
   return {
     speak,
     stop,
     isSpeaking,
-    isSupported,
+    isGenerating,
   }
 }
