@@ -11,6 +11,7 @@ import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
 import { Progress } from "@/components/ui/progress"
 import { Book, BookSetupProgress, BookSetupStage, BookSetupStatus } from "../../../../../../../../generated/prisma"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 type ProcessingInfoProps = {
   book: SearchResult
@@ -142,14 +143,12 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                   <Fragment key={stage.stage}>
                     <Stage
                       title={`Step ${index + 1}: ${stage.title}`}
-                      className={twMerge(
-                        index === 0 && "rounded-t-none",
-                        index === stages.length - 1 && "rounded-b-none"
-                      )}
                       isRunning={runningStage === stage.stage}
                       isCompleted={completedStages?.some(s => s.stage === stage.stage) ?? false}
                       isFailed={failedStages?.some(s => s.stage === stage.stage) ?? false}
                       progress={data?.stages?.find(s => s.stage === stage.stage)?.progress}
+                      isFirst={index === 0}
+                      isLast={index === stages.length - 1}
                     >
                       <div dangerouslySetInnerHTML={{ __html: stage.description }} />
                     </Stage>
@@ -178,12 +177,20 @@ type StageProps = {
   isCompleted: boolean
   isFailed: boolean
   children: React.ReactNode
-  className: string
   progress?: number
+  isFirst: boolean
+  isLast: boolean
 }
-export function Stage({ title, isRunning, isCompleted, isFailed, children, className, progress }: StageProps) {
+export function Stage({ title, isRunning, isCompleted, isFailed, children, progress, isFirst, isLast }: StageProps) {
   return (
-    <Alert className={twMerge("rounded-b-none", className)} variant={isFailed ? "destructive" : "default"}>
+    <Alert
+      className={twMerge(
+        isFirst && "rounded-b-none",
+        isLast && "rounded-t-none",
+        !isFirst && !isLast && "rounded-none"
+      )}
+      variant={isFailed ? "destructive" : "default"}
+    >
       {isFailed ? (
         <CircleXIcon />
       ) : isCompleted ? (
@@ -195,7 +202,14 @@ export function Stage({ title, isRunning, isCompleted, isFailed, children, class
       <AlertDescription>
         {children}
         {/* {progress && <p className="text-sm text-muted-foreground">Progress: {progress}%</p>} */}
-        {Boolean(progress) && isRunning && <Progress value={progress} />}
+        {Boolean(progress) && isRunning && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Progress value={progress} />
+            </TooltipTrigger>
+            <TooltipContent>Progress: {progress}%</TooltipContent>
+          </Tooltip>
+        )}
       </AlertDescription>
     </Alert>
   )
