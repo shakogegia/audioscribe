@@ -48,7 +48,7 @@ export async function setupBookFlow({ book, model }: { book: { id: string; title
   // reset book ready status
   await prisma.book.update({
     where: { id: book.id },
-    data: { audioProcessed: false, transcribed: false, vectorized: false, downloaded: false },
+    data: { audioProcessed: false, transcribed: false, vectorized: false, downloaded: false, model },
   })
 
   // reset book setup progress
