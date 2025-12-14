@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.4](/compare/0.8.3...0.8.4) (2025-12-14)
+
+
+### Bug Fixes
+
+* show stage errors 2f6f2d7
+
 ## [0.8.3](/compare/0.8.2...0.8.3) (2025-12-14)
 
 
