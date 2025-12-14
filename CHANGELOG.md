@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](/compare/0.8.1...0.8.2) (2025-12-14)
+
+
+### Bug Fixes
+
+* show estimated a2c08f6
+
 ## [0.8.1](/compare/0.8.0...0.8.1) (2025-12-14)
 
 
