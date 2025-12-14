@@ -191,6 +191,7 @@ type StageProps = {
   isFirst: boolean
   isLast: boolean
   startedAt?: Date | null
+  error?: string | null
 }
 export function Stage({
   title,
