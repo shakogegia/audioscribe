@@ -48,9 +48,7 @@ export default function Pushover({ config }: { config: AppConfig }) {
                 <div
                   className={cn(
                     "rounded-md p-3 text-sm",
-                    state.message && !state.errors
-                      ? "bg-green-500/15 text-green-500"
-                      : "bg-destructive/15 text-destructive"
+                    !state.errors ? "bg-green-500/15 text-green-500" : "bg-destructive/15 text-destructive"
                   )}
                 >
                   {state.message}
