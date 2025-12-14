@@ -1,6 +1,7 @@
 "use server"
 import { load, save } from "@/lib/config"
 import { PushoverFormSchema, PushoverFormState } from "@/lib/definitions"
+import { revalidatePath } from "next/cache"
 
 export async function updatePushover(state: PushoverFormState, formData: FormData) {
   // await save(config)
@@ -28,6 +29,8 @@ export async function updatePushover(state: PushoverFormState, formData: FormDat
   }
 
   await save(config)
+
+  revalidatePath("/authenticated", "layout")
 
   return {
     message: "Pushover configuration saved",
