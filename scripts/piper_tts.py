@@ -123,11 +123,20 @@ def main():
 
         print(f"Synthesizing text: {args.text[:50]}...", file=sys.stderr)
 
-        # Synthesize speech and write to WAV file using synthesize_wav
+        # Synthesize speech and write to WAV file
         import wave
 
         with wave.open(args.output, "wb") as wav_file:
-            voice.synthesize_wav(args.text, wav_file)
+            # Check if synthesize_wav method exists (newer piper-tts versions)
+            if hasattr(voice, "synthesize_wav"):
+                voice.synthesize_wav(args.text, wav_file)
+            else:
+                # Older piper-tts versions: synthesize() writes directly to wav_file
+                # but we need to set up the wave file parameters first
+                wav_file.setnchannels(1)  # Piper outputs mono audio
+                wav_file.setsampwidth(2)  # 16-bit audio (2 bytes per sample)
+                wav_file.setframerate(voice.config.sample_rate)
+                voice.synthesize(args.text, wav_file)
 
         # Verify file was created and has content
         file_size = os.path.getsize(args.output)
