@@ -10,6 +10,10 @@ export interface AppConfig {
     ollama: { enabled: boolean; baseUrl: string | null }
   }
   embeddingModel: string | null
+  pushover: {
+    token: string | null
+    user: string | null
+  }
 }
 
 export const defaultConfig: AppConfig = {
@@ -21,6 +25,10 @@ export const defaultConfig: AppConfig = {
     ollama: { enabled: false, baseUrl: null },
   },
   embeddingModel: "sentence-transformers/all-MiniLM-L6-v2",
+  pushover: {
+    token: null,
+    user: null,
+  },
 }
 
 const configPath = join(process.env.DATA_DIR!, "config.json")

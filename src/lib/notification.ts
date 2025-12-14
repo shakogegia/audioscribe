@@ -1,4 +1,5 @@
 import axios from "axios"
+import { load } from "./config"
 
 export async function sendNotification(
   title: string,
@@ -6,9 +7,13 @@ export async function sendNotification(
   attachmentBase64?: string | null
 ): Promise<boolean> {
   try {
+    const config = await load()
+    if (!config.pushover.token || !config.pushover.user) {
+      return false
+    }
     const response = await axios.post("https://api.pushover.net/1/messages.json", {
-      token: process.env.PUSHOVER_TOKEN,
-      user: process.env.PUSHOVER_USER,
+      token: config.pushover.token,
+      user: config.pushover.user,
       title,
       message,
       ...(attachmentBase64

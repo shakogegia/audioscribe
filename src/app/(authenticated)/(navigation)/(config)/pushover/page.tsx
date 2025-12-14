@@ -1,74 +1,8 @@
-"use client"
-import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
-import GradientIcon from "@/components/gradient-icon"
-import { Hero } from "@/components/hero"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import axios from "axios"
-import { DatabaseZap, InfoIcon, Loader2 } from "lucide-react"
-import Image from "next/image"
-import { toast } from "sonner"
-import useSWR from "swr"
+import { load } from "@/lib/config"
+import Pushover from "./pushover"
 
-export default function CachePage() {
-  const { isLoading, data: { humanReadableSize } = {}, mutate } = useSWR("/api/cache/size")
+export default async function PushoverPage() {
+  const config = await load()
 
-  async function purgeCache() {
-    toast.loading("Purging cache...", { id: "purge-cache" })
-    await axios.delete("/api/cache/purge")
-    await mutate()
-    toast.success("Cache purged", { id: "purge-cache" })
-  }
-
-  return (
-    <div className="flex flex-col items-center gap-8 w-full min-h-full px-4">
-      <Hero
-        title="Pushover"
-        description={[
-          "Pushover is a service that allows you to send notifications to your phone.",
-          "It is used to send notifications to the user when a book is ready to be read.",
-        ]}
-        icon={
-          <Image
-            src="https://pushover.net/images/icon-512.png"
-            alt="Pushover"
-            width={64}
-            height={64}
-            className="w-16 h-16"
-          />
-        }
-      />
-
-      <Card className="w-full max-w-lg mx-auto">
-        <CardHeader>
-          <CardTitle>Cache</CardTitle>
-          <CardDescription>
-            Size: {isLoading ? <Loader2 className="w-4 h-4 animate-spin inline-block" /> : humanReadableSize || "0 MB"}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          <Alert variant="destructive">
-            <InfoIcon />
-            <AlertTitle>Heads up!</AlertTitle>
-            <AlertDescription>
-              Clearing cache will remove all files, including audiofiles, transcriptions, and vectorized data.
-              <br />
-              It will keep configuration for Audiobookshelf and AI providers.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-        <CardFooter className="flex-col gap-2">
-          <ConfirmDialog
-            title="Purge Cache"
-            description="Are you sure you want to purge the cache? This action cannot be undone."
-            onConfirm={purgeCache}
-          >
-            <Button className="w-full">Purge Cache</Button>
-          </ConfirmDialog>
-        </CardFooter>
-      </Card>
-    </div>
-  )
+  return <Pushover config={config} />
 }
