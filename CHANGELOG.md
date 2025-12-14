@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.5](/compare/0.8.4...0.8.5) (2025-12-14)
+
+
+### Bug Fixes
+
+* items 32badf9
+* previously on 835941d
+
 ## [0.8.4](/compare/0.8.3...0.8.4) (2025-12-14)
 
 
