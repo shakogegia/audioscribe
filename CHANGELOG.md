@@ -1,5 +1,18 @@
 # Changelog
 
+# [0.7.0](/compare/0.6.1...0.7.0) (2025-12-14)
+
+
+### Bug Fixes
+
+* previously on b9e460a
+* remove console 0745b94
+
+
+### Features
+
+* previously on 1d7c6c0
+
 ## [0.6.1](/compare/0.6.0...0.6.1) (2025-12-13)
 
 
