@@ -231,6 +231,7 @@ export interface AudioBookmark {
 export interface Session {
   id: string
   libraryItemId: string
+  libraryId?: string | null
   bookId: string
   timeListening: number
   currentTime: number

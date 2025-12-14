@@ -39,17 +39,17 @@ export async function importTranscriptFlow({
     children: [vectorizeJob],
   }
 
-  // reset book ready status
-  await prisma.book.update({
-    where: { id: book.id },
-    data: { audioProcessed: false, transcribed: false, vectorized: false, downloaded: false },
-  })
-
   // reset book setup progress
   const existingBook = await prisma.book.findUnique({ where: { id: book.id } })
   if (!existingBook) {
     await prisma.book.create({ data: { id: book.id, model } })
   }
+
+  // reset book ready status
+  await prisma.book.update({
+    where: { id: book.id },
+    data: { audioProcessed: false, transcribed: false, vectorized: false, downloaded: false },
+  })
 
   await prisma.bookSetupProgress.deleteMany({ where: { bookId: book.id } })
 

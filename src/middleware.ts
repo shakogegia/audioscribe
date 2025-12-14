@@ -2,8 +2,7 @@ import { jwtVerify } from "jose"
 import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 
-const secretKey = process.env.SESSION_SECRET
-const encodedKey = new TextEncoder().encode(secretKey)
+const encodedKey = new TextEncoder().encode(process.env.SESSION_SECRET)
 
 async function decrypt(session: string | undefined = "") {
   try {
@@ -19,10 +18,21 @@ async function decrypt(session: string | undefined = "") {
 // Routes that don't require authentication
 const publicRoutes = ["/login"]
 
+const secretKey = process.env.SECRET_KEY
+
 export default async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname
   const isPublicRoute = publicRoutes.includes(path)
   const isApiRoute = path.startsWith("/api")
+
+  // if query params contains secret, check if it matches the secret key
+  if (req.nextUrl.searchParams.get("secret")) {
+    if (req.nextUrl.searchParams.get("secret") !== secretKey) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    } else {
+      return NextResponse.next()
+    }
+  }
 
   // Get session from cookie
   const cookie = (await cookies()).get("session")?.value
