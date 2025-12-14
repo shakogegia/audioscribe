@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](/compare/0.8.0...0.8.1) (2025-12-14)
+
+
+### Bug Fixes
+
+* pushover revalidate c384d7a
+
 # [0.8.0](/compare/0.7.7...0.8.0) (2025-12-14)
 
 
