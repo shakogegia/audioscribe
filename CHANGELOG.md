@@ -1,5 +1,19 @@
 # Changelog
 
+# [0.8.0](/compare/0.7.7...0.8.0) (2025-12-14)
+
+
+### Bug Fixes
+
+* model 9a3aa05
+* persist redis 5fe988b
+* remove redis from docker entrypoint ff31244
+
+
+### Features
+
+* enhance processing info component with tooltip for progress e842421
+
 ## [0.7.7](/compare/0.7.6...0.7.7) (2025-12-14)
 
 
