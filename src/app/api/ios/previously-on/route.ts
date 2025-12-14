@@ -1,13 +1,12 @@
-import fs from "fs"
-import path from "path"
-import { NextRequest, NextResponse } from "next/server"
-import { getApi, getBook } from "@/lib/audiobookshelf"
-import type { Session } from "@/types/audiobookshelf"
+import { generatePreviouslyOn } from "@/ai/prompts/previously-on"
+import { provider } from "@/ai/providers"
+import { AiModel, AiProvider } from "@/ai/types/ai"
+import { getBook, getLastPlayedLibraryItemId } from "@/lib/audiobookshelf"
 import { getTranscriptRangeByTime } from "@/lib/transcript"
 import { generateTTS } from "@/lib/tts"
-import { provider } from "@/ai/providers"
-import { generatePreviouslyOn } from "@/ai/prompts/previously-on"
-import { AiModel, AiProvider } from "@/ai/types/ai"
+import fs from "fs"
+import { NextRequest, NextResponse } from "next/server"
+import path from "path"
 
 export async function GET(request: NextRequest) {
   const params = {
@@ -19,35 +18,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Provider and model are required" }, { status: 400 })
   }
 
-  const api = await getApi()
+  const lastPlayedLibraryItemId = await getLastPlayedLibraryItemId()
 
-  type SessionResponse = {
-    total: number
-    numPages: number
-    page: number
-    itemsPerPage: number
-    sessions: Session[]
-  }
-
-  // First fetch to get pagination info
-  const initialResponse = await api.get<SessionResponse>(`/api/sessions?page=0&itemsPerPage=1`)
-  const { total, numPages } = initialResponse.data
-
-  if (total === 0) {
-    return NextResponse.json({ error: "No sessions found" }, { status: 404 })
-  }
-
-  // Fetch the last page to get the oldest session
-  const lastPage = numPages - 1
-  const lastPageResponse = await api.get<SessionResponse>(`/api/sessions?page=${lastPage}&itemsPerPage=1`)
-  const lastSession = lastPageResponse.data.sessions[0]
-
-  if (!lastSession) {
-    return NextResponse.json({ error: "No sessions found" }, { status: 404 })
-  }
-
-  // sample
-  const book = await getBook("ba3689b4-bd1d-416c-9056-5e344c5632fa")
+  const book = await getBook(lastPlayedLibraryItemId)
   const currentTime = book.currentTime
 
   if (!currentTime) {

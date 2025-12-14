@@ -313,3 +313,34 @@ export async function getLastSession(libraryItemId: string) {
     .filter(session => session.libraryItemId === libraryItemId)
     .sort((a, b) => b.startedAt - a.startedAt)[0]
 }
+
+export async function getLastPlayedLibraryItemId(): Promise<string> {
+  const api = await getApi()
+
+  type SessionResponse = {
+    total: number
+    numPages: number
+    page: number
+    itemsPerPage: number
+    sessions: Audiobookshelf.Session[]
+  }
+
+  // First fetch to get pagination info
+  const initialResponse = await api.get<SessionResponse>(`/api/sessions?page=0&itemsPerPage=1`)
+  const { total, numPages } = initialResponse.data
+
+  if (total === 0) {
+    throw new Error("No sessions found")
+  }
+
+  // Fetch the last page to get the oldest session
+  const lastPage = numPages - 1
+  const lastPageResponse = await api.get<SessionResponse>(`/api/sessions?page=${lastPage}&itemsPerPage=1`)
+  const lastSession = lastPageResponse.data.sessions[0]
+
+  if (!lastSession) {
+    throw new Error("No sessions found")
+  }
+
+  return lastSession.libraryItemId
+}
