@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.9.0](/compare/0.8.5...0.9.0) (2025-12-15)
+
+
+### Features
+
+* add chat summary and suggestions functionality 7dead94
+
 ## [0.8.5](/compare/0.8.4...0.8.5) (2025-12-14)
 
 
