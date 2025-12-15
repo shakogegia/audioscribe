@@ -28,7 +28,6 @@ export async function updateSuggestion(id: string, question: string) {
 }
 
 export async function updateSuggestions(suggestions: ChatQuickQuestion[]) {
-  console.log("🚀 ~ updateSuggestions ~ suggestions:", suggestions)
   await prisma.chatQuickQuestion.deleteMany()
   await prisma.chatQuickQuestion.createMany({
     data: suggestions.map(suggestion => suggestion),
