@@ -2,7 +2,7 @@
 
 import { ImageIcon, Loader2 } from "lucide-react"
 import Image from "next/image"
-import { useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { twMerge } from "tailwind-merge"
 
 type Props = {
@@ -26,6 +26,11 @@ export default function BookCover({ src, alt, size = 64, className }: Props) {
     setIsLoading(false)
   }
 
+  const imageUrl = useMemo(() => {
+    if (!src) return ""
+    return `/api/image?image=${src}`
+  }, [src])
+
   return (
     <div className={twMerge("relative", className)} style={{ width: size, height: size }}>
       {(isLoading || hasError) && (
@@ -35,7 +40,7 @@ export default function BookCover({ src, alt, size = 64, className }: Props) {
       )}
       <Image
         ref={imageRef}
-        src={src || ""}
+        src={imageUrl || ""}
         alt={alt || "Audiobook"}
         className={twMerge("object-cover rounded-md", isLoading ? "opacity-0" : "opacity-100", hasError && "opacity-0")}
         width={size}

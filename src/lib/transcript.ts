@@ -59,3 +59,25 @@ export async function getTranscriptRangeByTime({
 
   return segments
 }
+
+export async function getTranscriptByRange({
+  bookId,
+  startTime,
+  endTime,
+}: {
+  bookId: string
+  startTime: number // seconds
+  endTime: number // seconds
+}): Promise<TranscriptSegment[]> {
+  const startTimeInMilliseconds = startTime * 1000
+  const endTimeInMilliseconds = endTime * 1000
+
+  const segments = await prisma.transcriptSegment.findMany({
+    where: { bookId, startTime: { gte: startTimeInMilliseconds }, endTime: { lte: endTimeInMilliseconds } },
+    orderBy: {
+      startTime: "asc",
+    },
+  })
+
+  return segments
+}

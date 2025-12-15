@@ -14,6 +14,7 @@ redis-server --daemonize yes \
 # Setup database
 npx prisma generate
 npx prisma db push --accept-data-loss
+npx prisma db seed
 
 # Build the application
 echo "Building Next.js application..."

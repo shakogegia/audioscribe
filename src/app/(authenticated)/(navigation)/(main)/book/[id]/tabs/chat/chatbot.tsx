@@ -32,7 +32,8 @@ import { SearchResult } from "@/types/api"
 import { useChat } from "@ai-sdk/react"
 import { CaptionsIcon, CopyIcon, Loader2Icon, RefreshCcwIcon } from "lucide-react"
 import { Fragment, useState } from "react"
-import { suggestionIcons, suggestions } from "./suggestions"
+import { useSuggestions } from "./suggestions"
+import { ChatQuickQuestion } from "../../../../../../../../../generated/prisma"
 
 type ChatBotDemoProps = {
   bookId: string
@@ -49,13 +50,14 @@ type RequestBody = {
 }
 
 const ChatBotDemo = ({ bookId, book }: ChatBotDemoProps) => {
+  const suggestions = useSuggestions()
+
   const [input, setInput] = useState("")
   const { messages, sendMessage, status, regenerate } = useChat()
   const currentTime = usePlayerStore(state => state.currentTime)
   const { models, model, setModel, isLoading: isLoadingModels, provider } = useLLMModels()
 
   const [context, setContext] = useState<{ time: number; before: number; after: number } | null>(null)
-
   function handleSubmit(message: PromptInputMessage) {
     if (!message.text || !model || !provider) return
 
@@ -134,10 +136,14 @@ const ChatBotDemo = ({ bookId, book }: ChatBotDemoProps) => {
 
         {/* Suggestions */}
         <Suggestions className="mt-4">
-          {suggestions.map((suggestion, index) => (
-            <Suggestion key={suggestion} onClick={onSuggestionClick} suggestion={suggestion} className="font-normal">
-              {suggestionIcons[index]}
-              {suggestion}
+          {suggestions.map(suggestion => (
+            <Suggestion
+              key={suggestion.id}
+              onClick={() => onSuggestionClick(suggestion.question)}
+              suggestion={suggestion.question}
+              className="font-normal"
+            >
+              {suggestion.question}
             </Suggestion>
           ))}
         </Suggestions>

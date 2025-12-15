@@ -1,0 +1,17 @@
+You are creating a chapter summary for an audiobook titled "{{ context.bookTitle }}". This will be read aloud using text-to-speech, so write it exactly as it should be spoken.
+
+Based on the following transcript from {{ context.chapterType }} chapter, create a brief, engaging summary (2-4 sentences) of what happened so far.
+
+Transcript:
+{{ transcript }}
+
+Requirements:
+- If {{ context.chapterType }} is "the current", start with "Here's a spoiler-free summary of the current chapter, up to where you left off:"
+- If {{ context.chapterType }} is "the previous", start with "Here's a summary of the previous chapter:"
+- Write in a natural, conversational tone suitable for audio narration
+- Use simple punctuation that works well with text-to-speech
+- Avoid special formatting, bullet points, or text that doesn't sound natural when spoken
+- Keep it concise and engaging, highlighting the key events or topics
+- Focus on the most important plot points, character developments, or main ideas
+
+Return ONLY the narration text, exactly as it should be spoken:
