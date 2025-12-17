@@ -9,7 +9,6 @@ export async function getPrompts() {
 }
 
 export async function updatePrompt(state: PromptFormState, formData: FormData) {
-  console.log(formData, "formData")
   const validatedFields = PromptFormSchema.safeParse({
     slug: formData.get("slug"),
     name: formData.get("name"),
