@@ -8,5 +8,7 @@ services:
       - ./:/app
       - /app/node_modules
       - /app/.next
+      - ./docker/dev/entrypoint.sh:/app/entrypoint.sh
+      - ./docker/dev/supervisord.conf:/etc/supervisor/supervisord.conf
     ports:
       - "3000:3000"

@@ -1,5 +1,0 @@
-{
-  "watch": ["server.ts", "src/server/**/*.ts"],
-  "exec": "node --import=tsx server.ts",
-  "ext": "js ts"
-}

@@ -78,7 +78,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV DATABASE_URL="file:/app/data/sqlite/store.db"
 ENV DATA_DIR="/app/data"
-ENV CHROMA_HOST="localhost"
+ENV CHROMA_HOST="127.0.0.1"
 ENV CHROMA_PORT="8000"
 ENV CLEANUP_TEMP_FILES="true"
 ENV CHROMA_CORS_ALLOW_ORIGINS='["*"]'
@@ -95,5 +95,6 @@ EXPOSE 3000
 
 COPY ./docker/dev/supervisord.conf /etc/supervisor/supervisord.conf
 COPY ./docker/dev/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]
