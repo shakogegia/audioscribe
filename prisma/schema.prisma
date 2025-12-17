@@ -28,6 +28,7 @@ model Book {
   // relations
   transcriptSegment TranscriptSegment[]
   bookSetupProgress BookSetupProgress[]
+  chapterSummaries  ChapterSummary[]
 }
 
 model TranscriptSegment {
@@ -87,4 +88,28 @@ model ChatQuickQuestion {
   question  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Prompt {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  description String
+  name        String
+  prompt      String
+  system      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ChapterSummary {
+  id        String   @id @default(cuid())
+  bookId    String
+  chapterId Int
+  summary   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // relations
+  book      Book     @relation(fields: [bookId], references: [id])
+
+  @@index([bookId])
 }

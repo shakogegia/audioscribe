@@ -1,0 +1,10 @@
+services:
+  audioscribe:
+    container_name: audioscribe
+    build:
+      dockerfile: ./docker/prod/Dockerfile
+      context: ./
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "3000:3000"

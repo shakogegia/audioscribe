@@ -41,9 +41,9 @@ next-env.d.ts
 .gitignore
 README.md
 
-# Docker
-Dockerfile
-.dockerignore
+# Docker (root only)
+/Dockerfile
+/.dockerignore
 
 # Config
 config.json

@@ -38,3 +38,22 @@ export type SessionPayload = {
   userId: string
   expiresAt: Date
 }
+
+export const PromptFormSchema = z.object({
+  slug: z.string().min(1, { error: "Slug is required" }).trim(),
+  name: z.string().min(1, { error: "Name is required" }).trim(),
+  prompt: z.string().min(1, { error: "Prompt is required" }).trim(),
+  system: z.string().optional(),
+})
+
+export type PromptFormState =
+  | {
+      errors?: {
+        slug?: string[]
+        name?: string[]
+        prompt?: string[]
+        system?: string[]
+      }
+      message?: string
+    }
+  | undefined

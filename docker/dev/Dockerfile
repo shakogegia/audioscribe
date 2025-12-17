@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y \
     libswresample-dev \
     libc6 \
     redis-server \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables for whisper.cpp compilation
@@ -46,6 +47,9 @@ RUN echo "Building for architecture: $(dpkg --print-architecture)"
 # Install Piper TTS
 RUN pip3 install --no-cache-dir piper-tts==1.2.0 --break-system-packages
 
+RUN pip3 install --no-cache-dir chromadb --break-system-packages
+
+
 # Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
@@ -67,6 +71,7 @@ COPY . .
 
 # Install PM2 globally
 RUN npm install -g pm2
+RUN npm install -g nodemon
 
 # Set environment variables
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -76,7 +81,8 @@ ENV DATA_DIR="/app/data"
 ENV CHROMA_HOST="localhost"
 ENV CHROMA_PORT="8000"
 ENV CLEANUP_TEMP_FILES="true"
-ENV CHROMA_SERVER_CORS_ALLOW_ORIGINS="*"
+ENV CHROMA_CORS_ALLOW_ORIGINS='["*"]'
+ENV CHROMA_SERVER_CORS_ALLOW_ORIGINS='["*"]'
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV REDIS_HOST="localhost"
@@ -85,6 +91,9 @@ ENV PIPER_MODELS_DIR="/app/data/piper-models"
 
 USER root
 
-EXPOSE 3000 8000 6379
+EXPOSE 3000
+
+COPY ./docker/dev/supervisord.conf /etc/supervisor/supervisord.conf
+COPY ./docker/dev/entrypoint.sh /app/entrypoint.sh
 
 ENTRYPOINT ["/app/entrypoint.sh"]

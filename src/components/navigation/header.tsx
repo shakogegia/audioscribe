@@ -1,5 +1,5 @@
 "use client"
-import { BadgeInfo, Cog, CommandIcon, House, List, LogOut } from "lucide-react"
+import { BadgeInfo, BrainIcon, Cog, CommandIcon, House, Layers2Icon, List, LogOut } from "lucide-react"
 import Link from "next/link"
 import { Button } from "../ui/button"
 import { ThemeSwitcher } from "./theme-switcher"
@@ -40,6 +40,20 @@ export function Header() {
         <Link href="/about">
           <Button variant="outline" size="icon">
             <BadgeInfo className="w-4 h-4" />
+          </Button>
+        </Link>
+
+        {/* Prompts */}
+        <Link href="/prompts">
+          <Button variant="outline" size="icon">
+            <BrainIcon className="w-4 h-4" />
+          </Button>
+        </Link>
+
+        {/* iOS */}
+        <Link href="/ios/shortcuts">
+          <Button variant="outline" size="icon">
+            <Layers2Icon className="w-4 h-4" />
           </Button>
         </Link>
 
