@@ -37,12 +37,6 @@ export function Header() {
           </Button>
         </Link>
 
-        <Link href="/about">
-          <Button variant="outline" size="icon">
-            <BadgeInfo className="w-4 h-4" />
-          </Button>
-        </Link>
-
         {/* Prompts */}
         <Link href="/prompts">
           <Button variant="outline" size="icon">
@@ -61,6 +55,12 @@ export function Header() {
         <Link href="/jobs" target="audioscribe-jobs">
           <Button variant="outline" size="icon">
             <List className="w-4 h-4" />
+          </Button>
+        </Link>
+
+        <Link href="/about">
+          <Button variant="outline" size="icon">
+            <BadgeInfo className="w-4 h-4" />
           </Button>
         </Link>
 

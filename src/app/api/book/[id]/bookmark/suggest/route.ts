@@ -1,8 +1,7 @@
-import { generateBookmarkSuggestions } from "@/ai/prompts/bookmark"
-import { provider } from "@/ai/providers"
-import { getTranscriptByOffset } from "@/lib/transcript"
+import { generatePrompt } from "@/ai/prompts/helpers"
 import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
+import { getTranscriptByOffset } from "@/lib/transcript"
 import { millisecondsToTime } from "@/utils/time"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -26,20 +25,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const book = await getBook(bookId)
 
-    const ai = await provider(config.provider, config.model)
-
     const segments = await getTranscriptByOffset({ bookId, time, offset })
 
     const transcript = segments.map(s => `${millisecondsToTime(s.startTime)} ${s.text}`).join("\n\n")
 
-    const { suggestions } = await generateBookmarkSuggestions(ai, {
-      transcript: transcript,
-      context: {
-        bookTitle: book?.title ?? "",
-        authors: book?.authors ?? [],
-        time: millisecondsToTime(time * 1000),
+    const response = await generatePrompt({
+      provider: config.provider,
+      model: config.model,
+      slug: "bookmark-suggestions",
+      params: {
+        transcript: transcript,
+        context: {
+          bookTitle: book?.title ?? "",
+          authors: book?.authors ?? [],
+          time: millisecondsToTime(time * 1000),
+        },
       },
     })
+
+    const suggestions = parseBookmarkSuggestions(response)
 
     return NextResponse.json({ suggestions: suggestions, transcript })
   } catch (error) {
@@ -64,5 +68,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     return NextResponse.json({ error: "Failed to generate bookmark suggestions" }, { status: 500 })
+  }
+}
+
+function parseBookmarkSuggestions(text: string): string[] {
+  try {
+    // return the array of suggestions
+    const jsonString = text.replace(/^```json\n/, "").replace(/\n```$/, "")
+    const json = JSON.parse(jsonString)
+    return json
+  } catch (error) {
+    console.error("Error parsing bookmark suggestions:", error)
+    return ["Bookmark"] // Fallback
   }
 }

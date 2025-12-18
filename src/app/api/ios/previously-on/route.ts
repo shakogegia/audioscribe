@@ -1,11 +1,11 @@
-import { generatePreviouslyOn } from "@/ai/prompts/previously-on"
+import { generatePrompt } from "@/ai/prompts/helpers"
 import { getTranscriptRangeByTime } from "@/lib/transcript"
 import { NextRequest, NextResponse } from "next/server"
-import { getAi, getLastPlayedBook, respondWithAudio } from "../utils"
+import { getAiConfig, getLastPlayedBook, respondWithAudio } from "../utils"
 
 export async function GET(request: NextRequest) {
   try {
-    const ai = await getAi(request)
+    const { provider, model } = await getAiConfig(request)
 
     const book = await getLastPlayedBook(request)
 
@@ -18,10 +18,13 @@ export async function GET(request: NextRequest) {
 
     const transcript = transcripts.map(transcript => transcript.text).join(" ")
 
-    const { summary } = await generatePreviouslyOn(ai, {
-      transcript,
-      context: {
-        bookTitle: book.title,
+    const summary = await generatePrompt({
+      provider: provider,
+      model: model,
+      slug: "previously-on",
+      params: {
+        transcript,
+        context: { bookTitle: book.title },
       },
     })
 

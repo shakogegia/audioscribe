@@ -52,3 +52,16 @@ export async function getAi(request: NextRequest) {
 
   return ai
 }
+
+export async function getAiConfig(request: NextRequest): Promise<{ provider: AiProvider; model: AiModel }> {
+  const params = {
+    provider: request.nextUrl.searchParams.get("provider") as AiProvider | undefined,
+    model: request.nextUrl.searchParams.get("model") as AiModel | undefined,
+  }
+
+  if (!params.provider || !params.model) {
+    throw new Error("Provider and model are required")
+  }
+
+  return { provider: params.provider, model: params.model }
+}

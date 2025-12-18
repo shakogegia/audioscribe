@@ -1,5 +1,4 @@
-import { generatePreviouslyOn } from "@/ai/prompts/previously-on"
-import { provider } from "@/ai/providers"
+import { generatePrompt } from "@/ai/prompts/helpers"
 import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
 import { prisma } from "@/lib/prisma"
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Get last 10 minutes of transcript (600 seconds = 600,000 milliseconds)
     const currentTimeMs = currentTime * 1000
-    const tenMinutesAgoMs = currentTimeMs - (10 * 60 * 1000)
+    const tenMinutesAgoMs = currentTimeMs - 10 * 60 * 1000
 
     const segments = await prisma.transcriptSegment.findMany({
       where: {
@@ -51,12 +50,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     // Generate AI summary
-    const ai = await provider(config.provider, config.model)
-
-    const { summary } = await generatePreviouslyOn(ai, {
-      transcript: transcriptText,
-      context: {
-        bookTitle: book.title,
+    const summary = await generatePrompt({
+      provider: config.provider,
+      model: config.model,
+      slug: "previously-on",
+      params: {
+        transcript: transcriptText,
+        context: { bookTitle: book.title },
       },
     })
 

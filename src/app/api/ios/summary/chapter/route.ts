@@ -1,11 +1,11 @@
-import { generateChatSummary } from "@/ai/prompts/chat-summary"
+import { generatePrompt } from "@/ai/prompts/helpers"
 import { getTranscriptByRange } from "@/lib/transcript"
 import { NextRequest, NextResponse } from "next/server"
-import { getAi, getLastPlayedBook, respondWithAudio } from "../../utils"
+import { getAiConfig, getLastPlayedBook, respondWithAudio } from "../../utils"
 
 export async function GET(request: NextRequest) {
   try {
-    const ai = await getAi(request)
+    const { provider, model } = await getAiConfig(request)
     const book = await getLastPlayedBook(request)
 
     const params = {
@@ -43,11 +43,16 @@ export async function GET(request: NextRequest) {
 
     const transcript = transcripts.map(transcript => transcript.text).join(" ")
 
-    const { summary } = await generateChatSummary(ai, {
-      transcript,
-      context: {
-        bookTitle: book.title,
-        chapterType: params.chapter === "current" ? "the current" : "the previous",
+    const summary = await generatePrompt({
+      provider: provider,
+      model: model,
+      slug: "chapter-summary",
+      params: {
+        transcript,
+        context: {
+          bookTitle: book.title,
+          chapterType: params.chapter === "current" ? "the current" : "the previous",
+        },
       },
     })
 

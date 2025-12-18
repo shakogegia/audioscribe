@@ -5,6 +5,7 @@ import { transcribeQueue } from "@/server/jobs/queues/transcribe.queue"
 import { vectorizeQueue } from "@/server/jobs/queues/vectorize.queue"
 import { appRouter } from "@queuedash/api"
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
+import { chapterSummaryQueue } from "@/server/jobs/queues/chapter-summary.queue"
 
 async function handler(req: Request) {
   return fetchRequestHandler({
@@ -19,6 +20,7 @@ async function handler(req: Request) {
         { queue: transcribeQueue, displayName: "Transcribe Book", type: "bullmq" as const },
         { queue: vectorizeQueue, displayName: "Vectorize Book", type: "bullmq" as const },
         { queue: notificationQueue, displayName: "Send Notification", type: "bullmq" as const },
+        { queue: chapterSummaryQueue, displayName: "Generate Chapter Summary", type: "bullmq" as const },
       ],
     }),
   })
