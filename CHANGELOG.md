@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.12.0](/compare/0.11.0...0.12.0) (2025-12-18)
+
+
+### Features
+
+* single chapter summaries fc37595
+
 # [0.11.0](/compare/0.10.0...0.11.0) (2025-12-18)
 
 
