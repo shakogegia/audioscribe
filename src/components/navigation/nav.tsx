@@ -77,6 +77,11 @@ const menuItems = [
         icon: AudioLinesIcon,
       },
       {
+        label: "Text-to-Speech",
+        href: "/setup/tts",
+        icon: MicIcon,
+      },
+      {
         label: "Embedding",
         href: "/setup/embedding",
         icon: VectorSquareIcon,

@@ -1,60 +1,45 @@
-import { folders } from "@/lib/folders"
 import { NextRequest, NextResponse } from "next/server"
 import { spawn } from "child_process"
 import path from "path"
 import crypto from "crypto"
 import fs from "fs/promises"
+import os from "os"
 
-interface TTSGenerateRequestBody {
+interface TTSPreviewRequestBody {
   text: string
-  voice?: string
+  model: string
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: NextRequest) {
   try {
-    const { id: bookId } = await params
-    const body: TTSGenerateRequestBody = await request.json()
+    const body: TTSPreviewRequestBody = await request.json()
 
-    const { text, voice = "en_US-hfc_female-medium" } = body
+    const { text, model } = body
 
     if (!text || !text.trim()) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 })
     }
 
-    // Generate unique audio ID based on text hash
-    const audioId = crypto.createHash("md5").update(text).digest("hex")
-
-    // Get TTS folder for this book
-    const ttsFolder = await folders.book(bookId).tts()
-    const outputPath = path.join(ttsFolder, `${audioId}.wav`)
-
-    // Check if audio already exists (cached)
-    try {
-      await fs.access(outputPath)
-      console.log(`TTS audio already exists (cached): ${audioId}`)
-
-      // Get file stats for duration estimation (approximate)
-      const stats = await fs.stat(outputPath)
-      const duration = Math.round(stats.size / 32000) // Rough estimate based on 16kHz mono WAV
-
-      return NextResponse.json({
-        audioId,
-        duration,
-        cached: true,
-      })
-    } catch {
-      // File doesn't exist, continue with generation
+    if (!model) {
+      return NextResponse.json({ error: "Model is required" }, { status: 400 })
     }
+
+    // Generate unique ID for this preview
+    const previewId = crypto.createHash("md5").update(`${text}-${model}-${Date.now()}`).digest("hex")
+
+    // Use temp directory for preview files
+    const tmpDir = os.tmpdir()
+    const outputPath = path.join(tmpDir, `tts-preview-${previewId}.wav`)
+
+    console.log(`Generating TTS preview: model=${model}, text length=${text.length}`)
 
     // Spawn Python Piper TTS script
     const scriptPath = path.join(process.cwd(), "scripts", "piper_tts.py")
 
-    console.log(`Generating TTS audio for book ${bookId}, text length: ${text.length}`)
-
     const result = await spawnPiperTTS({
       text,
       output: outputPath,
-      model: voice,
+      model,
       scriptPath,
     })
 
@@ -62,18 +47,28 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: result.error || "TTS generation failed" }, { status: 500 })
     }
 
-    // Get file stats for duration estimation
-    const stats = await fs.stat(outputPath)
-    const duration = Math.round(stats.size / 32000) // Rough estimate
+    // Read the generated audio file
+    const audioBuffer = await fs.readFile(outputPath)
 
-    return NextResponse.json({
-      audioId,
-      duration,
-      cached: false,
+    // Clean up the temp file
+    try {
+      await fs.unlink(outputPath)
+    } catch (error) {
+      console.error("Failed to delete temp file:", error)
+    }
+
+    // Return the audio file as a stream
+    return new NextResponse(audioBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": "audio/wav",
+        "Content-Length": audioBuffer.length.toString(),
+        "Cache-Control": "no-cache",
+      },
     })
   } catch (error) {
-    console.error("TTS generation error:", error)
-    return NextResponse.json({ error: "Failed to generate TTS audio" }, { status: 500 })
+    console.error("TTS preview error:", error)
+    return NextResponse.json({ error: "Failed to generate TTS preview" }, { status: 500 })
   }
 }
 
@@ -85,7 +80,7 @@ interface SpawnPiperTTSOptions {
 }
 
 function spawnPiperTTS(options: SpawnPiperTTSOptions): Promise<{ success: boolean; error?: string }> {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     const { text, output, model, scriptPath } = options
 
     const args = ["--text", text, "--output", output, "--model", model]
@@ -117,7 +112,7 @@ function spawnPiperTTS(options: SpawnPiperTTSOptions): Promise<{ success: boolea
 
     child.on("close", code => {
       if (code === 0) {
-        console.log("Piper TTS generation completed successfully")
+        console.log("Piper TTS preview generated successfully")
         resolve({ success: true })
       } else {
         console.error(`Piper TTS exited with code ${code}`)

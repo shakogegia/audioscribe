@@ -13,7 +13,7 @@ type TTSOptions = {
 export async function generateTTS({
   bookId,
   text,
-  voice = "en_US-ljspeech-high",
+  voice = "en_US-hfc_female-medium",
 }: TTSOptions): Promise<{ url: string; duration: number }> {
   try {
     if (!text || !text.trim()) {
