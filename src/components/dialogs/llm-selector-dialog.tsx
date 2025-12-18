@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useLLMModels } from "@/hooks/use-llm-models"
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 
 export function LLMSelectorDialog({ children }: { children: React.ReactNode }) {
   const { models, model, setModel, provider, setProvider } = useLLMModels()
@@ -28,7 +29,15 @@ export function LLMSelectorDialog({ children }: { children: React.ReactNode }) {
   return (
     <Dialog>
       <form>
-        <DialogTrigger asChild>{children}</DialogTrigger>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>{children}</DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Select the LLM provider and model.</p>
+            <p>Selected model: {model}</p>
+          </TooltipContent>
+        </Tooltip>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>LLM Configuration</DialogTitle>

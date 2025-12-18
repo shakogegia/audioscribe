@@ -6,6 +6,7 @@ import { Hero } from "@/components/hero"
 import { Button } from "@/components/ui/button"
 import { SearchResult } from "@/types/api"
 import { AudioLinesIcon } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 interface BookProps {
   book: SearchResult
@@ -18,20 +19,24 @@ export default function BookInfo({ book, showOptions = true }: BookProps) {
       title={book.title}
       description={[book.authors.join(", ")]}
       content={
-        <div className="flex items-center gap-2">
-          <Favorite id={book.id} defaultFavorite={book.favorite} />
-          {showOptions && (
-            <BookOptionsDialog
-              title="Book Options"
-              book={book}
-              tabs={[BookOptionTab.Setup, BookOptionTab.Export, BookOptionTab.Import, BookOptionTab.Remove]}
-            >
-              <Button variant="outline" size="sm">
-                <AudioLinesIcon className="w-4 h-4" />
-                Options
-              </Button>
-            </BookOptionsDialog>
-          )}
+        <div className="flex flex-col gap-2 justify-center items-center">
+          {book.model && <Badge variant="outline">{book.model}</Badge>}
+
+          <div className="flex items-center gap-2">
+            <Favorite id={book.id} defaultFavorite={book.favorite} />
+            {showOptions && (
+              <BookOptionsDialog
+                title="Book Options"
+                book={book}
+                tabs={[BookOptionTab.Setup, BookOptionTab.Export, BookOptionTab.Import, BookOptionTab.Remove]}
+              >
+                <Button variant="outline" size="sm">
+                  <AudioLinesIcon className="w-4 h-4" />
+                  Options
+                </Button>
+              </BookOptionsDialog>
+            )}
+          </div>
         </div>
       }
       icon={

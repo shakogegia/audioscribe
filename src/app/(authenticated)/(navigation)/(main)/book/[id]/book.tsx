@@ -17,6 +17,7 @@ import useBookmarksStore from "@/stores/bookmarks"
 import { BookmarkIcon, BookOpenIcon, CaptionsIcon, SparklesIcon } from "lucide-react"
 import { Captions } from "./tabs/captions/captions"
 import { ProcessBookAlert } from "./components/process-book-alert"
+import { Downloader } from "./components/downloader"
 
 interface BookProps {
   id: string
@@ -91,20 +92,20 @@ export default function Book({ id, book, files, revalidate }: BookProps) {
                 </TabsTrigger>
               </TabsList>
 
+              <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
+                <Chat bookId={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
+              </TabsContent>
+
               <TabsContent value="bookmarks" forceMount className={twMerge("data-[state=inactive]:hidden")}>
                 <Bookmarks id={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
 
-              <TabsContent value="chapters" forceMount className={twMerge("data-[state=inactive]:hidden")}>
+              <TabsContent value="chapters" className={twMerge("data-[state=inactive]:hidden")}>
                 <Chapters id={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
 
               <TabsContent value="transcript" className={twMerge("data-[state=inactive]:hidden")}>
                 <Transcript bookId={id} book={book} play={time => playerRef.current?.play(time)} />
-              </TabsContent>
-
-              <TabsContent value="chat" forceMount className={twMerge("data-[state=inactive]:hidden")}>
-                <Chat bookId={id} book={book} files={files} play={time => playerRef.current?.play(time)} />
               </TabsContent>
 
               <TabsContent value="captions" className={twMerge("data-[state=inactive]:hidden")}>

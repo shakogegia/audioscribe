@@ -56,6 +56,8 @@ export async function getLibraryItems(
     params: {
       page: page ? parseInt(page) : 0,
       limit: limit ? parseInt(limit) : 10,
+      sort: "addedAt",
+      desc: 1,
     },
   })
   const libraryItemIds = response.data.results.map(x => x.id)

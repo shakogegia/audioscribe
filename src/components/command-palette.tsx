@@ -1,4 +1,14 @@
-import { CogIcon, HomeIcon, MoonIcon, SearchIcon, StarIcon, SunIcon } from "lucide-react"
+import {
+  BookOpenCheckIcon,
+  BrainIcon,
+  CircleDashedIcon,
+  CogIcon,
+  HomeIcon,
+  MoonIcon,
+  SearchIcon,
+  StarIcon,
+  SunIcon,
+} from "lucide-react"
 
 import {
   CommandDialog,
@@ -58,6 +68,16 @@ export function CommandPalette() {
             <StarIcon />
             <span>Favorites</span>
           </CommandItem>
+          {/* processed */}
+          <CommandItem onSelect={() => navigateTo("/processed")}>
+            <BookOpenCheckIcon />
+            <span>Processed</span>
+          </CommandItem>
+          {/* processing */}
+          <CommandItem onSelect={() => navigateTo("/processing")}>
+            <CircleDashedIcon />
+            <span>Processing</span>
+          </CommandItem>
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Appearance">
@@ -75,6 +95,13 @@ export function CommandPalette() {
           </CommandItem>
         </CommandGroup>
         <CommandSeparator />
+        <CommandGroup heading="Prompts">
+          <CommandItem onSelect={() => navigateTo("/prompts")}>
+            <BrainIcon />
+            <span>Prompts</span>
+          </CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
         <CommandGroup heading="Settings">
           <CommandItem onSelect={() => navigateTo("/setup/audiobookshelf")}>
             <CogIcon />
@@ -86,7 +113,7 @@ export function CommandPalette() {
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/setup/asr")}>
             <CogIcon />
-            <span>ASR Settings</span>
+            <span>Speech-to-Text Settings</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/setup/embedding")}>
             <CogIcon />

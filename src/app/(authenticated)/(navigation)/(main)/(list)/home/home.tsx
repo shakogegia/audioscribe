@@ -28,10 +28,13 @@ type Library = {
 
 function HomeContent({ libraries }: Props) {
   const [libraryId, setLibraryId] = useQueryState("libraryId", { defaultValue: libraries[0].id })
-  const [page, setPage] = useQueryState("page", { defaultValue: "0" })
+  const [page, setPage] = useQueryState("page", { defaultValue: "1" })
+
+  // Convert 1-indexed URL to 0-indexed API
+  const apiPage = Math.max(0, parseInt(page) - 1)
 
   const { data, error, isLoading } = useSWR<{ books: SearchResult[]; total: number; page: number; limit: number }>(
-    `/api/library/${libraryId}?page=${page}`,
+    `/api/library/${libraryId}?page=${apiPage}`,
     {
       revalidateOnFocus: false,
       refreshInterval: 0,
@@ -40,7 +43,7 @@ function HomeContent({ libraries }: Props) {
 
   const handleLibraryChange = (newLibraryId: string) => {
     setLibraryId(newLibraryId)
-    setPage("0") // Reset to first page when changing library
+    setPage("1") // Reset to first page when changing library
   }
 
   const books = data?.books
@@ -89,7 +92,12 @@ function HomeContent({ libraries }: Props) {
           <>
             <BookList books={books} />
 
-            <Pagination total={data?.total ?? 0} page={data?.page ?? 0} limit={data?.limit ?? 0} />
+            <Pagination
+              total={data?.total ?? 0}
+              page={parseInt(page)}
+              limit={data?.limit ?? 1}
+              onPageChange={p => setPage(p.toString())}
+            />
           </>
         )}
       </div>

@@ -1,5 +1,3 @@
-"use client"
-
 import {
   Pagination as PaginationPrimitive,
   PaginationContent,
@@ -9,31 +7,23 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
-import { useQueryState } from "nuqs"
 
 type PaginationProps = {
   total: number
-  page: number // 0-indexed page from API
+  page: number // 1-indexed page (matches URL)
   limit: number
+  onPageChange: (page: number) => void
 }
 
-export function Pagination({ total, page, limit }: PaginationProps) {
-  const [, setPage] = useQueryState("page", { defaultValue: "0" })
-
+export function Pagination({ total, page, limit, onPageChange }: PaginationProps) {
   const totalPages = Math.ceil(total / limit)
-  const currentPage = page + 1 // Convert to 1-indexed for display
 
   // Don't render if there's only one page or less
   if (totalPages <= 1) {
     return null
   }
 
-  const handlePageChange = (displayPage: number) => {
-    // Convert back to 0-indexed for API
-    setPage((displayPage - 1).toString())
-  }
-
-  // Generate page numbers to display (1-indexed for UI)
+  // Generate page numbers to display (1-indexed)
   const getPageNumbers = (): (number | "ellipsis")[] => {
     const pages: (number | "ellipsis")[] = []
     const maxVisiblePages = 5
@@ -47,19 +37,19 @@ export function Pagination({ total, page, limit }: PaginationProps) {
       // Always show first page
       pages.push(1)
 
-      if (currentPage > 3) {
+      if (page > 3) {
         pages.push("ellipsis")
       }
 
       // Show pages around current page
-      const start = Math.max(2, currentPage - 1)
-      const end = Math.min(totalPages - 1, currentPage + 1)
+      const start = Math.max(2, page - 1)
+      const end = Math.min(totalPages - 1, page + 1)
 
       for (let i = start; i <= end; i++) {
         pages.push(i)
       }
 
-      if (currentPage < totalPages - 2) {
+      if (page < totalPages - 2) {
         pages.push("ellipsis")
       }
 
@@ -82,12 +72,12 @@ export function Pagination({ total, page, limit }: PaginationProps) {
             href="#"
             onClick={e => {
               e.preventDefault()
-              if (currentPage > 1) {
-                handlePageChange(currentPage - 1)
+              if (page > 1) {
+                onPageChange(page - 1)
               }
             }}
-            aria-disabled={currentPage <= 1}
-            className={currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            aria-disabled={page <= 1}
+            className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
           />
         </PaginationItem>
 
@@ -102,9 +92,9 @@ export function Pagination({ total, page, limit }: PaginationProps) {
                 href="#"
                 onClick={e => {
                   e.preventDefault()
-                  handlePageChange(pageNum)
+                  onPageChange(pageNum)
                 }}
-                isActive={pageNum === currentPage}
+                isActive={pageNum === page}
                 className="cursor-pointer"
               >
                 {pageNum}
@@ -118,12 +108,12 @@ export function Pagination({ total, page, limit }: PaginationProps) {
             href="#"
             onClick={e => {
               e.preventDefault()
-              if (currentPage < totalPages) {
-                handlePageChange(currentPage + 1)
+              if (page < totalPages) {
+                onPageChange(page + 1)
               }
             }}
-            aria-disabled={currentPage >= totalPages}
-            className={currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            aria-disabled={page >= totalPages}
+            className={page >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
           />
         </PaginationItem>
       </PaginationContent>
