@@ -2,6 +2,7 @@ import { generatePrompt } from "@/ai/prompts/helpers"
 import { getTranscriptByRange } from "@/lib/transcript"
 import { NextRequest, NextResponse } from "next/server"
 import { getAiConfig, getLastPlayedBook, respondWithAudio } from "../../utils"
+import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,15 +34,28 @@ export async function GET(request: NextRequest) {
       throw new Error("Chapter not found")
     }
 
-    // Get transcript up to current time for current chapter (spoiler-free)
-    // Get full transcript for previous chapter
-    const transcripts = await getTranscriptByRange({
-      bookId: book.id,
-      startTime: chapter.start,
-      endTime: params.chapter === "current" ? book.currentTime! : chapter.end,
+    let transcript = ""
+
+    const chapterSummary = await prisma.chapterSummary.findFirst({
+      where: {
+        bookId: book.id,
+        chapterId: chapter.id,
+      },
     })
 
-    const transcript = transcripts.map(transcript => transcript.text).join(" ")
+    if (chapterSummary) {
+      transcript = chapterSummary.summary
+    } else {
+      // Get transcript up to current time for current chapter (spoiler-free)
+      // Get full transcript for previous chapter
+      const transcripts = await getTranscriptByRange({
+        bookId: book.id,
+        startTime: chapter.start,
+        endTime: params.chapter === "current" ? book.currentTime! : chapter.end,
+      })
+
+      transcript = transcripts.map(({ text }) => text).join(" ")
+    }
 
     const summary = await generatePrompt({
       provider: provider,
