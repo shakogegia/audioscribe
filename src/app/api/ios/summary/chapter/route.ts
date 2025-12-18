@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     const summary = await generatePrompt({
       provider: provider,
       model: model,
-      slug: "chapter-summary",
+      slug: "ios-chapter-summary",
       params: {
         transcript,
         context: {

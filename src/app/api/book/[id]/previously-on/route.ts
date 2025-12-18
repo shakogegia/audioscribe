@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const summary = await generatePrompt({
       provider: config.provider,
       model: config.model,
-      slug: "previously-on",
+      slug: "ios-previously-on",
       params: {
         transcript: transcriptText,
         context: { bookTitle: book.title },

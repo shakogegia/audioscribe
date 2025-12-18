@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const summary = await generatePrompt({
       provider: provider,
       model: model,
-      slug: "previously-on",
+      slug: "ios-previously-on",
       params: {
         transcript,
         context: { bookTitle: book.title },
