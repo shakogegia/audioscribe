@@ -2,9 +2,7 @@ import { provider } from "@/ai/providers"
 import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook, getLastPlayedLibraryItemId } from "@/lib/audiobookshelf"
 import { generateTTS } from "@/lib/tts"
-import fs from "fs"
 import { NextRequest, NextResponse } from "next/server"
-import path from "path"
 
 export async function getLastPlayedBook(request: NextRequest) {
   const lastPlayedLibraryItemId = await getLastPlayedLibraryItemId()
@@ -19,21 +17,14 @@ export async function getLastPlayedBook(request: NextRequest) {
   return book
 }
 
-export async function respondWithAudio(bookId: string, text: string) {
-  const { url: file } = await generateTTS({ bookId, text })
+export async function respondWithAudio(text: string, voice?: string) {
+  const audioBuffer = await generateTTS({ text, voice })
 
-  if (!fs.existsSync(file)) {
-    return NextResponse.json({ error: "File not found" }, { status: 404 })
-  }
-
-  const fileBuffer = fs.readFileSync(file)
-  const filename = path.basename(file)
-
-  return new NextResponse(fileBuffer, {
+  return new NextResponse(audioBuffer as unknown as BodyInit, {
     headers: {
       "Content-Type": "audio/wav",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-      "Content-Length": fileBuffer.length.toString(),
+      "Content-Disposition": 'attachment; filename="audio.wav"',
+      "Content-Length": audioBuffer.length.toString(),
     },
   })
 }

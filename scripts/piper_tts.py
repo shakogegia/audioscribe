@@ -84,7 +84,7 @@ def get_models_dir() -> str:
 def main():
     parser = argparse.ArgumentParser(description="Generate speech using Piper TTS")
     parser.add_argument("--text", required=True, help="Text to synthesize")
-    parser.add_argument("--output", required=True, help="Output WAV file path")
+    parser.add_argument("--output", required=True, help="Output WAV file path (use '-' for stdout)")
     parser.add_argument(
         "--model",
         default="en_US-ljspeech-high",
@@ -117,36 +117,68 @@ def main():
         # Load the voice model
         voice = PiperVoice.load(model_file, config_path=config_file)
 
-        # Create output directory if it doesn't exist
-        output_path = Path(args.output)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
         print(f"Synthesizing text: {args.text[:50]}...", file=sys.stderr)
 
-        # Synthesize speech and write to WAV file
+        # Synthesize speech and write to WAV file or stdout
         import wave
+        import io
 
-        with wave.open(args.output, "wb") as wav_file:
-            # Check if synthesize_wav method exists (newer piper-tts versions)
-            if hasattr(voice, "synthesize_wav"):
-                voice.synthesize_wav(args.text, wav_file)
-            else:
-                # Older piper-tts versions: synthesize() writes directly to wav_file
-                # but we need to set up the wave file parameters first
-                wav_file.setnchannels(1)  # Piper outputs mono audio
-                wav_file.setsampwidth(2)  # 16-bit audio (2 bytes per sample)
-                wav_file.setframerate(voice.config.sample_rate)
-                voice.synthesize(args.text, wav_file)
+        # Determine output mode
+        output_to_stdout = args.output == "-"
 
-        # Verify file was created and has content
-        file_size = os.path.getsize(args.output)
-        print(f"Audio file created: {args.output} ({file_size} bytes)", file=sys.stderr)
+        if output_to_stdout:
+            # Write to an in-memory buffer
+            buffer = io.BytesIO()
+            with wave.open(buffer, "wb") as wav_file:
+                # Check if synthesize_wav method exists (newer piper-tts versions)
+                if hasattr(voice, "synthesize_wav"):
+                    voice.synthesize_wav(args.text, wav_file)
+                else:
+                    # Older piper-tts versions: synthesize() writes directly to wav_file
+                    # but we need to set up the wave file parameters first
+                    wav_file.setnchannels(1)  # Piper outputs mono audio
+                    wav_file.setsampwidth(2)  # 16-bit audio (2 bytes per sample)
+                    wav_file.setframerate(voice.config.sample_rate)
+                    voice.synthesize(args.text, wav_file)
 
-        if file_size == 0:
-            print("WARNING: Generated audio file is empty!", file=sys.stderr)
-            sys.exit(1)
+            # Get the audio data
+            audio_data = buffer.getvalue()
+            print(f"Audio generated: {len(audio_data)} bytes", file=sys.stderr)
 
-        print("SUCCESS")  # Signal success to stdout for parsing
+            if len(audio_data) == 0:
+                print("WARNING: Generated audio is empty!", file=sys.stderr)
+                sys.exit(1)
+
+            # Write binary data to stdout
+            sys.stdout.buffer.write(audio_data)
+            sys.stdout.buffer.flush()
+        else:
+            # Create output directory if it doesn't exist
+            output_path = Path(args.output)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with wave.open(args.output, "wb") as wav_file:
+                # Check if synthesize_wav method exists (newer piper-tts versions)
+                if hasattr(voice, "synthesize_wav"):
+                    voice.synthesize_wav(args.text, wav_file)
+                else:
+                    # Older piper-tts versions: synthesize() writes directly to wav_file
+                    # but we need to set up the wave file parameters first
+                    wav_file.setnchannels(1)  # Piper outputs mono audio
+                    wav_file.setsampwidth(2)  # 16-bit audio (2 bytes per sample)
+                    wav_file.setframerate(voice.config.sample_rate)
+                    voice.synthesize(args.text, wav_file)
+
+            # Verify file was created and has content
+            file_size = os.path.getsize(args.output)
+            print(f"Audio file created: {args.output} ({file_size} bytes)", file=sys.stderr)
+
+            if file_size == 0:
+                print("WARNING: Generated audio file is empty!", file=sys.stderr)
+                sys.exit(1)
+
+            print("SUCCESS", file=sys.stderr)  # Signal success to stderr when writing to file
+
         sys.exit(0)
 
     except Exception as e:

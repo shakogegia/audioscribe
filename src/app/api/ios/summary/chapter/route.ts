@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    return await respondWithAudio(book.id, summary)
+    return await respondWithAudio(summary)
   } catch (error) {
     console.error("Error generating chat summary:", error)
     return NextResponse.json(
