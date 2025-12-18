@@ -1,5 +1,6 @@
 "use client"
 import BookList from "@/components/book-list"
+import { Pagination } from "@/components/pagination"
 import {
   Select,
   SelectContent,
@@ -27,16 +28,27 @@ type Library = {
 
 function HomeContent({ libraries }: Props) {
   const [libraryId, setLibraryId] = useQueryState("libraryId", { defaultValue: libraries[0].id })
+  const [page, setPage] = useQueryState("page", { defaultValue: "0" })
 
-  const { data, error, isLoading } = useSWR<SearchResult[]>(`/api/library/${libraryId}`, {
-    revalidateOnFocus: false,
-    refreshInterval: 0,
-  })
+  const { data, error, isLoading } = useSWR<{ books: SearchResult[]; total: number; page: number; limit: number }>(
+    `/api/library/${libraryId}?page=${page}`,
+    {
+      revalidateOnFocus: false,
+      refreshInterval: 0,
+    }
+  )
+
+  const handleLibraryChange = (newLibraryId: string) => {
+    setLibraryId(newLibraryId)
+    setPage("0") // Reset to first page when changing library
+  }
+
+  const books = data?.books
 
   return (
     <div className="flex flex-col items-center gap-8 w-full">
       <div className="flex justify-center">
-        <Select value={libraryId} onValueChange={setLibraryId}>
+        <Select value={libraryId} onValueChange={handleLibraryChange}>
           <SelectTrigger>
             <SelectValue placeholder="Select a library" />
           </SelectTrigger>
@@ -67,15 +79,17 @@ function HomeContent({ libraries }: Props) {
           </div>
         )}
 
-        {data && data.length === 0 && (
+        {books && books.length === 0 && (
           <div className={twMerge("flex items-center justify-center p-8 text-sm text-neutral-600")}>
             <span>No book found</span>
           </div>
         )}
 
-        {data && data.length > 0 && (
+        {books && books.length > 0 && (
           <>
-            <BookList books={data} />
+            <BookList books={books} />
+
+            <Pagination total={data?.total ?? 0} page={data?.page ?? 0} limit={data?.limit ?? 0} />
           </>
         )}
       </div>

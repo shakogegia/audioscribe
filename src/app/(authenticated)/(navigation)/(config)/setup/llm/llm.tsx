@@ -85,39 +85,6 @@ export default function LLMSetup({ config, updateConfig }: Props) {
         <Separator />
 
         <AiCard
-          title="OpenAI"
-          description="Requires an OpenAI account with prepaid API credits."
-          className="rounded-none border-y-0 [&>div]:opacity-10 [&>div]:cursor-not-allowed"
-          enabled={llmConfig.aiProviders.openai.enabled}
-          onCheckedChange={enabled =>
-            update({
-              ...llmConfig,
-              aiProviders: { ...llmConfig.aiProviders, openai: { ...llmConfig.aiProviders.openai, enabled } },
-            })
-          }
-          fields={[
-            {
-              label: "API Key",
-              hidden: true,
-              placeholder: "Enter API Key",
-              value: llmConfig.aiProviders.openai.apiKey || "",
-              onChange: apiKey => {
-                update({
-                  ...llmConfig,
-                  aiProviders: {
-                    ...llmConfig.aiProviders,
-                    openai: { ...llmConfig.aiProviders.openai, apiKey },
-                  },
-                })
-              },
-              help: { href: "https://platform.openai.com/api-keys", text: "Get API Key" },
-            },
-          ]}
-        />
-
-        <Separator />
-
-        <AiCard
           title="Ollama"
           description="Free and private access to local LLMs when you self-host Ollama. Be aware that small models may not produce usable results."
           className="rounded-t-none border-t-0"

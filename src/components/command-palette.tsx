@@ -41,7 +41,7 @@ export function CommandPalette() {
   }
 
   return (
-    <CommandDialog className="rounded-lg border shadow-md md:min-w-[450px] md:h-96" open={open} onOpenChange={setOpen}>
+    <CommandDialog className="rounded-lg border shadow-md md:min-w-[450px]" open={open} onOpenChange={setOpen}>
       <CommandInput placeholder="Type a command or search..." onValueChange={setQuery} />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>

@@ -35,7 +35,10 @@ export async function getAllLibraries(): Promise<Library[]> {
   }
 }
 
-export async function getLibraryItems(libraryId: string): Promise<BookBasicInfo[]> {
+export async function getLibraryItems(
+  libraryId: string,
+  { page, limit }: { page?: string | null; limit?: string | null } = {}
+): Promise<{ books: BookBasicInfo[]; total: number; page: number; limit: number }> {
   const api = await getApi()
   type ApiResponse = {
     total: number
@@ -49,10 +52,15 @@ export async function getLibraryItems(libraryId: string): Promise<BookBasicInfo[
     offset: number
     results: Audiobookshelf.LibraryItem[]
   }
-  const response = await api.get<ApiResponse>(`/api/libraries/${libraryId}/items`)
+  const response = await api.get<ApiResponse>(`/api/libraries/${libraryId}/items`, {
+    params: {
+      page: page ? parseInt(page) : 0,
+      limit: limit ? parseInt(limit) : 10,
+    },
+  })
   const libraryItemIds = response.data.results.map(x => x.id)
   const books = await getBatchLibraryItems(libraryItemIds)
-  return books
+  return { books, total: response.data.total, page: response.data.page, limit: response.data.limit }
 }
 
 async function getBookFromDatabase(libraryItemId: string) {
