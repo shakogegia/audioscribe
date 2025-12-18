@@ -1,16 +1,12 @@
 "use client"
 import { LLMSelectorDialog } from "@/components/dialogs/llm-selector-dialog"
 import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { ChapterSummary } from "@/generated/prisma"
 import { useLLMModels } from "@/hooks/use-llm-models"
-import { usePlayerStore } from "@/stores/player"
 import { AudioFile, SearchResult } from "@/types/api"
 import axios from "axios"
-import { BookmarkPlus, SlidersHorizontal, WandSparkles } from "lucide-react"
+import { SlidersHorizontal, WandSparkles } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import useSWR from "swr"
 import Chapter from "./chapter"
 
 type ChaptersProps = {
@@ -24,27 +20,23 @@ type ChaptersProps = {
 export default function Chapters({ play, book }: ChaptersProps) {
   const { provider, model } = useLLMModels()
 
-  const { data: chapterSummaries } = useSWR<ChapterSummary[]>(`/api/book/${book.id}/summary/chapters`, {
-    refreshInterval: 0,
-    revalidateOnFocus: false,
-  })
-
   const [chapters] = useState(() => book.chapters.sort((a, b) => a.start - b.start))
 
   const chaptersSorted = chapters.sort((a, b) => a.start - b.start)
 
   async function generateChaptersSummary() {
-    toast.loading("Generating chapters summary...", { id: "generate-chapters-summary" })
+    const toastId = `generate-chapters-summary-${book.id}-${Date.now()}`
+    toast.loading("Generating chapters summary...", { id: toastId })
     try {
       const response = await axios.post(`/api/book/${book.id}/summary/generate/chapters`, {
         provider: provider,
         model: model,
       })
 
-      toast.success(response.data.message, { id: "generate-chapters-summary" })
+      toast.success(response.data.message, { id: toastId })
     } catch (error) {
       console.error("Failed to generate chapters summary:", error)
-      toast.error("Failed to generate chapters summary", { id: "generate-chapters-summary" })
+      toast.error("Failed to generate chapters summary", { id: toastId })
     }
   }
 
@@ -71,14 +63,7 @@ export default function Chapters({ play, book }: ChaptersProps) {
 
       <div className="flex flex-col gap-2 w-full">
         {chaptersSorted.map((chapter, index) => (
-          <Chapter
-            key={chapter.id}
-            id={chapter.id.toString()}
-            book={book}
-            summaries={chapterSummaries}
-            chapter={chapter}
-            play={play}
-          />
+          <Chapter key={chapter.id} id={chapter.id.toString()} book={book} chapter={chapter} play={play} />
         ))}
 
         {chapters.length === 0 && (

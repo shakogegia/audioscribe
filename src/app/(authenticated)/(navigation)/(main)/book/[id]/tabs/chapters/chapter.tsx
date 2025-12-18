@@ -11,23 +11,34 @@ import axios from "axios"
 import { ChevronsDown, ChevronsUp, Loader2Icon, WandSparkles } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
 
 type ChapterProps = {
   id: string
   book: SearchResult
   play?: (time?: number) => void
-  summaries?: ChapterSummary[]
   chapter: Chapter
 }
 
-export default function Chapter({ play, book, summaries = [], chapter }: ChapterProps) {
+export default function Chapter({ play, book, chapter }: ChapterProps) {
   const { provider, model } = useLLMModels()
   const [isCollapsed, setIsCollapsed] = useState<boolean>(true)
   const [isGeneratingSummary, setIsGeneratingSummary] = useState<boolean>(false)
 
+  const { data: chapterSummary } = useSWR<ChapterSummary>(
+    `/api/book/${book.id}/summary/chapters/chapter/${chapter.id}`,
+    {
+      revalidateOnFocus: false,
+    }
+  )
+
+  const { summary, status } = chapterSummary || {}
+
   async function generateChapterSummary() {
-    toast.loading("Generating chapter summary...", { id: "generate-chapter-summary" })
+    const toastId = `generate-chapter-summary-${book.id}-${Date.now()}`
+    toast.loading("Generating chapter summary...", { id: toastId })
+    setIsCollapsed(false)
     try {
       setIsGeneratingSummary(true)
       const response = await axios.post(`/api/book/${book.id}/summary/generate/chapter/${chapter.id}`, {
@@ -35,16 +46,14 @@ export default function Chapter({ play, book, summaries = [], chapter }: Chapter
         model: model,
       })
 
-      toast.success(response.data.message, { id: "generate-chapters-summary" })
+      toast.success(response.data.message, { id: toastId })
     } catch (error) {
-      console.error("Failed to generate chapters summary:", error)
-      toast.error("Failed to generate chapters summary", { id: "generate-chapters-summary" })
+      console.error("Failed to generate chapter summary:", error)
+      toast.error("Failed to generate chapter summary", { id: toastId })
     } finally {
       setIsGeneratingSummary(false)
     }
   }
-
-  const { summary, status } = summaries.find(summary => summary.chapterId === chapter.id) || { summary: "" }
 
   const canGenerateSummary =
     !isGeneratingSummary &&
@@ -66,12 +75,11 @@ export default function Chapter({ play, book, summaries = [], chapter }: Chapter
           <div className="flex items-center gap-2">
             <ChapterAction
               title="Generate chapter summary"
-              onClick={generateChapterSummary}
+              onClick={() => generateChapterSummary()}
               disabled={!canGenerateSummary}
             >
               {isGenerating ? <Loader2Icon className="animate-spin" /> : <WandSparkles className="w-4 h-4" />}
             </ChapterAction>
-
             <ChapterAction
               title={isCollapsed ? "Expand chapter" : "Collapse chapter"}
               onClick={() => setIsCollapsed(!isCollapsed)}
@@ -83,7 +91,7 @@ export default function Chapter({ play, book, summaries = [], chapter }: Chapter
         </div>
       </div>
 
-      {!isCollapsed && <Markdown text={summary} />}
+      {!isCollapsed && <Markdown text={summary || ""} />}
     </div>
   )
 }

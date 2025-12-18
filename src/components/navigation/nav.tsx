@@ -17,6 +17,7 @@ import {
   DatabaseZapIcon,
   Layers2Icon,
   LibraryBigIcon,
+  ListChecksIcon,
   LogOutIcon,
   MicIcon,
   NavigationIcon,
@@ -86,6 +87,12 @@ const menuItems = [
         icon: BellIcon,
       },
       {
+        label: "Jobs",
+        href: "/jobs",
+        icon: ListChecksIcon,
+        target: "jobs",
+      },
+      {
         label: "Cache",
         href: "/cache",
         icon: DatabaseZapIcon,
@@ -119,7 +126,7 @@ export function NavigationMenu() {
             <DropdownMenuGroup>
               {item.children.map(child => (
                 <DropdownMenuItem key={child.label} asChild>
-                  <Link href={child.href}>
+                  <Link href={child.href} target={child.target}>
                     <child.icon className="w-4 h-4" />
                     {child.label}
                   </Link>
