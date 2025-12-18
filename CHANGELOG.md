@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.14.0](/compare/0.13.1...0.14.0) (2025-12-18)
+
+
+### Bug Fixes
+
+* ios endpoints 76f1fbe
+
+
+### Features
+
+* add chapter summary retrieval to iOS endpoint 6c22784
+
 ## [0.13.1](/compare/0.13.0...0.13.1) (2025-12-18)
 
 
