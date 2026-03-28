@@ -2,8 +2,26 @@
   "name": "audioscribe",
   "version": "0.14.0",
   "private": true,
+  "packageManager": "pnpm@10.29.3",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "better-sqlite3",
+      "cpu-features",
+      "esbuild",
+      "msgpackr-extract",
+      "msw",
+      "onnxruntime-node",
+      "prisma",
+      "protobufjs",
+      "sharp",
+      "ssh2",
+      "unrs-resolver"
+    ]
+  },
   "scripts": {
     "dev": "next dev",
+    "dev:all": "concurrently \"pnpm dev\" \"pnpm dev:workers\"",
     "start": "NODE_ENV=production next start",
     "build": "next build",
     "lint": "eslint",
@@ -82,6 +100,7 @@
     "nodejs-whisper": "^0.2.9",
     "nuqs": "^2.8.5",
     "ollama-ai-provider-v2": "^1.5.5",
+    "radix-ui": "^1.4.3",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "^7.68.0",
@@ -118,6 +137,7 @@
     "nodemon": "^3.1.11",
     "prisma": "^7.1.0",
     "release-it": "^19.1.0",
+    "shadcn": "^4.1.1",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.16",
