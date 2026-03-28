@@ -77,8 +77,8 @@ pnpm build && pnpm start
 # Build and run with default settings
 make run
 
-# With custom credentials
-AUTH_EMAIL=me@example.com AUTH_PASSWORD=secret SESSION_SECRET=mysecret make run
+# With custom credentials and port
+AUTH_EMAIL=me@example.com AUTH_PASSWORD=secret SESSION_SECRET=mysecret PORT=8080 make run
 ```
 
 Available targets: `build`, `run`, `stop`, `logs`, `shell`, `push`, `clean`
@@ -137,6 +137,7 @@ docker run -d \
 
 | Variable | Description | Default |
 |---|---|---|
+| `PORT` | Host port | `3000` |
 | `AUTH_EMAIL` | Login email | `email` |
 | `AUTH_PASSWORD` | Login password | `password` |
 | `SESSION_SECRET` | Session encryption key | `secret` |
