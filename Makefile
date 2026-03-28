@@ -1,41 +1,53 @@
-.PHONY: *
-.DEFAULT_GOAL := help
+IMAGE_NAME := audioscribe
+CONTAINER_NAME := audioscribe
+DOCKER_REPO ?= shakogegia/audioscribe
+PORT ?= 3000
+VOLUME_NAME := audioscribe-data
 
-THIS_FILE := $(abspath $(lastword $(MAKEFILE_LIST)))
-CURRENT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-
-# Detect Docker Compose command
-ifeq (,$(shell command docker compose 2> /dev/null))
-  DOCKER_COMPOSE = docker-compose
-else
-  DOCKER_COMPOSE = docker compose
+RUN_ENV :=
+ifdef SESSION_SECRET
+RUN_ENV += -e SESSION_SECRET=$(SESSION_SECRET)
+endif
+ifdef AUTH_EMAIL
+RUN_ENV += -e AUTH_EMAIL=$(AUTH_EMAIL)
+endif
+ifdef AUTH_PASSWORD
+RUN_ENV += -e AUTH_PASSWORD=$(AUTH_PASSWORD)
 endif
 
-help: ## Show this help message
-	@echo "\n\033[1mUsage:\033[0m\n  make \033[36m<TARGET>\033[0m\n"
-	@echo "\033[1mAvailable targets:\033[0m"
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+.PHONY: dev build run stop logs push clean shell
 
-up: ## Start all containers in the background (with build and file watch)
-	$(DOCKER_COMPOSE) -f docker-compose.dev.yml up --build -d
+dev:
+	pnpm dev:all
 
-down: ## Stop and remove containers and orphans
-	$(DOCKER_COMPOSE) -f docker-compose.dev.yml --profile="*" down --remove-orphans
+build:
+	docker build -t $(IMAGE_NAME) .
 
-restart: ## Restart containers (down + up)
-	@$(MAKE) -f docker-compose.dev.yml down
-	@$(MAKE) -f docker-compose.dev.yml up
-	@echo "✔ Restart completed"
+run: build
+	docker run -d \
+		--name $(CONTAINER_NAME) \
+		-p $(PORT):3000 \
+		--memory=10g \
+		--memory-reservation=4g \
+		--shm-size=2g \
+		$(RUN_ENV) \
+		-v $(VOLUME_NAME):/app/data \
+		$(IMAGE_NAME)
+	@echo "Running at http://localhost:$(PORT)"
 
-audioscribe-restart: ## Restart the audioscribe process
-	docker exec -it audioscribe supervisorctl -c /etc/supervisor/supervisord.conf restart audioscribe
-	@echo "✔ Restart completed"
+stop:
+	-docker stop $(CONTAINER_NAME)
+	-docker rm $(CONTAINER_NAME)
 
-workers-restart: ## Restart the workers process
-	docker exec -it audioscribe supervisorctl -c /etc/supervisor/supervisord.conf restart workers
-	@echo "✔ Restart completed"
+logs:
+	docker logs -f $(CONTAINER_NAME)
 
-chroma-restart: ## Restart the chroma process
-	docker exec -it audioscribe supervisorctl -c /etc/supervisor/supervisord.conf restart chroma
-	@echo "✔ Restart completed"
+shell:
+	docker exec -it $(CONTAINER_NAME) sh
+
+push:
+	docker buildx build --platform linux/amd64,linux/arm64 -t $(DOCKER_REPO):latest --push .
+
+clean: stop
+	-docker rmi $(IMAGE_NAME)
+	-docker volume rm $(VOLUME_NAME)
