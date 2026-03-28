@@ -64,6 +64,8 @@ export const transcribeWorker = new Worker(
       const audioFolder = await folders.book(bookId).audio()
       const processedAudioFilePath = path.join(audioFolder, "processed.wav")
 
+      console.log(`[Transcribe Job] Processed audio file path: ${processedAudioFilePath}`)
+
       const book = await getBook(bookId)
 
       await eraseTranscripts(bookId)
@@ -84,6 +86,7 @@ export const transcribeWorker = new Worker(
       })
 
       // save transcript segments to database
+      // nodewhisper converts any input to WAV internally, so JSON output is named after the WAV file
       const wavAudioFilePath = processedAudioFilePath.replace(/\.[^/.]+$/, ".wav")
       const outputJsonPath = `${wavAudioFilePath}.json`
       const outputContent = await fsPromise.readFile(outputJsonPath, "utf8")
@@ -109,16 +112,20 @@ export const transcribeWorker = new Worker(
 
 function spawnTranscribeScript({ file, model, log }: { file: string; model: string; log: (message: string) => void }) {
   return new Promise((resolve, reject) => {
-    const child = spawn("node", ["scripts/transcribe.js", "--file", file, "--model", model], {
-      cwd: process.cwd(),
-      stdio: "pipe",
-    })
+    const child = spawn(
+      "node",
+      ["--max-old-space-size=7168", "scripts/transcribe.js", "--file", file, "--model", model],
+      {
+        cwd: process.cwd(),
+        stdio: "pipe",
+      }
+    )
 
     child.stdout?.on("data", data => {
       log(data.toString())
     })
     child.stderr?.on("data", data => {
-      console.error(`[Transcribe Job] Error: ${data}`)
+      console.error(`[Transcribe Job] ${data}`)
     })
     child.on("exit", code => {
       if (code !== 0) {

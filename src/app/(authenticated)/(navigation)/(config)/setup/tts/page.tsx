@@ -12,6 +12,7 @@ import { toast } from "sonner"
 import { useTTSModels } from "@/hooks/use-tts-models"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 const DEFAULT_SAMPLE_TEXT =
   "Previously on Lord of the Rings: The fellowship stood at the edge of darkness, their quest hanging by a thread. With courage in their hearts and hope as their guide, they ventured forth into the unknown, knowing that even the smallest person can change the course of the future."
@@ -198,66 +199,70 @@ export default function TTSListPage() {
               </CardContent>
             </Card>
           ) : (
-            models.map(model => {
-              const hasBeenPlayed = playedModels.has(model.id)
-              const isSelected = model.id === selectedModel
-              return (
-                <div
-                  key={model.id}
-                  className={`flex items-center justify-between gap-4 p-3 border rounded-lg hover:bg-accent/50 transition-colors ${
-                    hasBeenPlayed ? "bg-muted" : ""
-                  } ${isSelected ? "border-primary border-2" : ""}`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">{model.name}</span>
-                      {isSelected && (
-                        <Badge variant="default" className="text-[10px] px-1.5 py-0">
-                          Selected
-                        </Badge>
-                      )}
-                      <Badge variant="outline" className="font-mono text-[10px] px-1.5 py-0">
-                        {model.id}
-                      </Badge>
-                      <button
-                        onClick={() => copyModelId(model.id)}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
-                        title="Copy model ID"
+            <ScrollArea className="h-[500px] rounded-lg border">
+              <div className="space-y-2 p-4">
+                {models.map(model => {
+                  const hasBeenPlayed = playedModels.has(model.id)
+                  const isSelected = model.id === selectedModel
+                  return (
+                    <div
+                      key={model.id}
+                      className={`flex items-center justify-between gap-4 p-3 border rounded-lg hover:bg-accent/50 transition-colors ${
+                        hasBeenPlayed ? "bg-muted" : ""
+                      } ${isSelected ? "border-primary border-2" : ""}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm">{model.name}</span>
+                          {isSelected && (
+                            <Badge variant="default" className="text-[10px] px-1.5 py-0">
+                              Selected
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="font-mono text-[10px] px-1.5 py-0">
+                            {model.id}
+                          </Badge>
+                          <button
+                            onClick={() => copyModelId(model.id)}
+                            className="text-muted-foreground hover:text-foreground transition-colors"
+                            title="Copy model ID"
+                          >
+                            <Copy className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">{model.description}</p>
+                      </div>
+                      <Button
+                        onClick={() => previewModel(model.id)}
+                        disabled={loadingModel !== null && loadingModel !== model.id}
+                        variant={
+                          playingModel === model.id ? "destructive" : loadingModel === model.id ? "secondary" : "default"
+                        }
+                        size="sm"
+                        className="shrink-0"
                       >
-                        <Copy className="w-3 h-3" />
-                      </button>
+                        {loadingModel === model.id ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : playingModel === model.id ? (
+                          <>
+                            <StopCircle className="w-4 h-4 mr-2" />
+                            Stop
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="w-4 h-4 mr-2" />
+                            Preview
+                          </>
+                        )}
+                      </Button>
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">{model.description}</p>
-                  </div>
-                  <Button
-                    onClick={() => previewModel(model.id)}
-                    disabled={loadingModel !== null && loadingModel !== model.id}
-                    variant={
-                      playingModel === model.id ? "destructive" : loadingModel === model.id ? "secondary" : "default"
-                    }
-                    size="sm"
-                    className="shrink-0"
-                  >
-                    {loadingModel === model.id ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Generating...
-                      </>
-                    ) : playingModel === model.id ? (
-                      <>
-                        <StopCircle className="w-4 h-4 mr-2" />
-                        Stop
-                      </>
-                    ) : (
-                      <>
-                        <Volume2 className="w-4 h-4 mr-2" />
-                        Preview
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )
-            })
+                  )
+                })}
+              </div>
+            </ScrollArea>
           )}
         </div>
       </div>

@@ -1,5 +1,4 @@
 import { jwtVerify } from "jose"
-import { cookies } from "next/headers"
 import { NextRequest, NextResponse } from "next/server"
 
 const encodedKey = new TextEncoder().encode(process.env.SESSION_SECRET)
@@ -20,7 +19,7 @@ const publicRoutes = ["/login"]
 
 const secretKey = process.env.SECRET_KEY
 
-export default async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname
   const isPublicRoute = publicRoutes.includes(path)
   const isApiRoute = path.startsWith("/api")
@@ -35,7 +34,7 @@ export default async function middleware(req: NextRequest) {
   }
 
   // Get session from cookie
-  const cookie = (await cookies()).get("session")?.value
+  const cookie = req.cookies.get("session")?.value
   const session = await decrypt(cookie)
 
   // Handle unauthenticated users

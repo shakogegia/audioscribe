@@ -4,7 +4,7 @@ import { Worker } from "bullmq"
 import path from "node:path"
 import { BookSetupStage } from "../../../../generated/prisma"
 import { redis } from "@/server/redis"
-import { completeStageProgress, failStageProgress, resetStageProgress } from "./utils/utils"
+import { completeStageProgress, failStageProgress, resetStageProgress, updateStageProgress } from "./utils/utils"
 import { promises as fs } from "fs"
 import ffmpeg from "fluent-ffmpeg"
 import audioconcat from "audioconcat"
@@ -39,7 +39,11 @@ export const processAudioWorker = new Worker(
         }
 
         const audioFilePath = files.length > 1 ? await stitchAudioFiles(files, outputFolder) : files[0]
-        await preprocessAudio(audioFilePath, outputFolder)
+        await preprocessAudio(audioFilePath, outputFolder, progress => {
+          if (progress) {
+            updateStageProgress(bookId, BookSetupStage.ProcessAudio, progress)
+          }
+        })
       }
 
       // Complete stage progress
@@ -73,7 +77,11 @@ async function stitchAudioFiles(files: string[], outputDir: string): Promise<str
   })
 }
 
-async function preprocessAudio(inputPath: string, outputDir: string): Promise<string> {
+async function preprocessAudio(
+  inputPath: string,
+  outputDir: string,
+  onProgress?: (progress?: number) => void
+): Promise<string> {
   // Process audio for better transcription quality
   const outputPath = path.join(outputDir, "processed.wav")
 
@@ -82,7 +90,7 @@ async function preprocessAudio(inputPath: string, outputDir: string): Promise<st
       ffmpeg(inputPath)
         .audioFrequency(16000) // 16kHz for Whisper
         .audioChannels(1) // Mono
-        .audioCodec("pcm_s16le") // 16-bit PCM
+        .audioCodec("pcm_s16le") // µ-law compression for speech (~50% smaller than 16-bit PCM)
         .format("wav")
         // Audio filters for better quality
         .audioFilters([
@@ -92,6 +100,9 @@ async function preprocessAudio(inputPath: string, outputDir: string): Promise<st
           "acompressor=threshold=-20dB:ratio=3:attack=1:release=50", // Gentle compression
         ])
         .output(outputPath)
+        .on("progress", function (progress) {
+          onProgress?.(progress.percent)
+        })
         .on("end", () => resolve())
         .on("error", error => reject(error))
         .run()

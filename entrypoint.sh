@@ -1,6 +1,7 @@
 #!/bin/sh
+set -e
 
-mkdir -p $DATA_DIR /app/.next /app/data/redis
+mkdir -p $DATA_DIR /app/data/sqlite /app/data/redis /app/.next
 
 # Start Redis with persistence
 echo "Starting Redis server..."
@@ -16,9 +17,9 @@ if [ ! -f .env ]; then
 fi
 
 # Setup database
-npx prisma generate
-npx prisma db seed
-npx prisma db push --accept-data-loss
+pnpm db:generate
+pnpm db:push
+pnpm db:seed
 
 # Build the application
 echo "Building Next.js application..."

@@ -4,8 +4,9 @@ import { ThemeProvider } from "@/context/theme-provider"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
+import { cn } from "@/lib/utils";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] })
+const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"] })
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -31,8 +32,8 @@ type Props = Readonly<{ children: React.ReactNode }>
 
 export default async function RootLayout({ children }: Props) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}>
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", geistSans.variable, geistMono.variable)}>
+      <body className="antialiased h-full">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AppProviders>
             <div className="font-sans min-h-screen">{children}</div>

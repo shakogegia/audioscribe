@@ -143,9 +143,8 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <form>
-        <DialogTrigger asChild>{children}</DialogTrigger>
-        <DialogContent className="sm:max-w-2xl">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{title || "Setup book"}</DialogTitle>
           </DialogHeader>
@@ -249,21 +248,21 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
             </DialogClose>
 
             {activeTab === BookOptionTab.Setup && (
-              <Button type="submit" onClick={() => onConfirm(model)} disabled={isLoading}>
+              <Button type="button" onClick={() => onConfirm(model)} disabled={isLoading}>
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <AudioLinesIcon className="w-4 h-4" />}
                 Start Setup
               </Button>
             )}
 
             {activeTab === BookOptionTab.Export && (
-              <Button type="submit" onClick={() => onExportTranscript()} disabled={isLoading}>
+              <Button type="button" onClick={() => onExportTranscript()} disabled={isLoading}>
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDownIcon className="w-4 h-4" />}
                 Export
               </Button>
             )}
 
             {activeTab === BookOptionTab.Import && (
-              <Button type="submit" onClick={() => onImportTranscript()} disabled={isLoading || !transcriptFile}>
+              <Button type="button" onClick={() => onImportTranscript()} disabled={isLoading || !transcriptFile}>
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUpIcon className="w-4 h-4" />}
                 Import
               </Button>
@@ -275,7 +274,7 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
                 description="All data will be deleted including transcript, vectorized data, and book. This action cannot be undone."
                 onConfirm={onRemove}
               >
-                <Button type="submit" disabled={isLoading} variant="destructive">
+                <Button type="button" disabled={isLoading} variant="destructive">
                   {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <TrashIcon className="w-4 h-4" />}
                   Remove
                 </Button>
@@ -283,7 +282,6 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
             )}
           </DialogFooter>
         </DialogContent>
-      </form>
     </Dialog>
   )
 }

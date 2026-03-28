@@ -1,90 +1,15 @@
-# Dependencies
 node_modules
-npm-debug.log*
-
-# Keep package-lock.json for npm ci
-!package-lock.json
-
-# Next.js
-.next/
-out/
-
-# Production
-build
-
-# Misc
-.DS_Store
-*.tgz
-*.tar.gz
-
-# Debug
-*.log
-.pnpm-debug.log*
-
-# Local env files
-.env*.local
-.env
-
-# Vercel
-.vercel
-
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# IDE
-.vscode
-.idea
-
-# Git
+.next
 .git
-.gitignore
-README.md
+data
+docs
+.conductor
+.claude
 
-# Docker (root only)
-/Dockerfile
-/.dockerignore
+.env*
+!.env.example
 
-# Config
-config.json
-data/
-
-# Build outputs and caches
-dist/
-.next/
-coverage/
-.nyc_output/
-.cache/
-tmp/
-temp/
-
-# Editor and system files
-.claude/
-.release-it.json
-.prettierrc*
-
-# Test files
-test/
-tests/
-__tests__/
-*.test.*
-*.spec.*
-
-# Documentation (optional - remove if you want docs in container)
-demo/
-docs/
-
-# Environment and secrets
-.env.development
-.env.production
-.env.staging
-.env.test
-*.key
-*.pem
-*.p12
-*.secrets
-*.private
-
-# Logs
-logs/
-*.log.*
+.DS_Store
+*.log
+*.tgz
+*.md

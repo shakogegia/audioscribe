@@ -1,8 +1,8 @@
 {
   "scripts": {
-    "setup": "bash bin/setup.sh",
-    "run": "bash bin/run.sh",
-    "archive": "bash bin/archive.sh"
+    "setup": "bash .conductor/setup.sh",
+    "run": "bash .conductor/run.sh",
+    "archive": "bash .conductor/archive.sh"
   },
   "runScriptMode": "nonconcurrent"
 }

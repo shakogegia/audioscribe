@@ -44,7 +44,7 @@ RUN pip3 install --no-cache-dir piper-tts==1.2.0 chromadb --break-system-package
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Install dependencies
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml .npmrc ./
 RUN pnpm install --frozen-lockfile
 
 # Pre-build whisper.cpp for architecture compatibility

@@ -49,23 +49,21 @@ brew install cmake
 
 #### Setup
 
-Clone repository, install npm dependencies and set env variables
-
 ```sh
-# Clone repo and install npm dependencies
-clone git@github.com:shakogegia/audioscribe.git
+git clone git@github.com:shakogegia/audioscribe.git
 cd audioscribe
-npm install
+pnpm install
 cp .env.example .env
 ```
 
 #### Run
 
 ```sh
-npm run dev
+# Dev (Next.js + workers + ChromaDB)
+make dev
 
-# or
-npm run build && npm run start
+# Or production
+pnpm build && pnpm start
 ```
 
 </details>
@@ -73,28 +71,19 @@ npm run build && npm run start
 <details>
 <summary>Docker</summary>
 
-Create a `docker-compose.yml` file:
-
-```yaml
-version: "3.8"
-
-services:
-  audioscribe:
-    image: shakogegia/audioscribe:latest
-    container_name: audioscribe
-    ports:
-      - 3000:3000
-    restart: unless-stopped
-    user: "1000:1000" # Match your host user UID:GID
-    volumes:
-      - /path/to/data:/app/data # Persist application data including database, audio files, and configuration
-```
-
-Then run:
-
 ```sh
-docker-compose up -d
+# Build and run
+make run
+
+# Or pull the image directly
+docker run -d \
+  --name audioscribe \
+  -p 3000:3000 \
+  -v audioscribe-data:/app/data \
+  shakogegia/audioscribe:latest
 ```
+
+Available Make targets: `build`, `run`, `stop`, `logs`, `shell`, `push`, `clean`
 
 </details>
 

@@ -85,9 +85,10 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
       return
     }
 
-    toast.loading("Sending a request", { id: "setup-book" })
+    toast.loading("Retrying from failed stage...", { id: "setup-book" })
     await axios.post(`/api/book/${book.id}/setup`, {
       model: book.model,
+      retry: true,
     })
     toast.success("Request sent", { id: "setup-book" })
   }
@@ -264,7 +265,7 @@ export function Stage({
               <Progress value={progress} />
             </TooltipTrigger>
             <TooltipContent>
-              <p>Progress: {progress}%</p>
+              {progress !== undefined && <p>Progress: {progress.toFixed(2)}%</p>}
               {estimated && <p>Estimated time to complete in: {estimated}</p>}
             </TooltipContent>
           </Tooltip>

@@ -9,8 +9,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params
     const body = await request.json()
 
-    const { model } = body as {
+    const { model, retry } = body as {
       model: string
+      retry?: boolean
     }
 
     if (!model) {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       })
     }
 
-    await setupBookFlow({ book, model })
+    await setupBookFlow({ book, model, retry })
 
     return NextResponse.json({ message: "Book setup flow queued successfully" })
 

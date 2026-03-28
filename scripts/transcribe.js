@@ -49,6 +49,9 @@ async function transcribeAudioFile(audioFilePath) {
       wordTimestamps: true,
       timestamps_length: 20,
       splitOnWord: true,
+      gen_file_txt: false,
+      gen_file_subtitle: false,
+      gen_file_vtt: false,
     },
   })
 

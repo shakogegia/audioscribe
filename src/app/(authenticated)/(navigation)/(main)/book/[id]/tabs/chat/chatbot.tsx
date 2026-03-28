@@ -30,8 +30,8 @@ import { useLLMModels } from "@/hooks/use-llm-models"
 import { usePlayerStore } from "@/stores/player"
 import { SearchResult } from "@/types/api"
 import { useChat } from "@ai-sdk/react"
-import { CaptionsIcon, CopyIcon, Loader2Icon, RefreshCcwIcon } from "lucide-react"
-import { Fragment, useState } from "react"
+import { CaptionsIcon, CopyIcon, Loader2Icon, RefreshCcwIcon, Volume2Icon, StopCircleIcon } from "lucide-react"
+import { Fragment, useRef, useState } from "react"
 import { useSuggestions } from "./suggestions"
 import { ChatQuickQuestion } from "../../../../../../../../../generated/prisma"
 
@@ -58,6 +58,65 @@ const ChatBotDemo = ({ bookId, book }: ChatBotDemoProps) => {
   const { models, model, setModel, isLoading: isLoadingModels, provider } = useLLMModels()
 
   const [context, setContext] = useState<{ time: number; before: number; after: number } | null>(null)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [isLoadingTTS, setIsLoadingTTS] = useState(false)
+  const ttsAudioRef = useRef<HTMLAudioElement | null>(null)
+
+  async function speak(text: string) {
+    if (isSpeaking) {
+      ttsAudioRef.current?.pause()
+      ttsAudioRef.current = null
+      setIsSpeaking(false)
+      return
+    }
+
+    setIsLoadingTTS(true)
+    try {
+      // Strip markdown syntax for clean TTS output
+      const plainText = text
+        .replace(/#{1,6}\s+/g, "")        // headings
+        .replace(/\*\*(.+?)\*\*/g, "$1")  // bold
+        .replace(/\*(.+?)\*/g, "$1")      // italic
+        .replace(/__(.+?)__/g, "$1")       // bold alt
+        .replace(/_(.+?)_/g, "$1")         // italic alt
+        .replace(/~~(.+?)~~/g, "$1")       // strikethrough
+        .replace(/`{1,3}[^`]*`{1,3}/g, "") // inline/block code
+        .replace(/\[(.+?)\]\(.+?\)/g, "$1") // links
+        .replace(/^[-*+]\s+/gm, "")        // unordered list markers
+        .replace(/^\d+\.\s+/gm, "")        // ordered list markers
+        .replace(/^>\s+/gm, "")            // blockquotes
+        .replace(/---+/g, "")              // horizontal rules
+        .replace(/\n{2,}/g, ". ")          // paragraph breaks to pauses
+        .replace(/\n/g, " ")              // remaining newlines
+        .trim()
+
+      const response = await fetch("/api/tts/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: plainText, model: "en_US-hfc_female-medium" }),
+      })
+
+      if (!response.ok) throw new Error("TTS failed")
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const audio = new Audio(url)
+      ttsAudioRef.current = audio
+
+      audio.onended = () => {
+        setIsSpeaking(false)
+        URL.revokeObjectURL(url)
+        ttsAudioRef.current = null
+      }
+
+      setIsSpeaking(true)
+      await audio.play()
+    } catch {
+      setIsSpeaking(false)
+    } finally {
+      setIsLoadingTTS(false)
+    }
+  }
   function handleSubmit(message: PromptInputMessage) {
     if (!message.text || !model || !provider) return
 
@@ -118,6 +177,18 @@ const ChatBotDemo = ({ bookId, book }: ChatBotDemoProps) => {
                               </Action>
                               <Action onClick={() => navigator.clipboard.writeText(part.text)} label="Copy">
                                 <CopyIcon className="size-3" />
+                              </Action>
+                              <Action
+                                onClick={() => speak(part.text)}
+                                label={isLoadingTTS ? "Loading..." : isSpeaking ? "Stop" : "Speak"}
+                              >
+                                {isLoadingTTS ? (
+                                  <Loader2Icon className="size-3 animate-spin" />
+                                ) : isSpeaking ? (
+                                  <StopCircleIcon className="size-3" />
+                                ) : (
+                                  <Volume2Icon className="size-3" />
+                                )}
                               </Action>
                             </Actions>
                           )}

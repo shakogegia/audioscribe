@@ -6,12 +6,9 @@ import { NextResponse } from "next/server"
 export async function GET() {
   const config = await load()
 
-  const google = await getGeminiModels()
-  const ollama = await getOllamaModels()
-
   const result = [
-    ...(config.aiProviders.google.enabled ? [{ provider: "Google", models: google }] : []),
-    ...(config.aiProviders.ollama.enabled ? [{ provider: "Ollama", models: ollama }] : []),
+    ...(config.aiProviders.google.enabled ? [{ provider: "Google", models: await getGeminiModels() }] : []),
+    ...(config.aiProviders.ollama.enabled ? [{ provider: "Ollama", models: await getOllamaModels() }] : []),
   ]
 
   return NextResponse.json(result)

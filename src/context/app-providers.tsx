@@ -1,5 +1,6 @@
 "use client"
 import { CommandPalette } from "@/components/command-palette"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { useTheme } from "next-themes"
 import { NuqsAdapter } from "nuqs/adapters/next/app"
 import { Toaster } from "sonner"
@@ -17,7 +18,9 @@ export default function AppProviders({ children }: Readonly<{ children: React.Re
             fetcher: (resource, init) => fetch(resource, init).then(res => res.json()),
           }}
         >
-          {children}
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
         </SWRConfig>
       </NuqsAdapter>
       <Toaster position="top-left" theme={theme as "light" | "dark"} duration={1000} />

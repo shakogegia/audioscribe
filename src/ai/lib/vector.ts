@@ -21,17 +21,13 @@ export class AudiobookVectorDB {
   }
 
   async initialize(bookId: string) {
-    try {
-      this.collection = await this.client.getOrCreateCollection({
-        name: `audiobook_${bookId}`,
-        metadata: { "hnsw:space": "cosine" },
-        embeddingFunction: embedder(),
-      })
+    this.collection = await this.client.getOrCreateCollection({
+      name: `audiobook_${bookId}`,
+      metadata: { "hnsw:space": "cosine" },
+      embeddingFunction: embedder(),
+    })
 
-      console.info(`Collection initialized: ${this.collection?.name}`)
-    } catch (error) {
-      console.error("Vector DB initialization failed:", error)
-    }
+    console.info(`Collection initialized: ${this.collection?.name}`)
   }
 
   async clearCollection(bookId: string) {
