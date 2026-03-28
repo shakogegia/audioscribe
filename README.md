@@ -71,21 +71,80 @@ pnpm build && pnpm start
 <details>
 <summary>Docker</summary>
 
+#### Using Make
+
 ```sh
-# Build and run
+# Build and run with default settings
 make run
 
-# Or pull the image directly
+# With custom credentials
+AUTH_EMAIL=me@example.com AUTH_PASSWORD=secret SESSION_SECRET=mysecret make run
+```
+
+Available targets: `build`, `run`, `stop`, `logs`, `shell`, `push`, `clean`
+
+#### Using Docker Compose
+
+Create a `docker-compose.yml`:
+
+```yaml
+services:
+  audioscribe:
+    image: shakogegia/audioscribe:latest
+    container_name: audioscribe
+    ports:
+      - 3000:3000
+    environment:
+      - AUTH_EMAIL=me@example.com
+      - AUTH_PASSWORD=secret
+      - SESSION_SECRET=mysecret
+    volumes:
+      - audioscribe-data:/app/data
+    restart: unless-stopped
+    shm_size: "2gb"
+    deploy:
+      resources:
+        limits:
+          memory: 10G
+        reservations:
+          memory: 4G
+
+volumes:
+  audioscribe-data:
+```
+
+```sh
+docker compose up -d
+```
+
+#### Using Docker Run
+
+```sh
 docker run -d \
   --name audioscribe \
   -p 3000:3000 \
+  -e AUTH_EMAIL=me@example.com \
+  -e AUTH_PASSWORD=secret \
+  -e SESSION_SECRET=mysecret \
+  --shm-size=2g \
   -v audioscribe-data:/app/data \
   shakogegia/audioscribe:latest
 ```
 
-Available Make targets: `build`, `run`, `stop`, `logs`, `shell`, `push`, `clean`
-
 </details>
+
+### Environment Variables
+
+| Variable | Description | Default |
+|---|---|---|
+| `AUTH_EMAIL` | Login email | `email` |
+| `AUTH_PASSWORD` | Login password | `password` |
+| `SESSION_SECRET` | Session encryption key | `secret` |
+| `DATA_DIR` | Data storage path | `./data` |
+| `CHROMA_HOST` | ChromaDB host | `localhost` |
+| `CHROMA_PORT` | ChromaDB port | `8000` |
+
+AI providers are configured in the app UI after login.
 
 ## License
 
