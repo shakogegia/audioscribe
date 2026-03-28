@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "setup": "bash bin/setup.sh",
+    "run": "bash bin/run.sh",
+    "archive": "bash bin/archive.sh"
+  },
+  "runScriptMode": "nonconcurrent"
+}
