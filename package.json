@@ -91,6 +91,7 @@
     "react-hook-form": "^7.68.0",
     "react-syntax-highlighter": "^16.1.0",
     "react-use": "^17.6.0",
+    "recharts": "3.8.0",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
     "server-only": "^0.0.1",
