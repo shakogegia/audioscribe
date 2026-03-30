@@ -1,11 +1,9 @@
-"use server"
 import { AppConfig, load, save } from "@/lib/config"
 import LLMSetup from "./llm"
 import { revalidatePath } from "next/cache"
 
 export const dynamic = "force-dynamic"
 
-// Move updateConfig to a server action and export it
 async function updateConfig(config: AppConfig) {
   "use server"
   await save(config)
@@ -14,6 +12,5 @@ async function updateConfig(config: AppConfig) {
 
 export default async function LLMSetupPage() {
   const config = await load()
-
   return <LLMSetup config={config} updateConfig={updateConfig} />
 }
