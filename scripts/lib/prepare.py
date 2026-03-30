@@ -1,4 +1,8 @@
-"""Prepare audio for transcription: stitch (if needed) and chunk."""
+"""Prepare audio for transcription: stitch (if needed) and chunk.
+
+Uses -c copy (no re-encoding) for speed. faster-whisper reads
+M4B/MP3/AAC natively, so WAV conversion is unnecessary.
+"""
 
 import os
 import subprocess
@@ -30,91 +34,64 @@ def get_audio_duration(file_path: str) -> float:
     return float(info["format"]["duration"])
 
 
-def _get_total_duration(files: list[str]) -> float:
-    """Get total duration of all audio files."""
-    total = 0.0
-    for f in files:
-        try:
-            total += get_audio_duration(f)
-        except Exception:
-            pass
-    return total
+def _get_file_ext(files: list[str]) -> str:
+    """Get the extension of the first file."""
+    _, ext = os.path.splitext(files[0])
+    return ext or ".m4b"
 
 
-def _run_ffmpeg(cmd: list[str], job_id: str, total_duration: float, label: str) -> None:
-    """Run FFmpeg with progress tracking."""
-    print(f"[Prepare] {label}")
-    print(f"[Prepare] Command: {' '.join(cmd[:6])}...")
-    print(f"[Prepare] Total duration: {total_duration:.0f}s ({total_duration/3600:.1f}h)")
-
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    last_logged = 0
-    for line in process.stdout:
-        line = line.strip()
-        if line.startswith("out_time_ms="):
-            try:
-                out_time_us = int(line.split("=")[1])
-                elapsed_s = out_time_us / 1_000_000
-                if total_duration > 0:
-                    progress = min((elapsed_s / total_duration) * 100, 99)
-                    db.update_job_progress(job_id, round(progress, 2))
-                    # Log every 10%
-                    pct = int(progress)
-                    if pct >= last_logged + 10:
-                        last_logged = pct
-                        print(f"[Prepare] Progress: {pct}% ({elapsed_s:.0f}s / {total_duration:.0f}s)")
-            except (ValueError, ZeroDivisionError):
-                pass
-
-    process.wait()
-    if process.returncode != 0:
-        stderr = process.stderr.read()
-        raise RuntimeError(f"FFmpeg failed: {stderr}")
-
-    print(f"[Prepare] {label} complete")
-
-
-def _stitch_and_chunk(files: list[str], chunks_dir: str, chunk_duration: int, job_id: str, total_duration: float) -> None:
-    """Concat multiple files and split into chunks in one FFmpeg pass."""
+def _stitch_and_chunk(files: list[str], chunks_dir: str, chunk_duration: int, job_id: str) -> None:
+    """Concat multiple files and split into chunks. No re-encoding."""
     audio_dir = os.path.dirname(chunks_dir)
     concat_list = _write_concat_list(files, audio_dir)
-    chunk_pattern = os.path.join(chunks_dir, "chunk_%04d.wav")
+    ext = _get_file_ext(files)
+    chunk_pattern = os.path.join(chunks_dir, f"chunk_%04d{ext}")
+
+    print(f"[Prepare] Stitching + chunking {len(files)} files (copy, no transcode)")
 
     cmd = [
         "ffmpeg", "-y",
         "-f", "concat", "-safe", "0", "-i", concat_list,
-        "-ar", "16000", "-ac", "1", "-acodec", "pcm_s16le",
+        "-c", "copy",
         "-f", "segment", "-segment_time", str(chunk_duration),
-        "-progress", "pipe:1",
         chunk_pattern,
     ]
 
-    _run_ffmpeg(cmd, job_id, total_duration, f"Stitching + chunking {len(files)} files")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"FFmpeg stitch+chunk failed: {result.stderr}")
 
     try:
         os.remove(concat_list)
     except OSError:
         pass
 
+    print("[Prepare] Stitch + chunk complete")
 
-def _chunk_single(input_path: str, chunks_dir: str, chunk_duration: int, job_id: str, total_duration: float) -> None:
-    """Split a single audio file into chunks."""
-    chunk_pattern = os.path.join(chunks_dir, "chunk_%04d.wav")
+
+def _chunk_single(input_path: str, chunks_dir: str, chunk_duration: int, job_id: str) -> None:
+    """Split a single audio file into chunks. No re-encoding — nearly instant."""
+    ext = os.path.splitext(input_path)[1] or ".m4b"
+    chunk_pattern = os.path.join(chunks_dir, f"chunk_%04d{ext}")
+
+    print(f"[Prepare] Chunking {os.path.basename(input_path)} (copy, no transcode)")
 
     cmd = [
         "ffmpeg", "-y", "-i", input_path,
-        "-ar", "16000", "-ac", "1", "-acodec", "pcm_s16le",
+        "-c", "copy",
         "-f", "segment", "-segment_time", str(chunk_duration),
-        "-progress", "pipe:1",
         chunk_pattern,
     ]
 
-    _run_ffmpeg(cmd, job_id, total_duration, f"Chunking {os.path.basename(input_path)}")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError(f"FFmpeg chunking failed: {result.stderr}")
+
+    print("[Prepare] Chunk complete")
 
 
 def run(job: dict):
-    """Prepare audio: stitch (if multi-file) → chunk, one FFmpeg pass."""
+    """Prepare audio: stitch (if multi-file) → chunk. No transcoding."""
     book_id = job["bookId"]
     metadata = json.loads(job["metadata"]) if job["metadata"] else {}
     model = metadata.get("model", config.get_setting("transcription.whisperModel"))
@@ -125,7 +102,7 @@ def run(job: dict):
     print(f"[Prepare] Book {book_id}, chunk duration: {chunk_duration}s")
 
     # Check if chunks already exist (resume case)
-    existing_chunks = [f for f in os.listdir(chunks_dir) if f.startswith("chunk_") and f.endswith(".wav")] if os.path.exists(chunks_dir) else []
+    existing_chunks = [f for f in os.listdir(chunks_dir) if f.startswith("chunk_") and f.endswith((".wav", ".mp3", ".m4b", ".m4a", ".ogg", ".flac"))] if os.path.exists(chunks_dir) else []
 
     if existing_chunks:
         print(f"[Prepare] Found {len(existing_chunks)} existing chunks, skipping FFmpeg")
@@ -135,16 +112,17 @@ def run(job: dict):
         files = [os.path.join(downloads_dir, f["path"]) for f in book_files]
 
         print(f"[Prepare] Input files: {len(files)}")
-        total_duration = _get_total_duration(files)
 
         if len(files) > 1:
-            _stitch_and_chunk(files, chunks_dir, chunk_duration, job["id"], total_duration)
+            _stitch_and_chunk(files, chunks_dir, chunk_duration, job["id"])
         else:
-            _chunk_single(files[0], chunks_dir, chunk_duration, job["id"], total_duration)
+            _chunk_single(files[0], chunks_dir, chunk_duration, job["id"])
+
+    db.update_job_progress(job["id"], 50)
 
     # Register chunks in DB
     chunk_files = sorted(
-        [f for f in os.listdir(chunks_dir) if f.startswith("chunk_") and f.endswith(".wav")]
+        [f for f in os.listdir(chunks_dir) if f.startswith("chunk_")]
     )
     total_chunks = len(chunk_files)
     print(f"[Prepare] Registering {total_chunks} chunks in DB")
@@ -155,9 +133,10 @@ def run(job: dict):
         start_time = i * chunk_duration
         end_time = start_time + chunk_dur
         db.save_audio_chunk(book_id, i, chunk_path, start_time, end_time, chunk_dur)
+        db.update_job_progress(job["id"], 50 + ((i + 1) / total_chunks) * 50)
 
     db.update_book_flag(book_id, "audioProcessed", True)
 
     # Create transcribe jobs for each chunk
     db.create_transcribe_jobs(book_id, model, total_chunks)
-    print(f"[Prepare] Created {total_chunks} transcribe jobs")
+    print(f"[Prepare] Created {total_chunks} transcribe jobs, done!")
