@@ -57,7 +57,7 @@ function ContinueListening({ libraryId }: { libraryId: string }) {
       <ScrollArea className="w-full">
         <div className="flex gap-3 pb-3">
           {books.map(book => (
-            <Link key={book.id} href={book.progress ? `/book/${book.id}` : "#"} className="shrink-0 w-[100px] group">
+            <Link key={book.id} href={`/book/${book.id}`} className="shrink-0 w-[100px] group">
               <BookCover src={book.cover} size={100} />
               <p className="text-xs font-medium mt-1.5 truncate group-hover:text-primary transition-colors">
                 {book.title}
