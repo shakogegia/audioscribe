@@ -11,7 +11,8 @@ def _write_concat_list(files: list[str], output_dir: str) -> str:
     list_file = os.path.join(output_dir, "concat_list.txt")
     with open(list_file, "w") as f:
         for filepath in files:
-            escaped = filepath.replace("'", "'\\''")
+            abs_path = os.path.abspath(filepath)
+            escaped = abs_path.replace("'", "'\\''")
             f.write(f"file '{escaped}'\n")
     return list_file
 
