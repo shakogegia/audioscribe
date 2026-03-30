@@ -268,7 +268,7 @@ export function Stage({
                 <span>Chunk {completedChunks + 1}</span>
                 <span>{currentChunkProgress.toFixed(0)}%</span>
               </div>
-              <Progress value={currentChunkProgress} />
+              <Progress value={currentChunkProgress} indeterminate={currentChunkProgress < 2} />
             </div>
           </div>
         )}
