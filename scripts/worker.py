@@ -6,14 +6,13 @@ import time
 import traceback
 
 from scripts.lib import db, config
-from scripts.lib import download, audio, chunk, transcribe, vectorize
+from scripts.lib import download, audio, chunk, transcribe
 
 HANDLERS = {
     "Download": download.run,
     "ProcessAudio": audio.run,
     "Chunk": chunk.run,
     "Transcribe": transcribe.run,
-    "Vectorize": vectorize.run,
 }
 
 running = True

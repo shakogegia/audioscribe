@@ -25,7 +25,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     // Reset book status flags
     await prisma.book.update({
       where: { id: book.id },
-      data: { audioProcessed: false, transcribed: false, vectorized: false, downloaded: false },
+      data: { audioProcessed: false, transcribed: false, downloaded: false },
     })
 
     // Create transcript segments

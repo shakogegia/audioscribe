@@ -8,14 +8,12 @@ const STAGE_ORDER: { type: JobType; sequenceOrder: number }[] = [
   { type: JobType.ProcessAudio, sequenceOrder: 1 },
   { type: JobType.Chunk, sequenceOrder: 2 },
   // Transcribe jobs (sequenceOrder 3) are created dynamically by the chunk worker
-  { type: JobType.Vectorize, sequenceOrder: 4 },
 ]
 
 const TYPE_FLAG: Record<string, string> = {
   Download: "downloaded",
   ProcessAudio: "audioProcessed",
   Transcribe: "transcribed",
-  Vectorize: "vectorized",
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -64,7 +62,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       // Fresh setup — reset everything
       await prisma.book.update({
         where: { id: bookId },
-        data: { downloaded: false, audioProcessed: false, transcribed: false, vectorized: false, model, setup: false },
+        data: { downloaded: false, audioProcessed: false, transcribed: false, model, setup: false },
       })
       await prisma.job.deleteMany({ where: { bookId } })
       await prisma.audioChunk.deleteMany({ where: { bookId } })

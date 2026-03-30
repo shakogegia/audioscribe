@@ -20,7 +20,6 @@ model Book {
   downloaded     Boolean @default(false)
   audioProcessed Boolean @default(false)
   transcribed    Boolean @default(false)
-  vectorized     Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -78,7 +77,6 @@ enum BookSetupStage {
   ProcessAudio
   Chunk
   Transcribe
-  Vectorize
 }
 
 enum BookSetupStatus {
@@ -93,7 +91,6 @@ enum JobType {
   ProcessAudio
   Chunk
   Transcribe
-  Vectorize
 }
 
 enum JobStatus {

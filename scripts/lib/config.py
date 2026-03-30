@@ -15,7 +15,6 @@ SEQUENCE_ORDER = {
     "ProcessAudio": 1,
     "Chunk": 2,
     "Transcribe": 3,
-    "Vectorize": 4,
 }
 
 # Stage to Book flag mapping (matches setup.worker.ts STAGE_FLAG)
@@ -24,7 +23,6 @@ STAGE_FLAG = {
     "ProcessAudio": "audioProcessed",
     "Chunk": "audioProcessed",
     "Transcribe": "transcribed",
-    "Vectorize": "vectorized",
 }
 
 # Default settings

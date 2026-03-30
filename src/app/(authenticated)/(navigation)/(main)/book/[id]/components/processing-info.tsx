@@ -65,8 +65,6 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
   //     toast.error("Book setup failed")
   //   } else if (currentStage.stage === "transcribe" && currentStage.status === "running") {
   //     toast.info("Book download is complete")
-  //   } else if (currentStage.stage === "vectorize" && currentStage.status === "running") {
-  //     toast.info("Book transcription is complete")
   //   }
   // }, [
   //   data?.currentStage?.stage,
@@ -119,11 +117,6 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
       stage: "Transcribe",
       title: "Transcribe",
       description: `Transcribe using <span class="font-medium">${data?.book?.model || "Unknown"}</span> model.`,
-    },
-    {
-      stage: "Vectorize",
-      title: "Vectorize",
-      description: "Create embeddings for AI-powered search and chat.",
     },
   ]
 

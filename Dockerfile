@@ -17,7 +17,6 @@ RUN pnpm prune --prod
 FROM python:3.12-slim AS python
 RUN pip install --no-cache-dir \
     "faster-whisper>=1.1.0" \
-    "chromadb>=1.0.0" \
     "piper-tts==1.2.0" \
     "requests>=2.32.0"
 
@@ -51,8 +50,6 @@ ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL="file:/app/data/sqlite/store.db"
 ENV DATA_DIR="/app/data"
-ENV CHROMA_HOST="127.0.0.1"
-ENV CHROMA_PORT="8000"
 ENV CLEANUP_TEMP_FILES="true"
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
