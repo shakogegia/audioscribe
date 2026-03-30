@@ -10,6 +10,9 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
   await prisma.transcriptSegment.deleteMany({ where: { bookId: id } })
   await prisma.job.deleteMany({ where: { bookId: id } })
+  await prisma.audioChunk.deleteMany({ where: { bookId: id } })
+  await prisma.chapterSummary.deleteMany({ where: { bookId: id } })
+  await prisma.bookSetupProgress.deleteMany({ where: { bookId: id } })
   await prisma.book.delete({ where: { id } })
 
   return NextResponse.json({ message: "Book removed" })
