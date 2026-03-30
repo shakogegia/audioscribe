@@ -263,8 +263,8 @@ export function Stage({
           <div className="flex flex-col gap-2 mt-2">
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Overall: {completedChunks}/{totalChunks} chunks ({totalChunks > 0 ? Math.round((completedChunks / totalChunks) * 100) : 0}%)</span>
-                {estimated && <span>~{estimated} remaining</span>}
+                <span>Overall: {completedChunks}/{totalChunks} chunks</span>
+                <span>{estimated && `~${estimated} remaining · `}{totalChunks > 0 ? Math.round((completedChunks / totalChunks) * 100) : 0}%</span>
               </div>
               <Progress value={totalChunks > 0 ? (completedChunks / totalChunks) * 100 : 0} />
             </div>
