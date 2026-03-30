@@ -9,20 +9,6 @@ DATABASE_PATH = os.environ.get("DATABASE_URL", f"file:{DATA_DIR}/sqlite/store.db
 CACHE_DIR = os.path.join(DATA_DIR, "cache")
 CHUNKS_DIR = os.path.join(DATA_DIR, "chunks")
 
-# Job type to sequence order mapping
-SEQUENCE_ORDER = {
-    "Download": 0,
-    "PrepareAudio": 1,
-    "Transcribe": 2,
-}
-
-# Stage to Book flag mapping
-STAGE_FLAG = {
-    "Download": "downloaded",
-    "PrepareAudio": "audioProcessed",
-    "Transcribe": "transcribed",
-}
-
 # Default settings
 DEFAULTS = {
     "transcription.chunkDuration": "300",
@@ -57,12 +43,6 @@ def get_db() -> sqlite3.Connection:
 
 def book_downloads_dir(book_id: str) -> str:
     path = os.path.join(CACHE_DIR, book_id, "downloads")
-    os.makedirs(path, exist_ok=True)
-    return path
-
-
-def book_audio_dir(book_id: str) -> str:
-    path = os.path.join(CACHE_DIR, book_id, "audio")
     os.makedirs(path, exist_ok=True)
     return path
 

@@ -36,12 +36,6 @@ def get_book_files(book_id: str) -> list[dict]:
     return files
 
 
-def get_book_duration(book_id: str) -> float:
-    """Get total book duration in seconds."""
-    files = get_book_files(book_id)
-    return sum(f["duration"] for f in files)
-
-
 def run(job: dict):
     """Download all audio files for a book."""
     book_id = job["bookId"]
