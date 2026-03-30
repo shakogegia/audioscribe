@@ -31,7 +31,7 @@ export const defaultConfig: AppConfig = {
   },
 }
 
-const configPath = join(process.env.DATA_DIR!, "config.json")
+const configPath = join(process.env.DATA_DIR || "./data", "config.json")
 
 export async function load(): Promise<AppConfig> {
   try {
@@ -57,7 +57,7 @@ export async function load(): Promise<AppConfig> {
 export async function save(config: AppConfig) {
   try {
     // Ensure data directory exists
-    const dataDir = join(process.cwd(), "data")
+    const dataDir = process.env.DATA_DIR || join(process.cwd(), "data")
     await fs.mkdir(dataDir, { recursive: true })
 
     // Save config file
