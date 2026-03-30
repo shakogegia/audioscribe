@@ -18,7 +18,7 @@ endif
 .PHONY: dev build run stop logs push clean shell
 
 dev:
-	concurrently "pnpm dev" "python3 -m scripts.worker" "chroma run --path ./data/chromadb"
+	pnpm dev:all
 
 build:
 	docker build -t $(IMAGE_NAME) .
