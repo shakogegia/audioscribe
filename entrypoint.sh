@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 mkdir -p /app/data/sqlite /app/data/chunks
@@ -12,9 +12,9 @@ python3 -m scripts.worker &
 WORKER_PID=$!
 
 # Trap signals for graceful shutdown
-trap "kill $WORKER_PID 2>/dev/null; exit" SIGTERM SIGINT
+trap "kill $WORKER_PID 2>/dev/null; exit 0" SIGTERM SIGINT
 
-# Start Next.js (foreground)
+# Start Next.js
 pnpm start &
 NEXT_PID=$!
 
