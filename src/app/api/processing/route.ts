@@ -8,10 +8,11 @@ export async function GET(): Promise<NextResponse<BookBasicInfo[]> | NextRespons
   try {
     const books = await prisma.job.findMany({
       where: { status: JobStatus.Running },
+      distinct: ["bookId"],
       select: { bookId: true },
     })
 
-    const libraryItemIds = [...new Set(books.map(book => book.bookId))]
+    const libraryItemIds = books.map(book => book.bookId)
 
     if (libraryItemIds.length === 0) {
       return NextResponse.json([])
