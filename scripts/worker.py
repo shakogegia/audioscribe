@@ -80,7 +80,8 @@ def main():
                 elapsed = db.get_total_processing_seconds(book_id)
                 duration = _format_duration(elapsed)
                 print(f"[Worker] All jobs completed for book {title} in {duration} — setup complete!")
-                config.send_notification("AudioScribe", f"{title} is ready ({duration})")
+                cover = config.get_book_cover(book_id)
+                config.send_notification("AudioScribe", f"{title} is ready ({duration})", image=cover)
 
         except Exception as e:
             error_msg = f"{type(e).__name__}: {e}"

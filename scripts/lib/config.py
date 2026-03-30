@@ -75,23 +75,38 @@ def load_pushover_config():
         return None, None
 
 
-def send_notification(title: str, message: str) -> bool:
-    """Send a Pushover notification. Returns True on success."""
+def send_notification(title: str, message: str, image: bytes | None = None) -> bool:
+    """Send a Pushover notification with optional image attachment. Returns True on success."""
     import requests
     token, user = load_pushover_config()
     if not token or not user:
         return False
     try:
-        resp = requests.post("https://api.pushover.net/1/messages.json", data={
-            "token": token,
-            "user": user,
-            "title": title,
-            "message": message,
-        }, timeout=10)
+        data = {"token": token, "user": user, "title": title, "message": message}
+        files = {"attachment": ("cover.jpg", image, "image/jpeg")} if image else None
+        resp = requests.post("https://api.pushover.net/1/messages.json", data=data, files=files, timeout=15)
         return resp.status_code == 200
     except Exception as e:
         print(f"[Worker] Failed to send notification: {e}")
         return False
+
+
+def get_book_cover(book_id: str) -> bytes | None:
+    """Fetch book cover image from Audiobookshelf API."""
+    import requests
+    url, api_key = load_audiobookshelf_config()
+    if not url or not api_key:
+        return None
+    try:
+        resp = requests.get(
+            f"{url}/audiobookshelf/api/items/{book_id}/cover",
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        return resp.content
+    except Exception:
+        return None
 
 
 def get_book_title(book_id: str) -> str:

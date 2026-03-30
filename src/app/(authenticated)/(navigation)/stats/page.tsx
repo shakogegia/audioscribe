@@ -9,6 +9,8 @@ import { PipelineHealth } from "./components/pipeline-health"
 import { ActivityChart } from "./components/activity-chart"
 import GradientIcon from "@/components/gradient-icon"
 
+export const dynamic = "force-dynamic"
+
 export default async function StatsPage() {
   const stats = await getTranscriptionStats()
 
