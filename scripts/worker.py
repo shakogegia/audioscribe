@@ -27,10 +27,16 @@ def main():
     signal.signal(signal.SIGTERM, shutdown)
 
     print("[Worker] Starting AudioScribe Python worker...")
+    print(f"[Worker] DATA_DIR: {config.DATA_DIR}")
     print(f"[Worker] Database: {config.DATABASE_PATH}")
+    print(f"[Worker] Cache: {config.CACHE_DIR}")
+    print(f"[Worker] Chunks: {config.CHUNKS_DIR}")
+
+    url, api_key = config.load_audiobookshelf_config()
+    print(f"[Worker] Audiobookshelf: {url or 'not configured'}")
 
     db.recover_stale_jobs(timeout_minutes=5)
-    print("[Worker] Recovered stale jobs")
+    print("[Worker] Recovered stale jobs, polling for work...")
 
     while running:
         job = db.get_next_pending_job()
