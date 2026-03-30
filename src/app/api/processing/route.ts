@@ -11,7 +11,7 @@ export async function GET(): Promise<NextResponse<BookBasicInfo[]> | NextRespons
       select: { bookId: true },
     })
 
-    const libraryItemIds = books.map(book => book.bookId)
+    const libraryItemIds = [...new Set(books.map(book => book.bookId))]
 
     if (libraryItemIds.length === 0) {
       return NextResponse.json([])
