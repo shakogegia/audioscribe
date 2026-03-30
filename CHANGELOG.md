@@ -1,5 +1,22 @@
 # Changelog
 
+# [0.15.0](/compare/0.14.0...0.15.0) (2026-03-30)
+
+
+### Bug Fixes
+
+* use plain JS seed script for Docker production runtime c71ad8e
+
+
+### Features
+
+* add conductor bin/ scripts for workspace automation 3ad3517
+* add duration formatting and total processing time to book completion notifications 3a121ef
+* add experimental proxyClientMaxBodySize configuration to Next.js setup 04f47c5
+* add root-level entrypoint and supervisord config cf3c5af
+* add single root-level Dockerfile using pnpm bad107a
+* enhance book completion notification system 53d589b
+
 # [0.14.0](/compare/0.13.1...0.14.0) (2025-12-18)
 
 
