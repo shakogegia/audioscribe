@@ -21,7 +21,6 @@ export default function SetupLayout({ children }: Props) {
           <TabsList>
             <TabsTrigger value="/setup/audiobookshelf">ABS</TabsTrigger>
             <TabsTrigger value="/setup/llm">LLM</TabsTrigger>
-            <TabsTrigger value="/setup/asr">ASR</TabsTrigger>
             <TabsTrigger value="/setup/transcription">Transcription</TabsTrigger>
             <TabsTrigger value="/setup/tts">TTS</TabsTrigger>
             <TabsTrigger value="/setup/pushover">Pushover</TabsTrigger>

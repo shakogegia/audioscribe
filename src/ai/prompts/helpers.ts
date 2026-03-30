@@ -1,7 +1,7 @@
 import { generate } from "@/ai/helpers/generate"
 import { prisma } from "@/lib/prisma"
 import handlebars from "handlebars"
-import { provider } from "../providers"
+import { getDefaultModel, provider } from "../providers"
 import { AiModel, AiProvider } from "../types/ai"
 
 type GetPromptParams = {
@@ -33,16 +33,19 @@ export async function getPrompt({ slug, params }: GetPromptParams): Promise<GetP
 }
 
 type GeneratePromptParams = {
-  provider: AiProvider
-  model: AiModel
+  provider?: AiProvider
+  model?: AiModel
   slug: string
   params: Record<string, any>
 }
 
 export async function generatePrompt(props: GeneratePromptParams): Promise<string> {
   try {
-    // Get AI provider
-    const ai = await provider(props.provider, props.model)
+    // Get AI provider - use defaults from settings if not specified
+    const defaults = !props.provider || !props.model ? await getDefaultModel() : null
+    const aiProvider = props.provider || defaults!.provider
+    const aiModel = props.model || defaults!.model
+    const ai = await provider(aiProvider, aiModel)
 
     // Get prompt
     const { user, system } = await getPrompt({ slug: props.slug, params: props.params })

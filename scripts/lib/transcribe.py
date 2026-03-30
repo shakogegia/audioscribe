@@ -63,17 +63,15 @@ def run(job: dict):
 
     db.save_transcript_segments(book_id, model_name, transcript_segments)
 
-    # Check if this was the last chunk — if so, mark book as transcribed
-    total_chunks = job["totalChunks"]
-    if total_chunks and chunk_index == total_chunks - 1:
-        conn = config.get_db()
-        try:
-            row = conn.execute(
-                """SELECT COUNT(*) as pending FROM Job
-                   WHERE bookId = ? AND type = 'Transcribe' AND status != 'Completed' AND id != ?""",
-                (book_id, job["id"]),
-            ).fetchone()
-            if row["pending"] == 0:
-                db.update_book_flag(book_id, "transcribed", True)
-        finally:
-            conn.close()
+    # Check if all transcribe jobs for this book are done (this one is about to be marked Completed)
+    conn = config.get_db()
+    try:
+        row = conn.execute(
+            """SELECT COUNT(*) as pending FROM Job
+               WHERE bookId = ? AND type = 'Transcribe' AND status != 'Completed' AND id != ?""",
+            (book_id, job["id"]),
+        ).fetchone()
+        if row["pending"] == 0:
+            db.update_book_flag(book_id, "transcribed", True)
+    finally:
+        conn.close()

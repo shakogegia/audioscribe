@@ -1,15 +1,10 @@
 import { generatePrompt } from "@/ai/prompts/helpers"
-import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
 
 interface PreviouslyOnRequestBody {
   currentTime: number // in seconds
-  config: {
-    provider: AiProvider
-    model: AiModel
-  }
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +12,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params
     const body: PreviouslyOnRequestBody = await request.json()
 
-    const { currentTime, config } = body
+    const { currentTime } = body
 
     const book = await getBook(bookId)
 
@@ -51,8 +46,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Generate AI summary
     const summary = await generatePrompt({
-      provider: config.provider,
-      model: config.model,
       slug: "ios-previously-on",
       params: {
         transcript: transcriptText,

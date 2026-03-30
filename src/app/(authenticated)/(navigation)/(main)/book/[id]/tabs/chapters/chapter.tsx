@@ -3,7 +3,6 @@ import { Markdown } from "@/components/markdown"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ChapterSummary, ChapterSummaryStatus } from "@/generated/prisma"
-import { useLLMModels } from "@/hooks/use-llm-models"
 import { formatTime } from "@/lib/format"
 import { SearchResult } from "@/types/api"
 import type { Chapter } from "@/types/audiobookshelf"
@@ -22,7 +21,6 @@ type ChapterProps = {
 }
 
 export default function Chapter({ play, book, chapter }: ChapterProps) {
-  const { provider, model } = useLLMModels()
   const [isCollapsed, setIsCollapsed] = useState<boolean>(true)
   const [isGeneratingSummary, setIsGeneratingSummary] = useState<boolean>(false)
 
@@ -41,10 +39,7 @@ export default function Chapter({ play, book, chapter }: ChapterProps) {
     setIsCollapsed(false)
     try {
       setIsGeneratingSummary(true)
-      const response = await axios.post(`/api/book/${book.id}/summary/generate/chapter/${chapter.id}`, {
-        provider: provider,
-        model: model,
-      })
+      const response = await axios.post(`/api/book/${book.id}/summary/generate/chapter/${chapter.id}`)
 
       toast.success(response.data.message, { id: toastId })
     } catch (error) {

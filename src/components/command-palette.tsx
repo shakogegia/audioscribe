@@ -5,7 +5,6 @@ import {
   CogIcon,
   HomeIcon,
   MoonIcon,
-  SearchIcon,
   StarIcon,
   SunIcon,
 } from "lucide-react"
@@ -60,18 +59,13 @@ export function CommandPalette() {
             <HomeIcon />
             <span>Home</span>
           </CommandItem>
-          <CommandItem onSelect={() => navigateTo("/search")}>
-            <SearchIcon />
-            <span>Search</span>
-          </CommandItem>
           <CommandItem onSelect={() => navigateTo("/favorites")}>
             <StarIcon />
             <span>Favorites</span>
           </CommandItem>
-          {/* processed */}
           <CommandItem onSelect={() => navigateTo("/processed")}>
             <BookOpenCheckIcon />
-            <span>Processed</span>
+            <span>Ready</span>
           </CommandItem>
           {/* processing */}
           <CommandItem onSelect={() => navigateTo("/processing")}>
@@ -110,10 +104,6 @@ export function CommandPalette() {
           <CommandItem onSelect={() => navigateTo("/setup/llm")}>
             <CogIcon />
             <span>LLM Settings</span>
-          </CommandItem>
-          <CommandItem onSelect={() => navigateTo("/setup/asr")}>
-            <CogIcon />
-            <span>Speech-to-Text Settings</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/cache")}>
             <CogIcon />

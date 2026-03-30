@@ -1,13 +1,11 @@
 import { generatePrompt } from "@/ai/prompts/helpers"
 import { getTranscriptRangeByTime } from "@/lib/transcript"
-import { NextRequest, NextResponse } from "next/server"
-import { getAiConfig, getLastPlayedBook, respondWithAudio } from "../utils"
+import { NextResponse } from "next/server"
+import { getLastPlayedBook, respondWithAudio } from "../utils"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { provider, model } = await getAiConfig(request)
-
-    const book = await getLastPlayedBook(request)
+    const book = await getLastPlayedBook()
 
     // transcripts for last 10 minutes
     const transcripts = await getTranscriptRangeByTime({
@@ -19,8 +17,6 @@ export async function GET(request: NextRequest) {
     const transcript = transcripts.map(transcript => transcript.text).join(" ")
 
     const summary = await generatePrompt({
-      provider: provider,
-      model: model,
       slug: "ios-previously-on",
       params: {
         transcript,

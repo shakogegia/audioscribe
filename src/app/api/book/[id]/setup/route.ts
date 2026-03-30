@@ -18,7 +18,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const { id: bookId } = await params
     const body = await request.json()
-    const { model, retry } = body as { model: string; retry?: boolean }
+    const { model: explicitModel, retry } = body as { model?: string; retry?: boolean }
+
+    // Use explicit model or fall back to configured default
+    const modelSetting = await prisma.setting.findUnique({ where: { key: "transcription.whisperModel" } })
+    const model = explicitModel || modelSetting?.value || "tiny.en"
 
     if (!model) {
       return NextResponse.json({ error: "Missing model" }, { status: 400 })

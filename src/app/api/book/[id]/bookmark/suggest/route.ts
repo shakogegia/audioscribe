@@ -1,5 +1,4 @@
 import { generatePrompt } from "@/ai/prompts/helpers"
-import { AiModel, AiProvider } from "@/ai/types/ai"
 import { getBook } from "@/lib/audiobookshelf"
 import { getTranscriptByOffset } from "@/lib/transcript"
 import { millisecondsToTime } from "@/utils/time"
@@ -8,10 +7,6 @@ import { NextRequest, NextResponse } from "next/server"
 interface BookmarkSuggestionsRequestBody {
   time: number
   offset?: number // in seconds, default is 30, seconds before and after the time to include in the transcript
-  config: {
-    provider: AiProvider
-    model: AiModel
-  }
 }
 
 // disable cache
@@ -21,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { id: bookId } = await params
     const body: BookmarkSuggestionsRequestBody = await request.json()
 
-    const { time, offset = 30, config } = body
+    const { time, offset = 30 } = body
 
     const book = await getBook(bookId)
 
@@ -30,8 +25,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const transcript = segments.map(s => `${millisecondsToTime(s.startTime)} ${s.text}`).join("\n\n")
 
     const response = await generatePrompt({
-      provider: config.provider,
-      model: config.model,
       slug: "bookmark-suggestions",
       params: {
         transcript: transcript,

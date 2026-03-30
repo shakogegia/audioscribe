@@ -4,11 +4,8 @@ import Logo from "@/components/logo"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   BookOpenCheckIcon,
-  CheckIcon,
   CircleDashedIcon,
   HomeIcon,
-  Loader2Icon,
-  SearchIcon,
   StarIcon,
 } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
@@ -40,17 +37,13 @@ export default function ListLayout({ children }: Props) {
                 <HomeIcon />
                 Home
               </TabsTrigger>
-              <TabsTrigger value="/search">
-                <SearchIcon />
-                Search
-              </TabsTrigger>
               <TabsTrigger value="/favorites">
                 <StarIcon />
                 Favorites
               </TabsTrigger>
               <TabsTrigger value="/processed">
                 <BookOpenCheckIcon />
-                Processed
+                Ready
               </TabsTrigger>
               <TabsTrigger value="/processing">
                 <CircleDashedIcon />

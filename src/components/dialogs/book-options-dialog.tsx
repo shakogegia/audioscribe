@@ -12,19 +12,8 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BookBasicInfo } from "@/types/api"
-import { WhisperModel } from "@/types/transript"
-import { whisperModels } from "@/utils/constants"
 import axios from "axios"
 import { AudioLinesIcon, FileDownIcon, FileUpIcon, InfoIcon, Loader2, TrashIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -61,16 +50,10 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
   const [isLoading, setIsLoading] = useState(false)
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null)
 
-  const [model, setModel] = useState<WhisperModel>(
-    () => whisperModels.find(model => model.name === "tiny.en")?.name ?? whisperModels[0].name
-  )
-
-  async function onConfirm(model: WhisperModel) {
+  async function onConfirm() {
     setIsLoading(true)
     toast.loading("Sending a request", { id: "setup-book" })
-    await axios.post(`/api/book/${book.id}/setup`, {
-      model: model,
-    })
+    await axios.post(`/api/book/${book.id}/setup`, {})
     toast.success("Request sent", { id: "setup-book" })
     setIsLoading(false)
     setOpen(false)
@@ -132,7 +115,7 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
       toast.loading("Removing book", { id: "remove-book" })
       await axios.delete(`/api/book/${book.id}/remove`)
       toast.success("Book removed", { id: "remove-book" })
-      router.replace("/search")
+      router.replace("/home")
     } catch (error) {
       console.error("Failed to remove book", error)
       toast.error("Failed to remove book", { id: "remove-book" })
@@ -159,44 +142,13 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
             </TabsList>
 
             <TabsContent value={BookOptionTab.Setup}>
-              <div className="grid gap-4">
-                <Alert>
-                  <InfoIcon />
-                  <AlertTitle>Heads up!</AlertTitle>
-                  <AlertDescription>
-                    <p>Use best (slowest) model you can run on your machine.</p>
-                    <ul className="list-inside list-disc text-sm">
-                      <li>
-                        Fastest model is <span className="font-medium inline">tiny.en</span> but it has the lowest
-                        accuracy.
-                      </li>
-                      <li>
-                        Most accurate model is <span className="font-medium inline">large-v3-turbo</span> but it
-                        requires more memory and time.
-                      </li>
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-
-                <div className="grid gap-3">
-                  <Label>Transcription model</Label>
-                  <Select value={model} onValueChange={value => setModel(value as WhisperModel)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a transcription model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Whisper</SelectLabel>
-                        {whisperModels.map(model => (
-                          <SelectItem key={model.name} value={model.name}>
-                            {model.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <Alert>
+                <InfoIcon />
+                <AlertTitle>Setup Transcription</AlertTitle>
+                <AlertDescription>
+                  <p>This will download, process, and transcribe the audiobook using the model configured in Transcription Settings.</p>
+                </AlertDescription>
+              </Alert>
             </TabsContent>
 
             <TabsContent value={BookOptionTab.Export}>
@@ -248,7 +200,7 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
             </DialogClose>
 
             {activeTab === BookOptionTab.Setup && (
-              <Button type="button" onClick={() => onConfirm(model)} disabled={isLoading}>
+              <Button type="button" onClick={() => onConfirm()} disabled={isLoading}>
                 {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <AudioLinesIcon className="w-4 h-4" />}
                 Start Setup
               </Button>

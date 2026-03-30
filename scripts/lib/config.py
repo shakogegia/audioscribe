@@ -12,7 +12,7 @@ CHUNKS_DIR = os.path.join(DATA_DIR, "chunks")
 # Default settings
 DEFAULTS = {
     "transcription.chunkDuration": "300",
-    "transcription.whisperModel": "large-v3",
+    "transcription.whisperModel": "tiny.en",
     "transcription.computeType": "auto",
 }
 

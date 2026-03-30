@@ -6,6 +6,7 @@ mkdir -p /app/data/sqlite /app/data/chunks
 # Database setup
 pnpm db:generate
 pnpm db:push
+pnpm db:seed
 
 # Start Python worker in background (-u for unbuffered output)
 python3 -u -m scripts.worker &

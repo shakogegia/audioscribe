@@ -14,11 +14,19 @@ import axios from "axios"
 
 const WHISPER_MODELS = [
   { value: "tiny", label: "Tiny", size: "~75 MB" },
-  { value: "base", label: "Base", size: "~150 MB" },
-  { value: "small", label: "Small", size: "~500 MB" },
+  { value: "tiny.en", label: "Tiny (English)", size: "~75 MB" },
+  { value: "base", label: "Base", size: "~142 MB" },
+  { value: "base.en", label: "Base (English)", size: "~142 MB" },
+  { value: "small", label: "Small", size: "~466 MB" },
+  { value: "small.en", label: "Small (English)", size: "~466 MB" },
   { value: "medium", label: "Medium", size: "~1.5 GB" },
-  { value: "large-v2", label: "Large v2", size: "~3 GB" },
-  { value: "large-v3", label: "Large v3", size: "~3 GB" },
+  { value: "medium.en", label: "Medium (English)", size: "~1.5 GB" },
+  { value: "large-v1", label: "Large v1", size: "~2.9 GB" },
+  { value: "large-v2", label: "Large v2", size: "~2.9 GB" },
+  { value: "large-v3", label: "Large v3", size: "~2.9 GB" },
+  { value: "large-v3-turbo", label: "Large v3 Turbo", size: "~1.6 GB" },
+  { value: "distil-large-v2", label: "Distil Large v2", size: "~1.5 GB" },
+  { value: "distil-large-v3", label: "Distil Large v3", size: "~1.5 GB" },
 ]
 
 const COMPUTE_TYPES = [
@@ -32,13 +40,13 @@ export default function TranscriptionSettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [chunkDuration, setChunkDuration] = useState("300")
-  const [whisperModel, setWhisperModel] = useState("large-v3")
+  const [whisperModel, setWhisperModel] = useState("tiny.en")
   const [computeType, setComputeType] = useState("auto")
 
   useEffect(() => {
     axios.get("/api/settings").then(({ data }) => {
       setChunkDuration(data["transcription.chunkDuration"] ?? "300")
-      setWhisperModel(data["transcription.whisperModel"] ?? "large-v3")
+      setWhisperModel(data["transcription.whisperModel"] ?? "tiny.en")
       setComputeType(data["transcription.computeType"] ?? "int8")
       setLoading(false)
     })

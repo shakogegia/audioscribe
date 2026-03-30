@@ -3,7 +3,6 @@ import { ConfirmDialog } from "@/components/dialogs/confirm-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useLLMModels } from "@/hooks/use-llm-models"
 import { formatTime } from "@/lib/format"
 import useBookmarksStore from "@/stores/bookmarks"
 import type * as Audiobookshelf from "@/types/audiobookshelf"
@@ -20,8 +19,6 @@ interface BookmarksProps {
 }
 
 export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
-  const { provider, model } = useLLMModels()
-
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false)
 
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -44,7 +41,6 @@ export function Bookmark({ bookId, bookmark, play }: BookmarksProps) {
 
       const response = await axios.post(`/api/book/${bookId}/bookmark/suggest`, {
         time: bookmark.time,
-        config: { provider, model },
       })
 
       const suggestions = response.data.suggestions || []

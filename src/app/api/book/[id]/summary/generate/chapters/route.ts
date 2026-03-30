@@ -1,21 +1,15 @@
-import { AiModel, AiProvider } from "@/ai/types/ai"
 import { generatePrompt } from "@/ai/prompts/helpers"
+import { getDefaultModel } from "@/ai/providers"
 import { ChapterSummaryStatus } from "@/generated/prisma"
 import { getBook } from "@/lib/audiobookshelf"
 import { getTranscriptByRange } from "@/lib/transcript"
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
 
-type GenerateChaptersRequestBody = {
-  provider: AiProvider
-  model: AiModel
-}
-
 async function generateChapterSummary(
   bookId: string,
   chapterId: number,
-  provider: AiProvider,
-  model: AiModel,
+  model: string,
   chapterStart: number,
   chapterEnd: number
 ) {
@@ -28,7 +22,7 @@ async function generateChapterSummary(
     const transcripts = await getTranscriptByRange({ bookId, startTime: chapterStart, endTime: chapterEnd })
     const transcript = transcripts.map(t => t.text).join(" ")
 
-    const summary = await generatePrompt({ provider, model, slug: "chapter-summary", params: { transcript } })
+    const summary = await generatePrompt({ slug: "chapter-summary", params: { transcript } })
 
     await prisma.chapterSummary.updateMany({
       where: { bookId, chapterId },
@@ -45,8 +39,7 @@ async function generateChapterSummary(
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-
-    const body: GenerateChaptersRequestBody = await request.json()
+    const { model } = await getDefaultModel()
 
     const book = await getBook(id)
 
@@ -63,7 +56,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: book.chapters.map(chapter => ({
         bookId: book.id,
         chapterId: chapter.id,
-        model: body.model,
+        model,
         summary: "",
         status: ChapterSummaryStatus.Pending,
       })),
@@ -71,7 +64,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     // Generate summaries in the background
     book.chapters.forEach(chapter => {
-      generateChapterSummary(book.id, chapter.id, body.provider, body.model, chapter.start, chapter.end)
+      generateChapterSummary(book.id, chapter.id, model, chapter.start, chapter.end)
     })
 
     return NextResponse.json({ message: "Chapters summary generation queued successfully" })

@@ -6,11 +6,23 @@ import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { AppConfig } from "@/lib/config"
-import { Brain, ExternalLink } from "lucide-react"
+import axios from "axios"
+import { Brain, ExternalLink, Loader2 } from "lucide-react"
+import { useEffect, useState } from "react"
 import { useMount } from "react-use"
 import { toast } from "sonner"
+import useSWR from "swr"
 import useLLMStore from "./store"
 import { twMerge } from "tailwind-merge"
 import { Separator } from "@/components/ui/separator"
@@ -114,12 +126,89 @@ export default function LLMSetup({ config, updateConfig }: Props) {
         />
       </div>
 
+      <DefaultModelCard />
+
       <div className="w-full max-w-2xl space-y-6">
         <Button className="w-full" onClick={save}>
           Save Configuration
         </Button>
       </div>
     </div>
+  )
+}
+
+type ModelGroup = {
+  provider: string
+  models: { name: string; value: string }[]
+}
+
+function DefaultModelCard() {
+  const { data: models, isLoading: isLoadingModels } = useSWR<ModelGroup[]>("/api/llm", {
+    revalidateOnFocus: false,
+  })
+  const { data: settings } = useSWR<Record<string, string>>("/api/settings", {
+    revalidateOnFocus: false,
+  })
+
+  const [selectedModel, setSelectedModel] = useState("")
+  const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    if (settings?.["ai.model"]) {
+      setSelectedModel(settings["ai.model"])
+    }
+  }, [settings])
+
+  async function saveDefaultModel(model: string) {
+    setSelectedModel(model)
+    setIsSaving(true)
+    try {
+      await axios.put("/api/settings", { "ai.model": model })
+      toast.success("Default model saved")
+    } catch {
+      toast.error("Failed to save default model")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <Card className="w-full max-w-2xl">
+      <CardHeader>
+        <CardTitle>Default Model</CardTitle>
+        <CardDescription>
+          Used for chat, summaries, bookmarks, and iOS shortcuts.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-2">
+          <Label>Model</Label>
+          {isLoadingModels ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" /> Loading models...
+            </div>
+          ) : (
+            <Select value={selectedModel} onValueChange={saveDefaultModel}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a model" />
+              </SelectTrigger>
+              <SelectContent>
+                {models?.map(group => (
+                  <SelectGroup key={group.provider}>
+                    <SelectLabel>{group.provider}</SelectLabel>
+                    {group.models.map(model => (
+                      <SelectItem key={model.value} value={model.value}>
+                        {model.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

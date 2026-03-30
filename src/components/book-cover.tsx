@@ -32,7 +32,7 @@ export default function BookCover({ src, alt, size = 64, className }: Props) {
   }, [src])
 
   return (
-    <div className={twMerge("relative", className)} style={{ width: size, height: size }}>
+    <div className={twMerge("relative shrink-0 overflow-hidden rounded-md", className)} style={{ width: size, height: size }}>
       {(isLoading || hasError) && (
         <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 dark:bg-neutral-900 rounded-md">
           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
@@ -42,7 +42,7 @@ export default function BookCover({ src, alt, size = 64, className }: Props) {
         ref={imageRef}
         src={imageUrl || ""}
         alt={alt || "Audiobook"}
-        className={twMerge("object-cover rounded-md", isLoading ? "opacity-0" : "opacity-100", hasError && "opacity-0")}
+        className={twMerge("object-cover rounded-md w-full h-full", isLoading ? "opacity-0" : "opacity-100", hasError && "opacity-0")}
         width={size}
         height={size}
         onLoad={handleLoad}

@@ -1,10 +1,8 @@
 "use client"
-import { LLMSelectorDialog } from "@/components/dialogs/llm-selector-dialog"
 import { Button } from "@/components/ui/button"
-import { useLLMModels } from "@/hooks/use-llm-models"
 import { AudioFile, SearchResult } from "@/types/api"
 import axios from "axios"
-import { SlidersHorizontal, WandSparkles } from "lucide-react"
+import { WandSparkles } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import Chapter from "./chapter"
@@ -18,8 +16,6 @@ type ChaptersProps = {
 }
 
 export default function Chapters({ play, book }: ChaptersProps) {
-  const { provider, model } = useLLMModels()
-
   const [chapters] = useState(() => book.chapters.sort((a, b) => a.start - b.start))
 
   const chaptersSorted = chapters.sort((a, b) => a.start - b.start)
@@ -28,10 +24,7 @@ export default function Chapters({ play, book }: ChaptersProps) {
     const toastId = `generate-chapters-summary-${book.id}-${Date.now()}`
     toast.loading("Generating chapters summary...", { id: toastId })
     try {
-      const response = await axios.post(`/api/book/${book.id}/summary/generate/chapters`, {
-        provider: provider,
-        model: model,
-      })
+      const response = await axios.post(`/api/book/${book.id}/summary/generate/chapters`)
 
       toast.success(response.data.message, { id: toastId })
     } catch (error) {
@@ -51,13 +44,6 @@ export default function Chapters({ play, book }: ChaptersProps) {
             <span className="sr-only">Generate Chapters Summaries</span>
             Generate Chapters Summaries
           </Button>
-
-          <LLMSelectorDialog>
-            <Button variant="outline" size="sm">
-              <SlidersHorizontal className="h-[1.2rem] w-[1.2rem]" />
-              <span className="sr-only">LLM Configuration</span>
-            </Button>
-          </LLMSelectorDialog>
         </div>
       </div>
 

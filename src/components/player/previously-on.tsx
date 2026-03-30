@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { useLLMModels } from "@/hooks/use-llm-models"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { usePlayerStore } from "@/stores/player"
 import { SearchResult } from "@/types/api"
@@ -12,7 +11,6 @@ import { useState } from "react"
 
 export function PreviouslyOn({ book }: { book: SearchResult }) {
   const playerTime = usePlayerStore(state => state.currentTime)
-  const { provider, model } = useLLMModels()
   const { speak, stop, isSpeaking, isGenerating: isTTSGenerating } = useTextToSpeech()
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
 
@@ -28,7 +26,6 @@ export function PreviouslyOn({ book }: { book: SearchResult }) {
     try {
       const response = await axios.post(`/api/book/${book.id}/previously-on`, {
         currentTime: playerTime,
-        config: { provider, model },
       })
 
       const { summary } = response.data

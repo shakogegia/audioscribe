@@ -70,11 +70,6 @@ const menuItems = [
         icon: BrainCircuitIcon,
       },
       {
-        label: "Speech-to-Text",
-        href: "/setup/asr",
-        icon: AudioLinesIcon,
-      },
-      {
         label: "Transcription",
         href: "/setup/transcription",
         icon: AudioLinesIcon,

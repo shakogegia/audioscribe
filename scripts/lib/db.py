@@ -5,15 +5,39 @@ from scripts.lib.config import get_db
 
 
 def get_next_pending_job():
-    """Get the next pending job, ordered by sequence then chunk index."""
+    """Get the next pending job, processing one book at a time.
+
+    Prioritizes books that already have running/completed jobs (i.e., in-progress books)
+    so one book finishes entirely before the next one starts.
+    """
     db = get_db()
     try:
-        row = db.execute(
-            """SELECT * FROM Job
-               WHERE status = 'Pending'
-               ORDER BY sequenceOrder ASC, chunkIndex ASC
+        # Find a book that already has non-pending jobs (in progress)
+        active = db.execute(
+            """SELECT DISTINCT bookId FROM Job
+               WHERE status IN ('Running', 'Completed')
+               AND bookId IN (SELECT DISTINCT bookId FROM Job WHERE status = 'Pending')
                LIMIT 1""",
         ).fetchone()
+
+        if active:
+            # Continue working on the in-progress book
+            row = db.execute(
+                """SELECT * FROM Job
+                   WHERE status = 'Pending' AND bookId = ?
+                   ORDER BY sequenceOrder ASC, chunkIndex ASC
+                   LIMIT 1""",
+                (active["bookId"],),
+            ).fetchone()
+        else:
+            # No in-progress book, pick the oldest pending job
+            row = db.execute(
+                """SELECT * FROM Job
+                   WHERE status = 'Pending'
+                   ORDER BY createdAt ASC, sequenceOrder ASC, chunkIndex ASC
+                   LIMIT 1""",
+            ).fetchone()
+
         return dict(row) if row else None
     finally:
         db.close()

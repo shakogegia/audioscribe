@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AppConfig } from "@/lib/config"
 import { ExternalLink } from "lucide-react"
-import Image from "next/image"
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -48,12 +47,12 @@ export default function AudiobookshelfPage({ config, updateConfig }: Props) {
         title="Audiobookshelf Setup"
         description={["Configure access to your Audiobookshelf server."]}
         icon={
-          <Image
-            src="https://www.audiobookshelf.org/Logo.png"
+          <img
+            src="/assets/abs.webp"
             alt="Audiobookshelf"
             width={64}
             height={64}
-            className="w-16 h-16"
+            className="w-16 h-16 rounded-xl"
           />
         }
       />

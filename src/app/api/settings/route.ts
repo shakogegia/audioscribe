@@ -2,8 +2,9 @@ import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
 
 const DEFAULTS: Record<string, string> = {
+  "ai.model": "gemini-2.5-flash",
   "transcription.chunkDuration": "300",
-  "transcription.whisperModel": "large-v3",
+  "transcription.whisperModel": "tiny.en",
   "transcription.computeType": "auto",
 }
 

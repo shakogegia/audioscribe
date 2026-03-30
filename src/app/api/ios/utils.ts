@@ -1,10 +1,8 @@
-import { provider } from "@/ai/providers"
-import { AiModel, AiProvider } from "@/ai/types/ai"
-import { getBook, getLastPlayedLibraryItemId } from "@/lib/audiobookshelf"
+import { getLastPlayedLibraryItemId, getBook } from "@/lib/audiobookshelf"
 import { generateTTS } from "@/lib/tts"
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
-export async function getLastPlayedBook(request: NextRequest) {
+export async function getLastPlayedBook() {
   const lastPlayedLibraryItemId = await getLastPlayedLibraryItemId()
 
   const book = await getBook(lastPlayedLibraryItemId)
@@ -27,32 +25,4 @@ export async function respondWithAudio(text: string, voice?: string) {
       "Content-Length": audioBuffer.length.toString(),
     },
   })
-}
-
-export async function getAi(request: NextRequest) {
-  const params = {
-    provider: request.nextUrl.searchParams.get("provider") as AiProvider | undefined,
-    model: request.nextUrl.searchParams.get("model") as AiModel | undefined,
-  }
-
-  if (!params.provider || !params.model) {
-    throw new Error("Provider and model are required")
-  }
-
-  const ai = await provider(params.provider, params.model)
-
-  return ai
-}
-
-export async function getAiConfig(request: NextRequest): Promise<{ provider: AiProvider; model: AiModel }> {
-  const params = {
-    provider: request.nextUrl.searchParams.get("provider") as AiProvider | undefined,
-    model: request.nextUrl.searchParams.get("model") as AiModel | undefined,
-  }
-
-  if (!params.provider || !params.model) {
-    throw new Error("Provider and model are required")
-  }
-
-  return { provider: params.provider, model: params.model }
 }

@@ -33,7 +33,6 @@ import { useChat } from "@ai-sdk/react"
 import { CaptionsIcon, CopyIcon, Loader2Icon, RefreshCcwIcon, Volume2Icon, StopCircleIcon } from "lucide-react"
 import { Fragment, useRef, useState } from "react"
 import { useSuggestions } from "./suggestions"
-import { ChatQuickQuestion } from "../../../../../../../../../generated/prisma"
 
 type ChatBotDemoProps = {
   bookId: string
@@ -42,9 +41,8 @@ type ChatBotDemoProps = {
 }
 
 type RequestBody = {
-  model: string
-  provider: string
   bookId: string
+  model?: string
   time?: number
   custom?: { time: number; before: number; after: number } | null
 }
@@ -55,7 +53,7 @@ const ChatBotDemo = ({ bookId, book }: ChatBotDemoProps) => {
   const [input, setInput] = useState("")
   const { messages, sendMessage, status, regenerate } = useChat()
   const currentTime = usePlayerStore(state => state.currentTime)
-  const { models, model, setModel, isLoading: isLoadingModels, provider } = useLLMModels()
+  const { models, model, setModel, isLoading: isLoadingModels } = useLLMModels()
 
   const [context, setContext] = useState<{ time: number; before: number; after: number } | null>(null)
   const [isSpeaking, setIsSpeaking] = useState(false)
@@ -118,20 +116,15 @@ const ChatBotDemo = ({ bookId, book }: ChatBotDemoProps) => {
     }
   }
   function handleSubmit(message: PromptInputMessage) {
-    if (!message.text || !model || !provider) return
+    if (!message.text) return
 
-    const requestBody: RequestBody = { model: model, provider, bookId, time: currentTime }
-
-    requestBody.time = currentTime
-    requestBody.custom = context
-
+    const requestBody: RequestBody = { bookId, model, time: currentTime, custom: context }
     sendMessage({ text: message.text }, { body: requestBody })
     setInput("")
   }
 
   function onSuggestionClick(suggestion: string) {
-    if (!model || !provider) return
-    const requestBody: RequestBody = { model: model, provider, bookId, time: currentTime, custom: context }
+    const requestBody: RequestBody = { bookId, model, time: currentTime, custom: context }
     sendMessage({ text: suggestion }, { body: requestBody })
   }
 
@@ -241,9 +234,9 @@ const ChatBotDemo = ({ bookId, book }: ChatBotDemoProps) => {
                     {models.map(provider => (
                       <SelectGroup key={provider.provider}>
                         <SelectLabel>{provider.provider}</SelectLabel>
-                        {provider.models.map(model => (
-                          <PromptInputModelSelectItem key={model.value} value={model.value}>
-                            {model.name}
+                        {provider.models.map(m => (
+                          <PromptInputModelSelectItem key={m.value} value={m.value}>
+                            {m.name}
                           </PromptInputModelSelectItem>
                         ))}
                       </SelectGroup>

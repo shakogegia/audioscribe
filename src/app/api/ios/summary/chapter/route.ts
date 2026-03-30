@@ -1,13 +1,12 @@
 import { generatePrompt } from "@/ai/prompts/helpers"
 import { getTranscriptByRange } from "@/lib/transcript"
 import { NextRequest, NextResponse } from "next/server"
-import { getAiConfig, getLastPlayedBook, respondWithAudio } from "../../utils"
+import { getLastPlayedBook, respondWithAudio } from "../../utils"
 import { prisma } from "@/lib/prisma"
 
 export async function GET(request: NextRequest) {
   try {
-    const { provider, model } = await getAiConfig(request)
-    const book = await getLastPlayedBook(request)
+    const book = await getLastPlayedBook()
 
     const params = {
       chapter: request.nextUrl.searchParams.get("chapter"),
@@ -58,8 +57,6 @@ export async function GET(request: NextRequest) {
     }
 
     const summary = await generatePrompt({
-      provider: provider,
-      model: model,
       slug: "ios-chapter-summary",
       params: {
         transcript,
