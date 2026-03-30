@@ -10,6 +10,7 @@ FROM deps AS build
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+ENV DATA_DIR="/app/data"
 RUN pnpm build
 RUN pnpm prune --prod
 
