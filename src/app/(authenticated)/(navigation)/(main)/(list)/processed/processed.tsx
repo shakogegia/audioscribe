@@ -1,9 +1,10 @@
 "use client"
 import BookList from "@/components/book-list"
+import { BookListSkeleton } from "@/components/book-list-skeleton"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { SearchResult } from "@/types/api"
-import { Loader2 } from "lucide-react"
+import { BookOpenCheck } from "lucide-react"
 import useSWR from "swr"
-import { twMerge } from "tailwind-merge"
 
 export function Processed() {
   const { data, error, isLoading } = useSWR<SearchResult[]>(`/api/processed?limit=20`, {
@@ -12,25 +13,25 @@ export function Processed() {
 
   return (
     <div className="flex flex-col items-center gap-8 w-full">
-      {/* Results */}
       <div className="flex flex-col gap-4 w-full max-w-4xl">
-        {isLoading && (
-          <div className={twMerge("flex items-center justify-center p-8 text-sm text-neutral-600")}>
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            <span>Loading processed books...</span>
-          </div>
-        )}
+        {isLoading && <BookListSkeleton />}
 
         {error && (
-          <div className={twMerge("flex items-center justify-center p-8 text-sm text-neutral-600", "text-red-500")}>
+          <div className="flex items-center justify-center p-8 text-sm text-red-500">
             <span>Error fetching processed books. Please try again.</span>
           </div>
         )}
 
         {data && data.length === 0 && (
-          <div className={twMerge("flex items-center justify-center p-8 text-sm text-neutral-600")}>
-            <span>No processed books found</span>
-          </div>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BookOpenCheck />
+              </EmptyMedia>
+              <EmptyTitle>No processed books</EmptyTitle>
+              <EmptyDescription>Fully transcribed books will appear here.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
 
         {data && data.length > 0 && <BookList books={data} />}

@@ -37,7 +37,7 @@ export async function getAllLibraries(): Promise<Library[]> {
 
 export async function getLibraryItems(
   libraryId: string,
-  { page, limit }: { page?: string | null; limit?: string | null } = {}
+  { page, limit, sort, desc }: { page?: string | null; limit?: string | null; sort?: string | null; desc?: string | null } = {}
 ): Promise<{ books: BookBasicInfo[]; total: number; page: number; limit: number }> {
   const api = await getApi()
   type ApiResponse = {
@@ -56,8 +56,8 @@ export async function getLibraryItems(
     params: {
       page: page ? parseInt(page) : 0,
       limit: limit ? parseInt(limit) : 10,
-      sort: "addedAt",
-      desc: 1,
+      sort: sort || "addedAt",
+      desc: desc !== null && desc !== undefined ? parseInt(desc) : 1,
     },
   })
   const libraryItemIds = response.data.results.map(x => x.id)
@@ -150,9 +150,10 @@ export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<Bo
 
   const bookMap = new Map(books.map(book => [book.id, book]))
 
-  return Promise.all(
-    response.data.libraryItems.map(libraryItem => {
-      return {
+  const itemMap = new Map(
+    response.data.libraryItems.map(libraryItem => [
+      libraryItem.id,
+      {
         id: libraryItem.id,
         title: libraryItem.media.metadata.title ?? "",
         authors: libraryItem.media.metadata.authors.map(author => author.name),
@@ -166,9 +167,32 @@ export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<Bo
         setup: bookMap.get(libraryItem.id)?.setup ?? false,
         model: bookMap.get(libraryItem.id)?.model ?? null,
         progress: bookMap.get(libraryItem.id)?.jobs,
-      }
-    })
+      },
+    ])
   )
+
+  // Preserve the original order of libraryItemIds
+  return libraryItemIds.map(id => itemMap.get(id)).filter((item): item is BookBasicInfo => item !== undefined)
+}
+
+export async function getContinueListening(libraryId: string): Promise<BookBasicInfo[]> {
+  const api = await getApi()
+  type PersonalizedShelf = {
+    id: string
+    label: string
+    labelStringKey: string
+    type: string
+    entities: Audiobookshelf.LibraryItem[]
+  }
+  const response = await api.get<PersonalizedShelf[]>(`/api/libraries/${libraryId}/personalized`, {
+    params: { limit: 10 },
+  })
+
+  const shelf = response.data.find(s => s.id === "continue-listening")
+  if (!shelf || shelf.entities.length === 0) return []
+
+  const libraryItemIds = shelf.entities.map(e => e.id)
+  return getBatchLibraryItems(libraryItemIds)
 }
 
 export async function getBookmarks(libraryItemId: string): Promise<Audiobookshelf.AudioBookmark[]> {

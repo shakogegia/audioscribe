@@ -14,8 +14,10 @@ export async function GET(
 
     const page = request.nextUrl.searchParams.get("page")
     const limit = request.nextUrl.searchParams.get("limit")
+    const sort = request.nextUrl.searchParams.get("sort")
+    const desc = request.nextUrl.searchParams.get("desc")
 
-    const response = await getLibraryItems(libraryId, { page, limit })
+    const response = await getLibraryItems(libraryId, { page, limit, sort, desc })
 
     return NextResponse.json(response)
   } catch (error) {

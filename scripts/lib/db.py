@@ -157,6 +157,21 @@ def are_all_jobs_completed(book_id: str) -> bool:
         db.close()
 
 
+def get_total_processing_seconds(book_id: str) -> int:
+    """Get total elapsed seconds from first job start to last job completion."""
+    db = get_db()
+    try:
+        row = db.execute(
+            """SELECT
+                 CAST((julianday(MAX(completedAt)) - julianday(MIN(startedAt))) * 86400 AS INTEGER) as seconds
+               FROM Job WHERE bookId = ? AND status = 'Completed'""",
+            (book_id,),
+        ).fetchone()
+        return row["seconds"] if row and row["seconds"] else 0
+    finally:
+        db.close()
+
+
 def save_transcript_segments(book_id: str, model: str, segments: list[dict]):
     """Batch insert transcript segments."""
     db = get_db()

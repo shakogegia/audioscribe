@@ -16,6 +16,17 @@ HANDLERS = {
 running = True
 
 
+def _format_duration(seconds: int) -> str:
+    """Format seconds into a friendly human-readable string."""
+    if seconds < 60:
+        return f"{seconds}s"
+    minutes, secs = divmod(seconds, 60)
+    if minutes < 60:
+        return f"{minutes}m {secs}s"
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours}h {minutes}m"
+
+
 def shutdown(signum, frame):
     global running
     print(f"\n[Worker] Received signal {signum}, shutting down...")
@@ -66,8 +77,10 @@ def main():
             if db.are_all_jobs_completed(book_id):
                 db.mark_book_setup_complete(book_id)
                 title = config.get_book_title(book_id)
-                print(f"[Worker] All jobs completed for book {title} — setup complete!")
-                config.send_notification("AudioScribe", f"✅ {title} is ready")
+                elapsed = db.get_total_processing_seconds(book_id)
+                duration = _format_duration(elapsed)
+                print(f"[Worker] All jobs completed for book {title} in {duration} — setup complete!")
+                config.send_notification("AudioScribe", f"{title} is ready ({duration})")
 
         except Exception as e:
             error_msg = f"{type(e).__name__}: {e}"
