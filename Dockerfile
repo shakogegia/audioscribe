@@ -11,6 +11,8 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV DATA_DIR="/app/data"
+ENV DATABASE_URL="file:/app/data/sqlite/store.db"
+RUN mkdir -p /app/data/sqlite && pnpm db:generate && pnpm db:push
 RUN pnpm build
 RUN pnpm prune --prod
 
