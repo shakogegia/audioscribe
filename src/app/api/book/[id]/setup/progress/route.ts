@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     }
 
     // Group jobs by type for stage-level summary
-    const stageMap = new Map<string, { status: string; progress: number; error: string | null; startedAt: Date | null; completedAt: Date | null; totalChunks: number; completedChunks: number }>()
+    const stageMap = new Map<string, { status: string; progress: number; error: string | null; startedAt: Date | null; completedAt: Date | null; totalChunks: number; completedChunks: number; currentChunkProgress: number }>()
 
     for (const job of jobs) {
       const existing = stageMap.get(job.type)
@@ -29,6 +29,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
           completedAt: job.completedAt,
           totalChunks: job.type === "Transcribe" ? 1 : 0,
           completedChunks: job.type === "Transcribe" && job.status === JobStatus.Completed ? 1 : 0,
+          currentChunkProgress: job.type === "Transcribe" && job.status === JobStatus.Running ? job.progress : 0,
         })
       } else if (job.type === "Transcribe") {
         // Aggregate transcribe chunk jobs
@@ -38,7 +39,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         }
         if (job.status === JobStatus.Running) {
           existing.status = "Running"
-          existing.progress = job.progress
+          existing.currentChunkProgress = job.progress
           existing.startedAt = existing.startedAt || job.startedAt
         }
         if (job.status === JobStatus.Failed) {
@@ -62,6 +63,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       completedAt: data.completedAt,
       totalChunks: data.totalChunks,
       completedChunks: data.completedChunks,
+      currentChunkProgress: data.currentChunkProgress,
     }))
 
     const currentStage = stages.find(s => s.status === "Running") || null

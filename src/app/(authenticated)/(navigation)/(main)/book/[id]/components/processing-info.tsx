@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import axios from "axios"
 import {
-  BugIcon,
   CircleCheckIcon,
   CircleDashedIcon,
   CircleXIcon,
@@ -35,6 +34,7 @@ type StageInfo = {
   completedAt: string | null
   totalChunks: number
   completedChunks: number
+  currentChunkProgress: number
 }
 
 type ProgressResponse = {
@@ -152,6 +152,7 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                       error={data?.stages?.find(s => s.stage === stage.stage)?.error}
                       totalChunks={data?.stages?.find(s => s.stage === stage.stage)?.totalChunks ?? 0}
                       completedChunks={data?.stages?.find(s => s.stage === stage.stage)?.completedChunks ?? 0}
+                      currentChunkProgress={data?.stages?.find(s => s.stage === stage.stage)?.currentChunkProgress ?? 0}
                       isFirst={index === 0}
                       isLast={index === stages.length - 1}
                     >
@@ -189,6 +190,7 @@ type StageProps = {
   error?: string | null
   totalChunks?: number
   completedChunks?: number
+  currentChunkProgress?: number
 }
 export function Stage({
   title,
@@ -203,6 +205,7 @@ export function Stage({
   error,
   totalChunks = 0,
   completedChunks = 0,
+  currentChunkProgress = 0,
 }: StageProps) {
   const estimated = useMemo(() => {
     if (!startedAt || !progress || progress <= 0) return null
@@ -256,15 +259,33 @@ export function Stage({
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>
         {children}
-        {/* {progress && <p className="text-sm text-muted-foreground">Progress: {progress}%</p>} */}
-        {Boolean(progress) && isRunning && (
+        {isRunning && totalChunks > 0 && (
+          <div className="flex flex-col gap-2 mt-2">
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Overall: {completedChunks}/{totalChunks} chunks</span>
+                {estimated && <span>~{estimated} remaining</span>}
+              </div>
+              <Progress value={totalChunks > 0 ? (completedChunks / totalChunks) * 100 : 0} />
+            </div>
+            {currentChunkProgress > 0 && (
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Chunk {completedChunks + 1}</span>
+                  <span>{currentChunkProgress.toFixed(0)}%</span>
+                </div>
+                <Progress value={currentChunkProgress} className="h-1.5" />
+              </div>
+            )}
+          </div>
+        )}
+        {isRunning && totalChunks === 0 && Boolean(progress) && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Progress value={progress} />
+              <Progress value={progress} className="mt-2" />
             </TooltipTrigger>
             <TooltipContent>
               {progress !== undefined && <p>Progress: {progress.toFixed(2)}%</p>}
-              {totalChunks > 0 && <p>Chunks: {completedChunks}/{totalChunks}</p>}
               {estimated && <p>Estimated: {estimated}</p>}
             </TooltipContent>
           </Tooltip>

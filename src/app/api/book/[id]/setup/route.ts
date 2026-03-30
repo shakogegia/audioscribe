@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
-import { getBook } from "@/lib/audiobookshelf"
 import { JobStatus, JobType } from "../../../../../../generated/prisma"
 
 const STAGE_ORDER: { type: JobType; sequenceOrder: number }[] = [
@@ -25,8 +24,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (!model) {
       return NextResponse.json({ error: "Missing model" }, { status: 400 })
     }
-
-    const book = await getBook(bookId)
 
     // Ensure book exists in DB
     const existingBook = await prisma.book.findUnique({ where: { id: bookId } })

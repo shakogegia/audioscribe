@@ -11,7 +11,7 @@ def get_model(model_name: str, compute_type: str) -> WhisperModel:
     """Load or retrieve cached whisper model."""
     cache_key = f"{model_name}:{compute_type}"
     if cache_key not in _model_cache:
-        _model_cache[cache_key] = WhisperModel(model_name, device="cpu", compute_type=compute_type)
+        _model_cache[cache_key] = WhisperModel(model_name, device="auto", compute_type=compute_type)
     return _model_cache[cache_key]
 
 
@@ -39,6 +39,7 @@ def run(job: dict):
         chunk["filePath"],
         beam_size=5,
         word_timestamps=True,
+        vad_filter=True,
     )
 
     transcript_segments = []
