@@ -1,7 +1,7 @@
 import { Header } from "@/components/navigation/header"
 import AppProviders from "@/context/app-providers"
 import { ThemeProvider } from "@/context/theme-provider"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils";
@@ -9,13 +9,16 @@ import { cn } from "@/lib/utils";
 const geistSans = Geist({ variable: "--font-sans", subsets: ["latin"] })
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] })
 
-export const metadata: Metadata = {
-  title: "AudioScribe",
-  description: "Audiobook companion app for Audiobookshelf",
+export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#262626" },
   ],
+}
+
+export const metadata: Metadata = {
+  title: "AudioScribe",
+  description: "Audiobook companion app for Audiobookshelf",
   icons: {
     icon: [
       {
