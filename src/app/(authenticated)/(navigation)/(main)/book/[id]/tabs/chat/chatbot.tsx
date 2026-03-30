@@ -91,7 +91,7 @@ const ChatBotDemo = ({ bookId, book }: ChatBotDemoProps) => {
       const response = await fetch("/api/tts/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: plainText, model: "en_US-hfc_female-medium" }),
+        body: JSON.stringify({ text: plainText }),
       })
 
       if (!response.ok) throw new Error("TTS failed")

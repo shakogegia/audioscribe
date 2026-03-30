@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 const DEFAULTS: Record<string, string> = {
   "ai.model": "gemini-2.5-flash",
+  "tts.model": "en_US-hfc_female-medium",
   "transcription.chunkDuration": "300",
   "transcription.whisperModel": "tiny.en",
   "transcription.computeType": "auto",

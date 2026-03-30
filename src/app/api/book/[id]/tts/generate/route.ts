@@ -10,7 +10,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const body: TTSGenerateRequestBody = await request.json()
 
-    const { text, voice = "en_US-hfc_female-medium" } = body
+    const { text, voice } = body
 
     if (!text || !text.trim()) {
       return NextResponse.json({ error: "Text is required" }, { status: 400 })

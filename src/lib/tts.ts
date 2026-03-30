@@ -1,12 +1,17 @@
 import { spawn } from "child_process"
 import path from "path"
+import { prisma } from "@/lib/prisma"
 
 type TTSOptions = {
   text: string
   voice?: string
 }
 
-export async function generateTTS({ text, voice = "en_US-hfc_female-medium" }: TTSOptions): Promise<Buffer> {
+export async function generateTTS({ text, voice }: TTSOptions): Promise<Buffer> {
+  if (!voice) {
+    const setting = await prisma.setting.findUnique({ where: { key: "tts.model" } })
+    voice = setting?.value || "en_US-hfc_female-medium"
+  }
   if (!text || !text.trim()) {
     throw new Error("Text is required")
   }

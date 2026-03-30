@@ -6,13 +6,15 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { MicIcon, Volume2, Loader2, AlertCircle, StopCircle, Copy } from "lucide-react"
-import { useState } from "react"
+import { MicIcon, Volume2, Loader2, AlertCircle, StopCircle, Copy, Check } from "lucide-react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useTTSModels } from "@/hooks/use-tts-models"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import axios from "axios"
+import useSWR from "swr"
 
 const DEFAULT_SAMPLE_TEXT =
   "Previously on Lord of the Rings: The fellowship stood at the edge of darkness, their quest hanging by a thread. With courage in their hearts and hope as their guide, they ventured forth into the unknown, knowing that even the smallest person can change the course of the future."
@@ -20,16 +22,32 @@ const DEFAULT_SAMPLE_TEXT =
 const PIPER_PROJECT_URL = "https://github.com/OHF-Voice/piper1-gpl"
 const PIPER_VOICES_URL = "https://huggingface.co/rhasspy/piper-voices"
 
-const selectedModel = "en_US-hfc_female-medium"
-
 export default function TTSListPage() {
   const { models, loading, error } = useTTSModels()
+  const { data: settings } = useSWR<Record<string, string>>("/api/settings", { revalidateOnFocus: false })
+  const [selectedModel, setSelectedModel] = useState("en_US-hfc_female-medium")
   const [sampleText, setSampleText] = useState(DEFAULT_SAMPLE_TEXT)
   const [loadingModel, setLoadingModel] = useState<string | null>(null)
   const [playingModel, setPlayingModel] = useState<string | null>(null)
   const [playedModels, setPlayedModels] = useState<Set<string>>(new Set())
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    if (settings?.["tts.model"]) {
+      setSelectedModel(settings["tts.model"])
+    }
+  }, [settings])
+
+  async function selectModel(modelId: string) {
+    setSelectedModel(modelId)
+    try {
+      await axios.put("/api/settings", { "tts.model": modelId })
+      toast.success("TTS model saved")
+    } catch {
+      toast.error("Failed to save TTS model")
+    }
+  }
 
   function stopAudio() {
     if (currentAudio) {
@@ -232,32 +250,40 @@ export default function TTSListPage() {
                         </div>
                         <p className="text-xs text-muted-foreground truncate">{model.description}</p>
                       </div>
-                      <Button
-                        onClick={() => previewModel(model.id)}
-                        disabled={loadingModel !== null && loadingModel !== model.id}
-                        variant={
-                          playingModel === model.id ? "destructive" : loadingModel === model.id ? "secondary" : "default"
-                        }
-                        size="sm"
-                        className="shrink-0"
-                      >
-                        {loadingModel === model.id ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Generating...
-                          </>
-                        ) : playingModel === model.id ? (
-                          <>
-                            <StopCircle className="w-4 h-4 mr-2" />
-                            Stop
-                          </>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          onClick={() => previewModel(model.id)}
+                          disabled={loadingModel !== null && loadingModel !== model.id}
+                          variant={
+                            playingModel === model.id ? "destructive" : loadingModel === model.id ? "secondary" : "outline"
+                          }
+                          size="sm"
+                        >
+                          {loadingModel === model.id ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            </>
+                          ) : playingModel === model.id ? (
+                            <>
+                              <StopCircle className="w-4 h-4" />
+                            </>
+                          ) : (
+                            <>
+                              <Volume2 className="w-4 h-4" />
+                            </>
+                          )}
+                        </Button>
+                        {isSelected ? (
+                          <Button size="sm" variant="default" disabled>
+                            <Check className="w-4 h-4" />
+                            Selected
+                          </Button>
                         ) : (
-                          <>
-                            <Volume2 className="w-4 h-4 mr-2" />
-                            Preview
-                          </>
+                          <Button size="sm" variant="outline" onClick={() => selectModel(model.id)}>
+                            Select
+                          </Button>
                         )}
-                      </Button>
+                      </div>
                     </div>
                   )
                 })}
