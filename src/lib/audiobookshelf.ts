@@ -172,7 +172,11 @@ export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<Bo
   )
 
   // Preserve the original order of libraryItemIds
-  return libraryItemIds.map(id => itemMap.get(id)).filter((item): item is BookBasicInfo => item !== undefined)
+  return libraryItemIds.reduce<BookBasicInfo[]>((acc, id) => {
+    const item = itemMap.get(id)
+    if (item) acc.push(item)
+    return acc
+  }, [])
 }
 
 export async function getContinueListening(libraryId: string): Promise<BookBasicInfo[]> {
