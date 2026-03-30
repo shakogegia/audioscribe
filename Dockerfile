@@ -27,6 +27,8 @@ RUN pip install --no-cache-dir \
 FROM node:24-slim AS runtime
 WORKDIR /app
 
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Install minimal runtime dependencies
 RUN apt-get update && apt-get install -y \
     ffmpeg \
