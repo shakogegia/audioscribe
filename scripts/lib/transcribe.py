@@ -35,6 +35,8 @@ def run(job: dict):
 
     model = get_model(model_name, compute_type)
 
+    chunk_duration = chunk["duration"]  # seconds
+
     segments_iter, info = model.transcribe(
         chunk["filePath"],
         beam_size=5,
@@ -42,11 +44,9 @@ def run(job: dict):
         vad_filter=True,
     )
 
+    # Stream segments from the generator — progress based on timestamp vs chunk duration
     transcript_segments = []
-    segments_list = list(segments_iter)
-    total_segments = len(segments_list)
-
-    for i, segment in enumerate(segments_list):
+    for segment in segments_iter:
         start_ms = chunk_start_ms + int(segment.start * 1000)
         end_ms = chunk_start_ms + int(segment.end * 1000)
 
@@ -56,8 +56,9 @@ def run(job: dict):
             "endTime": end_ms,
         })
 
-        if total_segments > 0:
-            progress = round(((i + 1) / total_segments) * 100, 2)
+        # Progress based on how far into the chunk we've transcribed
+        if chunk_duration > 0:
+            progress = min(round((segment.end / chunk_duration) * 100, 2), 99)
             db.update_job_progress(job["id"], progress)
 
     db.save_transcript_segments(book_id, model_name, transcript_segments)
