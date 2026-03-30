@@ -3,6 +3,8 @@ import { Home } from "./home"
 import { load } from "@/lib/config"
 import { redirect } from "next/navigation"
 
+export const dynamic = "force-dynamic"
+
 export default async function SearchPage() {
   const config = await load()
 
