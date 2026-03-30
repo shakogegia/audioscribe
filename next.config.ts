@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
       { protocol: "http", hostname: "*" },
     ],
   },
+  experimental: {
+    proxyClientMaxBodySize: "50mb",
+  },
 }
 
 export default nextConfig
