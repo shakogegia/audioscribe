@@ -31,9 +31,12 @@ export const defaultConfig: AppConfig = {
   },
 }
 
-const configPath = join(process.env.DATA_DIR || "./data", "config.json")
+function getConfigPath() {
+  return join(process.env.DATA_DIR || "./data", "config.json")
+}
 
 export async function load(): Promise<AppConfig> {
+  const configPath = getConfigPath()
   try {
     const configExists = await fs
       .access(configPath)
@@ -41,7 +44,7 @@ export async function load(): Promise<AppConfig> {
       .catch(() => false)
 
     if (!configExists) {
-      console.log("Config file doesn't exist, returning default config")
+      console.log(`Config file not found at ${configPath} (DATA_DIR=${process.env.DATA_DIR})`)
       return defaultConfig
     }
 
@@ -49,18 +52,17 @@ export async function load(): Promise<AppConfig> {
     const parsedConfig = JSON.parse(config)
     return { ...defaultConfig, ...parsedConfig }
   } catch (error) {
-    console.error("Failed to load config, returning default config:", error)
+    console.error(`Failed to load config from ${configPath}:`, error)
     return defaultConfig
   }
 }
 
 export async function save(config: AppConfig) {
+  const configPath = getConfigPath()
   try {
-    // Ensure data directory exists
     const dataDir = process.env.DATA_DIR || join(process.cwd(), "data")
     await fs.mkdir(dataDir, { recursive: true })
 
-    // Save config file
     await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf8")
   } catch (error) {
     console.error("Failed to save config:", error)
