@@ -148,9 +148,9 @@ export async function getTranscriptionStats(): Promise<StatsData> {
       return {
         bookId: book.id,
         bookTitle: title,
-        download: downloadMinutes,
-        prepare: prepareMinutes,
-        transcribe: transcribeMinutes,
+        download: Math.round(downloadMinutes * 10) / 10,
+        prepare: Math.round(prepareMinutes * 10) / 10,
+        transcribe: Math.round(transcribeMinutes * 10) / 10,
       }
     })
     .filter(b => b.download + b.prepare + b.transcribe > 0)
@@ -191,10 +191,10 @@ export async function getTranscriptionStats(): Promise<StatsData> {
         {
           bookId: book.id,
           bookTitle: title,
-          rtf,
+          rtf: Math.round(rtf * 100) / 100,
           model,
-          audioDuration: audioDurationMinutes,
-          processingTime: totalTranscribeMinutes,
+          audioDuration: Math.round(audioDurationMinutes * 10) / 10,
+          processingTime: Math.round(totalTranscribeMinutes * 10) / 10,
         },
       ]
     })
@@ -247,9 +247,9 @@ export async function getTranscriptionStats(): Promise<StatsData> {
   const modelUsage = Array.from(modelMap.entries()).map(([model, stats]) => ({
     model,
     bookCount: stats.bookCount,
-    avgRtf: stats.rtfs.reduce((s, v) => s + v, 0) / stats.rtfs.length,
-    medianRtf: median(stats.rtfs),
-    totalHours: stats.totalAudioMinutes / 60,
+    avgRtf: Math.round((stats.rtfs.reduce((s, v) => s + v, 0) / stats.rtfs.length) * 100) / 100,
+    medianRtf: Math.round(median(stats.rtfs) * 100) / 100,
+    totalHours: Math.round((stats.totalAudioMinutes / 60) * 10) / 10,
   }))
 
   // --- Pipeline Health ---
@@ -319,16 +319,16 @@ export async function getTranscriptionStats(): Promise<StatsData> {
     .map(([period, entry]) => ({
       period,
       booksProcessed: entry.booksProcessed,
-      audioHours: entry.audioSeconds / 3600,
+      audioHours: Math.round((entry.audioSeconds / 3600) * 10) / 10,
     }))
     .sort((a, b) => a.period.localeCompare(b.period))
 
   return {
     overview: {
       booksTranscribed,
-      audioHoursProcessed,
-      medianRtf,
-      successRate,
+      audioHoursProcessed: Math.round(audioHoursProcessed * 10) / 10,
+      medianRtf: Math.round(medianRtf * 100) / 100,
+      successRate: Math.round(successRate * 10) / 10,
     },
     processingBreakdown,
     transcriptionSpeed,
