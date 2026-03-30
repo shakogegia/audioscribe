@@ -25,24 +25,22 @@ export function ModelUsage({ data }: { data: StatsData["modelUsage"] }) {
   }))
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Model Distribution</CardTitle>
-          <CardDescription>Books processed per model</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+    <Card className="flex-1">
+      <CardHeader>
+        <CardTitle>Model Distribution</CardTitle>
+        <CardDescription>Usage and performance by whisper model</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex justify-center">
+          <ChartContainer config={chartConfig} className="!aspect-square max-h-[160px]">
             <PieChart>
               <Pie
                 data={pieData}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={60}
+                innerRadius={40}
+                outerRadius={70}
                 strokeWidth={5}
-                label={({ name, percent }: { name?: string; percent?: number }) =>
-                  `${name ?? ""} (${((percent ?? 0) * 100).toFixed(0)}%)`
-                }
               >
                 {pieData.map((entry, i) => (
                   <Cell key={entry.name} fill={COLORS[i % COLORS.length]} />
@@ -52,39 +50,31 @@ export function ModelUsage({ data }: { data: StatsData["modelUsage"] }) {
               <Tooltip formatter={(value: any) => [value, "Books"]} />
             </PieChart>
           </ChartContainer>
-        </CardContent>
-      </Card>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Model Comparison</CardTitle>
-          <CardDescription>Performance by whisper model</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Model</TableHead>
-                <TableHead className="text-right">Books</TableHead>
-                <TableHead className="text-right">Avg RTF</TableHead>
-                <TableHead className="text-right">Median RTF</TableHead>
-                <TableHead className="text-right">Hours</TableHead>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Model</TableHead>
+              <TableHead className="text-right">Books</TableHead>
+              <TableHead className="text-right">Avg RTF</TableHead>
+              <TableHead className="text-right">Median RTF</TableHead>
+              <TableHead className="text-right">Hours</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map(row => (
+              <TableRow key={row.model}>
+                <TableCell className="font-medium">{row.model}</TableCell>
+                <TableCell className="text-right">{row.bookCount}</TableCell>
+                <TableCell className="text-right">{row.avgRtf}x</TableCell>
+                <TableCell className="text-right">{row.medianRtf}x</TableCell>
+                <TableCell className="text-right">{row.totalHours}h</TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map(row => (
-                <TableRow key={row.model}>
-                  <TableCell className="font-medium">{row.model}</TableCell>
-                  <TableCell className="text-right">{row.bookCount}</TableCell>
-                  <TableCell className="text-right">{row.avgRtf}x</TableCell>
-                  <TableCell className="text-right">{row.medianRtf}x</TableCell>
-                  <TableCell className="text-right">{row.totalHours}h</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   )
 }

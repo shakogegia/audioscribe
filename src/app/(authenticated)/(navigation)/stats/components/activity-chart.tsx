@@ -14,13 +14,13 @@ export function ActivityChart({ data }: { data: StatsData["activity"] }) {
   if (data.length === 0) return null
 
   return (
-    <Card>
+    <Card className="flex-1">
       <CardHeader>
         <CardTitle>Activity Over Time</CardTitle>
         <CardDescription>Books processed and audio hours by month</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+        <ChartContainer config={chartConfig} className="!aspect-auto w-full" style={{ height: 200 }}>
           <AreaChart data={data} margin={{ left: 12, right: 12 }}>
             <defs>
               <linearGradient id="gradientBooks" x1="0" y1="0" x2="0" y2="1">

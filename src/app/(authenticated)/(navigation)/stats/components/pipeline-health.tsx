@@ -50,15 +50,7 @@ export function PipelineHealth({ data }: PipelineHealthProps) {
   const hasErrors = data.recentErrors.length > 0
 
   if (!hasFailures && !hasRetries && !hasErrors) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground text-sm">
-            All systems nominal — no failures or retries detected.
-          </p>
-        </CardContent>
-      </Card>
-    )
+    return null
   }
 
   return (
@@ -70,7 +62,7 @@ export function PipelineHealth({ data }: PipelineHealthProps) {
             <CardTitle className="text-sm font-medium">Failure Rates by Stage</CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
+            <ChartContainer config={chartConfig} className="!aspect-auto w-full" style={{ height: 200 }}>
               <BarChart
                 data={data.failureRates}
                 margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
