@@ -45,4 +45,8 @@ next-env.d.ts
 
 data/
 
+# python
+__pycache__/
+*.pyc
+
 notes.txt
