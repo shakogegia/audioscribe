@@ -35,7 +35,7 @@ export function ActivityChart({ data }: { data: StatsData["activity"] }) {
             <CartesianGrid vertical={false} />
             <XAxis dataKey="period" tickFormatter={v => v.slice(2)} />
             <YAxis />
-            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartTooltip content={<ChartTooltipContent className="min-w-44" />} />
             <Area
               type="monotone"
               dataKey="booksProcessed"
