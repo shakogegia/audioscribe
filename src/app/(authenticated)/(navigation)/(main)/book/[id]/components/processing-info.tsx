@@ -268,15 +268,13 @@ export function Stage({
               </div>
               <Progress value={totalChunks > 0 ? (completedChunks / totalChunks) * 100 : 0} />
             </div>
-            {currentChunkProgress > 0 && (
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Chunk {completedChunks + 1}</span>
-                  <span>{currentChunkProgress.toFixed(0)}%</span>
-                </div>
-                <Progress value={currentChunkProgress} className="h-1.5" />
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Current: chunk {completedChunks + 1}/{totalChunks}</span>
+                <span>{currentChunkProgress.toFixed(0)}%</span>
               </div>
-            )}
+              <Progress value={currentChunkProgress} className="h-1.5" />
+            </div>
           </div>
         )}
         {isRunning && totalChunks === 0 && Boolean(progress) && (
