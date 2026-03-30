@@ -1,5 +1,5 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf"
-import { Book, BookSetupProgress } from "../../generated/prisma"
+import { Book } from "../../generated/prisma"
 import axios from "axios"
 import { AudioFile, BookBasicInfo, SearchResult } from "../types/api"
 import { load } from "./config"
@@ -69,10 +69,12 @@ async function getBookFromDatabase(libraryItemId: string) {
   const book = await prisma.book.findUnique({
     where: { id: libraryItemId },
     include: {
-      bookSetupProgress: true,
+      jobs: {
+        orderBy: [{ sequenceOrder: "asc" }, { chunkIndex: "asc" }],
+      },
     },
   })
-  return { book, progress: book?.bookSetupProgress }
+  return { book, progress: book?.jobs }
 }
 
 export async function searchBook(libraryId: string, query: string): Promise<BookBasicInfo[]> {
@@ -96,7 +98,9 @@ export async function searchBook(libraryId: string, query: string): Promise<Book
       },
     },
     include: {
-      bookSetupProgress: true,
+      jobs: {
+        orderBy: [{ sequenceOrder: "asc" }, { chunkIndex: "asc" }],
+      },
     },
   })
 
@@ -117,7 +121,7 @@ export async function searchBook(libraryId: string, query: string): Promise<Book
         libraryId: libraryId,
         setup: book?.setup ?? false,
         model: book?.model ?? null,
-        progress: book?.bookSetupProgress,
+        progress: book?.jobs,
       }
     })
   )
@@ -138,7 +142,9 @@ export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<Bo
       },
     },
     include: {
-      bookSetupProgress: true,
+      jobs: {
+        orderBy: [{ sequenceOrder: "asc" }, { chunkIndex: "asc" }],
+      },
     },
   })
 
@@ -159,7 +165,7 @@ export async function getBatchLibraryItems(libraryItemIds: string[]): Promise<Bo
         libraryId: libraryItem.libraryId,
         setup: bookMap.get(libraryItem.id)?.setup ?? false,
         model: bookMap.get(libraryItem.id)?.model ?? null,
-        progress: bookMap.get(libraryItem.id)?.bookSetupProgress,
+        progress: bookMap.get(libraryItem.id)?.jobs,
       }
     })
   )

@@ -2,12 +2,12 @@ import { getBatchLibraryItems } from "@/lib/audiobookshelf"
 import { prisma } from "@/lib/prisma"
 import { BookBasicInfo } from "@/types/api"
 import { NextResponse } from "next/server"
-import { BookSetupStatus } from "../../../../generated/prisma"
+import { JobStatus } from "../../../../generated/prisma"
 
 export async function GET(): Promise<NextResponse<BookBasicInfo[]> | NextResponse<{ error: string }>> {
   try {
-    const books = await prisma.bookSetupProgress.findMany({
-      where: { status: BookSetupStatus.Running },
+    const books = await prisma.job.findMany({
+      where: { status: JobStatus.Running },
       select: { bookId: true },
     })
 
