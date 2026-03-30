@@ -17,11 +17,9 @@ import {
   DatabaseZapIcon,
   Layers2Icon,
   LibraryBigIcon,
-  ListChecksIcon,
   LogOutIcon,
   MicIcon,
   NavigationIcon,
-  VectorSquareIcon,
   WebhookIcon,
 } from "lucide-react"
 import Link from "next/link"
@@ -77,25 +75,19 @@ const menuItems = [
         icon: AudioLinesIcon,
       },
       {
+        label: "Transcription",
+        href: "/setup/transcription",
+        icon: AudioLinesIcon,
+      },
+      {
         label: "Text-to-Speech",
         href: "/setup/tts",
         icon: MicIcon,
       },
       {
-        label: "Embedding",
-        href: "/setup/embedding",
-        icon: VectorSquareIcon,
-      },
-      {
         label: "Pushover",
         href: "/setup/pushover",
         icon: BellIcon,
-      },
-      {
-        label: "Jobs",
-        href: "/jobs",
-        icon: ListChecksIcon,
-        target: "jobs",
       },
       {
         label: "Cache",
@@ -131,7 +123,7 @@ export function NavigationMenu() {
             <DropdownMenuGroup>
               {item.children.map(child => (
                 <DropdownMenuItem key={child.label} asChild>
-                  <Link href={child.href} target={child.target}>
+                  <Link href={child.href}>
                     <child.icon className="w-4 h-4" />
                     {child.label}
                   </Link>

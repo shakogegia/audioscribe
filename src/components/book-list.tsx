@@ -12,14 +12,13 @@ type Props = {
   books: BookBasicInfo[]
 }
 
-type Stage = "pending" | "downloading" | "transcribing" | "vectorizing" | "completed" | "failed"
+type Stage = "pending" | "downloading" | "transcribing" | "completed" | "failed"
 type StageVariant = "default" | "secondary" | "destructive" | "outline"
 
 const STAGES: Record<Stage, { variant: StageVariant; label: string }> = {
   pending: { variant: "outline", label: "Pending" },
   downloading: { variant: "outline", label: "Downloading" },
   transcribing: { variant: "outline", label: "Transcribing" },
-  vectorizing: { variant: "outline", label: "Vectorizing" },
   completed: { variant: "default", label: "Ready" },
   failed: { variant: "destructive", label: "Failed" },
 }

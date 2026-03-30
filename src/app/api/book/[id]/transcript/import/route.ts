@@ -1,8 +1,6 @@
-// import { setupBook } from "@/server/jobs/queue"
 import { getBook } from "@/lib/audiobookshelf"
-import { importTranscriptFlow } from "@/server/jobs/workers/import-transcript.worker"
 import { NextRequest, NextResponse } from "next/server"
-import { TranscriptSegment } from "../../../../../../../generated/prisma"
+import { Prisma, TranscriptSegment } from "../../../../../../../generated/prisma"
 import { prisma } from "@/lib/prisma"
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -18,7 +16,35 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const model = segments[0].model
 
-    await importTranscriptFlow({ book, model, segments })
+    // Upsert book record
+    const existingBook = await prisma.book.findUnique({ where: { id: book.id } })
+    if (!existingBook) {
+      await prisma.book.create({ data: { id: book.id, model } })
+    }
+
+    // Reset book status flags
+    await prisma.book.update({
+      where: { id: book.id },
+      data: { audioProcessed: false, transcribed: false, downloaded: false },
+    })
+
+    // Create transcript segments
+    const transcriptSegments: Prisma.TranscriptSegmentUncheckedCreateInput[] = segments.map(segment => ({
+      bookId: book.id,
+      model: segment.model,
+      fileIno: segment.fileIno,
+      text: segment.text,
+      startTime: segment.startTime,
+      endTime: segment.endTime,
+    }))
+    await prisma.transcriptSegment.deleteMany({ where: { bookId: book.id } })
+    await prisma.transcriptSegment.createMany({ data: transcriptSegments })
+
+    // Mark as transcribed
+    await prisma.book.update({
+      where: { id: book.id },
+      data: { transcribed: true, audioProcessed: true },
+    })
 
     return NextResponse.json({ segments })
   } catch (error) {

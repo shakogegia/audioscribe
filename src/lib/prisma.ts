@@ -8,9 +8,9 @@ const prisma = new PrismaClient({ adapter }).$extends({
   result: {
     book: {
       ready: {
-        needs: { audioProcessed: true, transcribed: true, vectorized: true, downloaded: true },
+        needs: { audioProcessed: true, transcribed: true, downloaded: true },
         compute(book) {
-          return book.audioProcessed && book.transcribed && book.vectorized && book.downloaded
+          return book.audioProcessed && book.transcribed && book.downloaded
         },
       },
     },

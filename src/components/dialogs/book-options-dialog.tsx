@@ -235,7 +235,7 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
                 <AlertTitle>Remove Book</AlertTitle>
                 <AlertDescription>
                   <p>Remove the book from the database.</p>
-                  <p>All data will be deleted including transcript, vectorized data, and book.</p>
+                  <p>All data will be deleted including transcript and book.</p>
                   <p>This action cannot be undone.</p>
                 </AlertDescription>
               </Alert>
@@ -271,7 +271,7 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
             {activeTab === BookOptionTab.Remove && (
               <ConfirmDialog
                 title="Remove Book"
-                description="All data will be deleted including transcript, vectorized data, and book. This action cannot be undone."
+                description="All data will be deleted including transcript and book. This action cannot be undone."
                 onConfirm={onRemove}
               >
                 <Button type="button" disabled={isLoading} variant="destructive">

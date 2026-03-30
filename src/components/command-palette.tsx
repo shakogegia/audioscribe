@@ -115,14 +115,6 @@ export function CommandPalette() {
             <CogIcon />
             <span>Speech-to-Text Settings</span>
           </CommandItem>
-          <CommandItem onSelect={() => navigateTo("/setup/embedding")}>
-            <CogIcon />
-            <span>Embedding Settings</span>
-          </CommandItem>
-          <CommandItem onSelect={() => navigateTo("/jobs")}>
-            <CogIcon />
-            <span>Jobs</span>
-          </CommandItem>
           <CommandItem onSelect={() => navigateTo("/cache")}>
             <CogIcon />
             <span>Cache</span>

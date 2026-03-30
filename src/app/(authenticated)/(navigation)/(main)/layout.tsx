@@ -1,6 +1,8 @@
 import { load } from "@/lib/config"
 import { redirect } from "next/navigation"
 
+export const dynamic = "force-dynamic"
+
 type Props = Readonly<{
   children: React.ReactNode
 }>

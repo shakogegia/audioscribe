@@ -1,5 +1,5 @@
 import type * as Audiobookshelf from "@/types/audiobookshelf"
-import { BookSetupProgress } from "../../generated/prisma"
+import { Job } from "../../generated/prisma"
 
 export interface SearchResult {
   id: string
@@ -20,7 +20,7 @@ export interface SearchResult {
   setup: boolean
   ready: boolean
   model?: string | null
-  progress?: BookSetupProgress[]
+  progress?: Job[]
   favorite?: boolean
 }
 
@@ -48,5 +48,5 @@ export interface BookBasicInfo {
   setup: boolean
   model?: string | null
   favorite?: boolean
-  progress?: BookSetupProgress[]
+  progress?: Job[]
 }

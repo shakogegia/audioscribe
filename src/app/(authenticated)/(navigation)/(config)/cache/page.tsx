@@ -44,7 +44,7 @@ export default function CachePage() {
             <InfoIcon />
             <AlertTitle>Heads up!</AlertTitle>
             <AlertDescription>
-              Clearing cache will remove all files, including audiofiles, transcriptions, and vectorized data.
+              Clearing cache will remove all files, including audiofiles and transcriptions.
               <br />
               It will keep configuration for Audiobookshelf and AI providers.
             </AlertDescription>

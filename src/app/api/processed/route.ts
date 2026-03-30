@@ -6,7 +6,7 @@ import { NextResponse } from "next/server"
 export async function GET(): Promise<NextResponse<BookBasicInfo[]> | NextResponse<{ error: string }>> {
   try {
     const books = await prisma.book.findMany({
-      where: { audioProcessed: true, downloaded: true, transcribed: true, vectorized: true },
+      where: { audioProcessed: true, downloaded: true, transcribed: true },
     })
     const libraryItemIds = books.map(book => book.id)
 
