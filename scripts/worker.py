@@ -65,7 +65,9 @@ def main():
 
             if db.are_all_jobs_completed(book_id):
                 db.mark_book_setup_complete(book_id)
-                print(f"[Worker] All jobs completed for book {book_id} — setup complete!")
+                title = config.get_book_title(book_id)
+                print(f"[Worker] All jobs completed for book {title} — setup complete!")
+                config.send_notification("AudioScribe", f"✅ {title} is ready")
 
         except Exception as e:
             error_msg = f"{type(e).__name__}: {e}"

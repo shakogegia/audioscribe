@@ -61,3 +61,53 @@ def get_setting(key: str) -> str:
         return row["value"] if row else DEFAULTS.get(key, "")
     finally:
         db.close()
+
+
+def load_pushover_config():
+    """Load Pushover token and user key from config.json."""
+    config_path = os.path.join(DATA_DIR, "config.json")
+    try:
+        with open(config_path) as f:
+            cfg = json.load(f)
+            pushover = cfg.get("pushover", {})
+            return pushover.get("token"), pushover.get("user")
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None, None
+
+
+def send_notification(title: str, message: str) -> bool:
+    """Send a Pushover notification. Returns True on success."""
+    import requests
+    token, user = load_pushover_config()
+    if not token or not user:
+        return False
+    try:
+        resp = requests.post("https://api.pushover.net/1/messages.json", data={
+            "token": token,
+            "user": user,
+            "title": title,
+            "message": message,
+        }, timeout=10)
+        return resp.status_code == 200
+    except Exception as e:
+        print(f"[Worker] Failed to send notification: {e}")
+        return False
+
+
+def get_book_title(book_id: str) -> str:
+    """Fetch book title from Audiobookshelf API."""
+    import requests
+    url, api_key = load_audiobookshelf_config()
+    if not url or not api_key:
+        return book_id
+    try:
+        resp = requests.get(
+            f"{url}/audiobookshelf/api/items/{book_id}",
+            headers={"Authorization": f"Bearer {api_key}"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        item = resp.json()
+        return item.get("media", {}).get("metadata", {}).get("title", book_id)
+    except Exception:
+        return book_id
