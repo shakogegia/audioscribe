@@ -48,6 +48,7 @@ COPY --from=python /usr/local/bin /usr/local/bin
 
 # Copy runtime source files
 COPY prisma ./prisma
+COPY prisma.config.ts ./
 COPY scripts ./scripts
 COPY entrypoint.sh ./
 
