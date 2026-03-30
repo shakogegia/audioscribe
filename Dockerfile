@@ -51,6 +51,7 @@ COPY entrypoint.sh ./
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV PYTHONUNBUFFERED=1
 ENV DATABASE_URL="file:/app/data/sqlite/store.db"
 ENV DATA_DIR="/app/data"
 ENV CLEANUP_TEMP_FILES="true"

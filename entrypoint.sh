@@ -7,8 +7,8 @@ mkdir -p /app/data/sqlite /app/data/chunks
 pnpm db:generate
 pnpm db:push
 
-# Start Python worker in background
-python3 -m scripts.worker &
+# Start Python worker in background (-u for unbuffered output)
+python3 -u -m scripts.worker &
 WORKER_PID=$!
 
 # Trap signals for graceful shutdown
