@@ -23,6 +23,10 @@ def run(job: dict):
     model_name = metadata.get("model", config.get_setting("transcription.whisperModel"))
     compute_type = config.get_setting("transcription.computeType")
 
+    # Store compute_type in metadata for analytics
+    metadata["compute_type"] = compute_type
+    db.update_job_metadata(job["id"], json.dumps(metadata))
+
     chunk = db.get_audio_chunk(book_id, chunk_index)
     if not chunk:
         raise RuntimeError(f"AudioChunk not found: book={book_id} chunk={chunk_index}")

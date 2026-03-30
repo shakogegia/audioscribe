@@ -69,6 +69,19 @@ def update_job_progress(job_id: str, progress: float):
         db.close()
 
 
+def update_job_metadata(job_id: str, metadata: str):
+    """Update job metadata JSON."""
+    db = get_db()
+    try:
+        db.execute(
+            "UPDATE Job SET metadata = ?, updatedAt = datetime('now') WHERE id = ?",
+            (metadata, job_id),
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
 def complete_job(job_id: str):
     """Mark job as completed."""
     db = get_db()
