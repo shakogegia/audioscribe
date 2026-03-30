@@ -12,6 +12,10 @@ See [Youtube Demo](https://youtu.be/zyr6M5ebI38)
 
 <img alt="screenshot" src="https://github.com/user-attachments/assets/bb617e0a-310c-4235-9d7b-49bf59cd6506" />
 
+## iOS Shortcuts
+<img width="1179" height="790" alt="image" src="https://github.com/user-attachments/assets/d4009e32-2277-4678-b06c-ef968991f601" />
+
+
 ## Features
 
 - **Library Integration**: Seamless connection with Audiobookshelf servers for book management and progress syncing
