@@ -29,6 +29,10 @@ model Book {
   transcriptSegment TranscriptSegment[]
   bookSetupProgress BookSetupProgress[]
   chapterSummaries  ChapterSummary[]
+
+  // new relations
+  jobs        Job[]
+  audioChunks AudioChunk[]
 }
 
 model TranscriptSegment {
@@ -72,6 +76,7 @@ model BookSetupProgress {
 enum BookSetupStage {
   Download
   ProcessAudio
+  Chunk
   Transcribe
   Vectorize
 }
@@ -81,6 +86,66 @@ enum BookSetupStatus {
   Running
   Completed
   Failed
+}
+
+enum JobType {
+  Download
+  ProcessAudio
+  Chunk
+  Transcribe
+  Vectorize
+}
+
+enum JobStatus {
+  Pending
+  Running
+  Completed
+  Failed
+}
+
+model Job {
+  id            String    @id @default(cuid())
+  bookId        String
+  type          JobType
+  status        JobStatus @default(Pending)
+  progress      Float     @default(0)
+  error         String?
+  metadata      String?
+  chunkIndex    Int?
+  totalChunks   Int?
+  sequenceOrder Int       @default(0)
+  attempts      Int       @default(0)
+  maxAttempts   Int       @default(2)
+  createdAt     DateTime  @default(now())
+  startedAt     DateTime?
+  completedAt   DateTime?
+  updatedAt     DateTime  @updatedAt
+
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@index([bookId])
+  @@index([status, sequenceOrder])
+}
+
+model AudioChunk {
+  id         String @id @default(cuid())
+  bookId     String
+  chunkIndex Int
+  filePath   String
+  startTime  Float
+  endTime    Float
+  duration   Float
+
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@unique([bookId, chunkIndex])
+  @@index([bookId])
+}
+
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model ChatQuickQuestion {
