@@ -270,7 +270,7 @@ export function Stage({
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Current: chunk {completedChunks + 1}/{totalChunks}</span>
+                <span>Chunk {completedChunks + 1}</span>
                 <span>{currentChunkProgress.toFixed(0)}%</span>
               </div>
               <Progress value={currentChunkProgress} className="h-1.5" />
