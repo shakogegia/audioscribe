@@ -77,7 +77,7 @@ const menuItems = [
       {
         label: "Transcription",
         href: "/setup/transcription",
-        icon: CogIcon,
+        icon: AudioLinesIcon,
       },
       {
         label: "Text-to-Speech",

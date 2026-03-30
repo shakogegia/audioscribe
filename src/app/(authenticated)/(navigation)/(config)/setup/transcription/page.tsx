@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AudioLines, Loader2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -22,6 +22,7 @@ const WHISPER_MODELS = [
 ]
 
 const COMPUTE_TYPES = [
+  { value: "auto", label: "auto (recommended)" },
   { value: "int8", label: "int8 (fastest, least memory)" },
   { value: "float16", label: "float16 (balanced)" },
   { value: "float32", label: "float32 (most accurate)" },
@@ -32,7 +33,7 @@ export default function TranscriptionSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [chunkDuration, setChunkDuration] = useState("300")
   const [whisperModel, setWhisperModel] = useState("large-v3")
-  const [computeType, setComputeType] = useState("int8")
+  const [computeType, setComputeType] = useState("auto")
 
   useEffect(() => {
     axios.get("/api/settings").then(({ data }) => {
@@ -108,11 +109,14 @@ export default function TranscriptionSettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {WHISPER_MODELS.map(m => (
-                    <SelectItem key={m.value} value={m.value}>
-                      {m.label} ({m.size})
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    <SelectLabel>Models</SelectLabel>
+                    {WHISPER_MODELS.map(m => (
+                      <SelectItem key={m.value} value={m.value}>
+                        {m.label} ({m.size})
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
@@ -127,11 +131,14 @@ export default function TranscriptionSettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {COMPUTE_TYPES.map(c => (
-                    <SelectItem key={c.value} value={c.value}>
-                      {c.label}
-                    </SelectItem>
-                  ))}
+                  <SelectGroup>
+                    <SelectLabel>Compute Type</SelectLabel>
+                    {COMPUTE_TYPES.map(c => (
+                      <SelectItem key={c.value} value={c.value}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
                 </SelectContent>
               </Select>
             </Field>

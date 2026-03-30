@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server"
 const DEFAULTS: Record<string, string> = {
   "transcription.chunkDuration": "300",
   "transcription.whisperModel": "large-v3",
-  "transcription.computeType": "int8",
+  "transcription.computeType": "auto",
 }
 
 export async function GET() {

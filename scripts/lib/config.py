@@ -29,7 +29,7 @@ STAGE_FLAG = {
 DEFAULTS = {
     "transcription.chunkDuration": "300",
     "transcription.whisperModel": "large-v3",
-    "transcription.computeType": "int8",
+    "transcription.computeType": "auto",
 }
 
 
