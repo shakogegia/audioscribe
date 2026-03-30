@@ -273,7 +273,7 @@ export function Stage({
                 <span>Chunk {completedChunks + 1}</span>
                 <span>{currentChunkProgress.toFixed(0)}%</span>
               </div>
-              <Progress value={currentChunkProgress} className="h-1.5" />
+              <Progress value={currentChunkProgress} />
             </div>
           </div>
         )}
