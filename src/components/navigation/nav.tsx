@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   AudioLinesIcon,
+  BarChart3Icon,
   BellIcon,
   BrainCircuitIcon,
   BrainIcon,
@@ -53,6 +54,16 @@ const menuItems = [
         label: "Endpoints",
         href: "/ios/endpoints",
         icon: WebhookIcon,
+      },
+    ],
+  },
+  {
+    label: "Analytics",
+    children: [
+      {
+        label: "Stats",
+        href: "/stats",
+        icon: BarChart3Icon,
       },
     ],
   },
