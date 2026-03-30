@@ -18,7 +18,7 @@ import { toast } from "sonner"
 import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
 import { Progress } from "@/components/ui/progress"
-import { Book, BookSetupProgress, BookSetupStage, BookSetupStatus } from "../../../../../../../../generated/prisma"
+import { Book } from "../../../../../../../../generated/prisma"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 type ProcessingInfoProps = {
@@ -26,21 +26,31 @@ type ProcessingInfoProps = {
   revalidate: (id: string) => void
 }
 
+type StageInfo = {
+  stage: string
+  status: string
+  progress: number
+  error: string | null
+  startedAt: string | null
+  completedAt: string | null
+  totalChunks: number
+  completedChunks: number
+}
+
 type ProgressResponse = {
-  stages: BookSetupProgress[]
-  currentStage: BookSetupProgress | null
-  progress: BookSetupProgress | null // Legacy support
+  stages: StageInfo[]
+  currentStage: StageInfo | null
   book: Book | null
 }
 
 export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
   const { data } = useSWR<ProgressResponse>(`/api/book/${book.id}/setup/progress`, {
-    refreshInterval: 1000,
+    refreshInterval: 2000,
     revalidateOnFocus: false,
   })
 
   // const allCompleted = data?.stages.every(s => s.status === "completed")
-  const hasFailed = data?.stages.some(s => s.status === BookSetupStatus.Failed)
+  const hasFailed = data?.stages.some(s => s.status === "Failed")
 
   // TODO: use setup true
   // useEffect(() => {
@@ -75,10 +85,6 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
     }
   }, [data?.book?.setup, revalidate, book.id])
 
-  const runningStage = data?.currentStage?.stage
-  const completedStages = data?.stages.filter(s => s.status === BookSetupStatus.Completed)
-  const failedStages = data?.stages.filter(s => s.status === BookSetupStatus.Failed)
-
   async function retry() {
     if (!book.model) {
       toast.error("Book model is not set")
@@ -95,36 +101,29 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
 
   const stages = [
     {
-      stage: BookSetupStage.Download,
+      stage: "Download",
       title: "Download",
-      description: `Download book from Audiobookshelf and save it to the local cache folder.
-                  <br />
-                  Fastest stage, can be completed in a few seconds if Audiobookshelf is locally hosted.`,
+      description: "Download book from Audiobookshelf and save it to the local cache.",
     },
     {
-      stage: BookSetupStage.ProcessAudio,
+      stage: "ProcessAudio",
       title: "Process Audio",
-      description: `Process the audio file to prepare it for transcription, stitching multiple audio files if needed. and
-                  converting to WAV format.
-                  <br />
-                  Can be completed in a few minutes, depending on the size of the book and the number of audio files.`,
+      description: "Stitch and preprocess audio files for transcription.",
     },
     {
-      stage: BookSetupStage.Transcribe,
+      stage: "Chunk",
+      title: "Chunk Audio",
+      description: "Split audio into chunks for resumable transcription.",
+    },
+    {
+      stage: "Transcribe",
       title: "Transcribe",
-      description: `Transcribe the whole book using <span className="font-medium inline">${
-        data?.book?.model || "Unknown"
-      }</span> model and save the transcript to the database.
-                  <br />
-                  Slowest stage, depending on the size of the book and the model used.`,
+      description: `Transcribe using <span class="font-medium">${data?.book?.model || "Unknown"}</span> model.`,
     },
     {
-      stage: BookSetupStage.Vectorize,
+      stage: "Vectorize",
       title: "Vectorize",
-      description: `Vectorize the book and save the chunks to the vector database. This will allow you to ask questions
-                  about the book.
-                  <br />
-                  Second fastest stage, can be completed in a max of few minutes.`,
+      description: "Create embeddings for AI-powered search and chat.",
     },
   ]
 
@@ -152,12 +151,14 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                   <Fragment key={stage.stage}>
                     <Stage
                       title={`Step ${index + 1}: ${stage.title}`}
-                      isRunning={runningStage === stage.stage}
-                      isCompleted={completedStages?.some(s => s.stage === stage.stage) ?? false}
-                      isFailed={failedStages?.some(s => s.stage === stage.stage) ?? false}
+                      isRunning={data?.currentStage?.stage === stage.stage}
+                      isCompleted={data?.stages?.some(s => s.stage === stage.stage && s.status === "Completed") ?? false}
+                      isFailed={data?.stages?.some(s => s.stage === stage.stage && s.status === "Failed") ?? false}
                       progress={data?.stages?.find(s => s.stage === stage.stage)?.progress}
                       startedAt={data?.stages?.find(s => s.stage === stage.stage)?.startedAt}
                       error={data?.stages?.find(s => s.stage === stage.stage)?.error}
+                      totalChunks={data?.stages?.find(s => s.stage === stage.stage)?.totalChunks ?? 0}
+                      completedChunks={data?.stages?.find(s => s.stage === stage.stage)?.completedChunks ?? 0}
                       isFirst={index === 0}
                       isLast={index === stages.length - 1}
                     >
@@ -191,8 +192,10 @@ type StageProps = {
   progress?: number
   isFirst: boolean
   isLast: boolean
-  startedAt?: Date | null
+  startedAt?: Date | string | null
   error?: string | null
+  totalChunks?: number
+  completedChunks?: number
 }
 export function Stage({
   title,
@@ -205,6 +208,8 @@ export function Stage({
   isLast,
   startedAt,
   error,
+  totalChunks = 0,
+  completedChunks = 0,
 }: StageProps) {
   const estimated = useMemo(() => {
     if (!startedAt || !progress || progress <= 0) return null
@@ -266,9 +271,13 @@ export function Stage({
             </TooltipTrigger>
             <TooltipContent>
               {progress !== undefined && <p>Progress: {progress.toFixed(2)}%</p>}
-              {estimated && <p>Estimated time to complete in: {estimated}</p>}
+              {totalChunks > 0 && <p>Chunks: {completedChunks}/{totalChunks}</p>}
+              {estimated && <p>Estimated: {estimated}</p>}
             </TooltipContent>
           </Tooltip>
+        )}
+        {isCompleted && totalChunks > 0 && (
+          <p className="text-xs text-muted-foreground mt-1">{totalChunks} chunks transcribed</p>
         )}
 
         {error && (
