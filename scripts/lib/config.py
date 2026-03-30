@@ -12,16 +12,14 @@ CHUNKS_DIR = os.path.join(DATA_DIR, "chunks")
 # Job type to sequence order mapping
 SEQUENCE_ORDER = {
     "Download": 0,
-    "ProcessAudio": 1,
-    "Chunk": 2,
-    "Transcribe": 3,
+    "PrepareAudio": 1,
+    "Transcribe": 2,
 }
 
-# Stage to Book flag mapping (matches setup.worker.ts STAGE_FLAG)
+# Stage to Book flag mapping
 STAGE_FLAG = {
     "Download": "downloaded",
-    "ProcessAudio": "audioProcessed",
-    "Chunk": "audioProcessed",
+    "PrepareAudio": "audioProcessed",
     "Transcribe": "transcribed",
 }
 

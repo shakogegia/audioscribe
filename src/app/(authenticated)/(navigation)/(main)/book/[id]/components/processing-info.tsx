@@ -104,14 +104,9 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
       description: "Download book from Audiobookshelf and save it to the local cache.",
     },
     {
-      stage: "ProcessAudio",
-      title: "Process Audio",
-      description: "Stitch and preprocess audio files for transcription.",
-    },
-    {
-      stage: "Chunk",
-      title: "Chunk Audio",
-      description: "Split audio into chunks for resumable transcription.",
+      stage: "PrepareAudio",
+      title: "Prepare Audio",
+      description: "Stitch, preprocess, and split audio into chunks for transcription.",
     },
     {
       stage: "Transcribe",

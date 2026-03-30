@@ -168,7 +168,7 @@ def create_transcribe_jobs(book_id: str, model: str, total_chunks: int):
             job_id = hashlib.sha256(f"{book_id}-transcribe-{i}-{time.time()}".encode()).hexdigest()[:25]
             db.execute(
                 """INSERT INTO Job (id, bookId, type, status, sequenceOrder, chunkIndex, totalChunks, metadata, updatedAt)
-                   VALUES (?, ?, 'Transcribe', 'Pending', 3, ?, ?, ?, datetime('now'))""",
+                   VALUES (?, ?, 'Transcribe', 'Pending', 2, ?, ?, ?, datetime('now'))""",
                 (job_id, book_id, i, total_chunks, json.dumps({"model": model})),
             )
         db.commit()

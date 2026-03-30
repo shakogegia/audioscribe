@@ -123,7 +123,7 @@ export function NavigationMenu() {
             <DropdownMenuGroup>
               {item.children.map(child => (
                 <DropdownMenuItem key={child.label} asChild>
-                  <Link href={child.href} target={child.target}>
+                  <Link href={child.href}>
                     <child.icon className="w-4 h-4" />
                     {child.label}
                   </Link>

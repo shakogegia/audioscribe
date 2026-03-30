@@ -4,14 +4,13 @@ import { JobStatus, JobType } from "../../../../../../generated/prisma"
 
 const STAGE_ORDER: { type: JobType; sequenceOrder: number }[] = [
   { type: JobType.Download, sequenceOrder: 0 },
-  { type: JobType.ProcessAudio, sequenceOrder: 1 },
-  { type: JobType.Chunk, sequenceOrder: 2 },
-  // Transcribe jobs (sequenceOrder 3) are created dynamically by the chunk worker
+  { type: JobType.PrepareAudio, sequenceOrder: 1 },
+  // Transcribe jobs (sequenceOrder 2) are created dynamically by PrepareAudio
 ]
 
 const TYPE_FLAG: Record<string, string> = {
   Download: "downloaded",
-  ProcessAudio: "audioProcessed",
+  PrepareAudio: "audioProcessed",
   Transcribe: "transcribed",
 }
 

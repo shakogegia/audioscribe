@@ -1,17 +1,15 @@
 """AudioScribe Python Worker — polls SQLite Job table and executes pipeline stages."""
 
 import signal
-import sys
 import time
 import traceback
 
 from scripts.lib import db, config
-from scripts.lib import download, audio, chunk, transcribe
+from scripts.lib import download, prepare, transcribe
 
 HANDLERS = {
     "Download": download.run,
-    "ProcessAudio": audio.run,
-    "Chunk": chunk.run,
+    "PrepareAudio": prepare.run,
     "Transcribe": transcribe.run,
 }
 
