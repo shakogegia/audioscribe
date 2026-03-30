@@ -17,11 +17,9 @@ import {
   DatabaseZapIcon,
   Layers2Icon,
   LibraryBigIcon,
-  ListChecksIcon,
   LogOutIcon,
   MicIcon,
   NavigationIcon,
-  VectorSquareIcon,
   WebhookIcon,
 } from "lucide-react"
 import Link from "next/link"
@@ -82,20 +80,9 @@ const menuItems = [
         icon: MicIcon,
       },
       {
-        label: "Embedding",
-        href: "/setup/embedding",
-        icon: VectorSquareIcon,
-      },
-      {
         label: "Pushover",
         href: "/setup/pushover",
         icon: BellIcon,
-      },
-      {
-        label: "Jobs",
-        href: "/jobs",
-        icon: ListChecksIcon,
-        target: "jobs",
       },
       {
         label: "Cache",
