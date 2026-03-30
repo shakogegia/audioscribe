@@ -1,84 +1,38 @@
 "use client"
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts"
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { StatsData } from "../actions"
 
-interface ProcessingBreakdownChartProps {
-  data: StatsData["processingBreakdown"]
-}
-
 const chartConfig = {
-  download: {
-    label: "Download",
-    color: "var(--chart-1)",
-  },
-  prepare: {
-    label: "Prepare",
-    color: "var(--chart-2)",
-  },
-  transcribe: {
-    label: "Transcribe",
-    color: "var(--chart-3)",
-  },
+  download: { label: "Download", color: "var(--chart-1)" },
+  prepare: { label: "Prepare", color: "var(--chart-2)" },
+  transcribe: { label: "Transcribe", color: "var(--chart-3)" },
 } satisfies ChartConfig
 
-export function ProcessingBreakdownChart({ data }: ProcessingBreakdownChartProps) {
+export function ProcessingBreakdownChart({ data }: { data: StatsData["processingBreakdown"] }) {
   if (data.length === 0) return null
 
   return (
-    <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-      <BarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-        <XAxis type="number" unit="min" />
-        <YAxis
-          type="category"
-          dataKey="bookTitle"
-          width={150}
-          tick={{ fontSize: 12 }}
-          tickLine={false}
-        />
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar
-          dataKey="download"
-          stackId="a"
-          fill="var(--chart-1)"
-          name="Download"
-          radius={[0, 0, 0, 0]}
-        />
-        <Bar
-          dataKey="prepare"
-          stackId="a"
-          fill="var(--chart-2)"
-          name="Prepare"
-          radius={[0, 0, 0, 0]}
-        />
-        <Bar
-          dataKey="transcribe"
-          stackId="a"
-          fill="var(--chart-3)"
-          name="Transcribe"
-          radius={[0, 4, 4, 0]}
-        />
-      </BarChart>
-    </ChartContainer>
+    <Card>
+      <CardHeader>
+        <CardTitle>Processing Time Breakdown</CardTitle>
+        <CardDescription>Time spent per stage (minutes)</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+          <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
+            <CartesianGrid horizontal={false} />
+            <XAxis type="number" tickFormatter={v => `${v}m`} />
+            <YAxis type="category" dataKey="bookTitle" width={150} tick={{ fontSize: 12 }} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Bar dataKey="download" stackId="a" fill="var(--color-download)" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="prepare" stackId="a" fill="var(--color-prepare)" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="transcribe" stackId="a" fill="var(--color-transcribe)" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   )
 }

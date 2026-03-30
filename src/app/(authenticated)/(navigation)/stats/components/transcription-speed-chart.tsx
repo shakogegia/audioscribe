@@ -1,38 +1,20 @@
 "use client"
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ReferenceLine,
-  Tooltip,
-} from "recharts"
-import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, Tooltip } from "recharts"
+import { ChartConfig, ChartContainer } from "@/components/ui/chart"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { StatsData } from "../actions"
 
-interface TranscriptionSpeedChartProps {
-  data: StatsData["transcriptionSpeed"]
-}
-
 const chartConfig = {
-  rtf: {
-    label: "RTF",
-    color: "var(--chart-1)",
-  },
+  rtf: { label: "RTF", color: "var(--chart-1)" },
 } satisfies ChartConfig
-
-interface TooltipPayloadEntry {
-  payload: StatsData["transcriptionSpeed"][number]
-}
 
 function CustomTooltip({
   active,
   payload,
 }: {
   active?: boolean
-  payload?: TooltipPayloadEntry[]
+  payload?: Array<{ payload: StatsData["transcriptionSpeed"][number] }>
 }) {
   if (!active || !payload || payload.length === 0) return null
 
@@ -56,29 +38,29 @@ function CustomTooltip({
   )
 }
 
-export function TranscriptionSpeedChart({ data }: TranscriptionSpeedChartProps) {
+export function TranscriptionSpeedChart({ data }: { data: StatsData["transcriptionSpeed"] }) {
   if (data.length === 0) return null
 
   return (
-    <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-      <BarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-        <XAxis type="number" />
-        <YAxis
-          type="category"
-          dataKey="bookTitle"
-          width={150}
-          tick={{ fontSize: 12 }}
-          tickLine={false}
-        />
-        <ReferenceLine x={1} stroke="var(--muted-foreground)" strokeDasharray="4 4" label={{ value: "1x", position: "insideTopRight", fontSize: 11 }} />
-        <Tooltip content={<CustomTooltip />} />
-        <Bar dataKey="rtf" fill="var(--chart-1)" name="RTF" radius={[0, 4, 4, 0]} />
-      </BarChart>
-    </ChartContainer>
+    <Card>
+      <CardHeader>
+        <CardTitle>Transcription Speed</CardTitle>
+        <CardDescription>
+          Real-Time Factor — higher is faster (e.g. 5x = 1h audio in 12min)
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+          <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
+            <CartesianGrid horizontal={false} />
+            <XAxis type="number" tickFormatter={v => `${v}x`} />
+            <YAxis type="category" dataKey="bookTitle" width={150} tick={{ fontSize: 12 }} />
+            <ReferenceLine x={1} stroke="var(--muted-foreground)" strokeDasharray="3 3" />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="rtf" fill="var(--color-rtf)" radius={[0, 4, 4, 0]} />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+    </Card>
   )
 }

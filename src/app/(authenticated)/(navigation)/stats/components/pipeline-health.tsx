@@ -78,10 +78,11 @@ export function PipelineHealth({ data }: PipelineHealthProps) {
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="stage" tick={{ fontSize: 12 }} />
                 <YAxis unit="%" tick={{ fontSize: 12 }} />
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <Tooltip
-                  formatter={(value: number, _name: string, props: { payload?: { total?: number; failed?: number } }) => {
-                    const { total = 0, failed = 0 } = props.payload ?? {}
-                    return [`${value.toFixed(1)}% (${failed}/${total})`, "Failure Rate"]
+                  formatter={(value: any, _name: any, props: any) => {
+                    const { total = 0, failed = 0 } = props?.payload ?? {}
+                    return [`${Number(value).toFixed(1)}% (${failed}/${total})`, "Failure Rate"]
                   }}
                 />
                 <Bar dataKey="rate" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
