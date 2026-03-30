@@ -1,29 +1,73 @@
 import { prisma } from "@/lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
-import { BookSetupStatus } from "../../../../../../../generated/prisma"
+import { JobStatus } from "../../../../../../../generated/prisma"
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id: bookId } = await params
 
-    const stages = await prisma.bookSetupProgress.findMany({
+    const jobs = await prisma.job.findMany({
       where: { bookId },
-      orderBy: { createdAt: "asc" },
+      orderBy: [{ sequenceOrder: "asc" }, { chunkIndex: "asc" }],
     })
 
-    if (!stages.length) {
+    if (!jobs.length) {
       return NextResponse.json({ stages: [], currentStage: null })
     }
 
-    const currentStage = stages.find(s => s.status === BookSetupStatus.Running)
+    // Group jobs by type for stage-level summary
+    const stageMap = new Map<string, { status: string; progress: number; error: string | null; startedAt: Date | null; completedAt: Date | null; totalChunks: number; completedChunks: number }>()
 
+    for (const job of jobs) {
+      const existing = stageMap.get(job.type)
+      if (!existing) {
+        stageMap.set(job.type, {
+          status: job.status,
+          progress: job.progress,
+          error: job.error,
+          startedAt: job.startedAt,
+          completedAt: job.completedAt,
+          totalChunks: job.type === "Transcribe" ? 1 : 0,
+          completedChunks: job.type === "Transcribe" && job.status === JobStatus.Completed ? 1 : 0,
+        })
+      } else if (job.type === "Transcribe") {
+        // Aggregate transcribe chunk jobs
+        existing.totalChunks++
+        if (job.status === JobStatus.Completed) {
+          existing.completedChunks++
+        }
+        if (job.status === JobStatus.Running) {
+          existing.status = "Running"
+          existing.progress = job.progress
+          existing.startedAt = existing.startedAt || job.startedAt
+        }
+        if (job.status === JobStatus.Failed) {
+          existing.status = "Failed"
+          existing.error = job.error
+        }
+        // Calculate overall transcribe progress from chunks
+        if (existing.totalChunks > 0) {
+          existing.progress = Math.round((existing.completedChunks / existing.totalChunks) * 100 * 100) / 100
+        }
+      }
+    }
+
+    // Convert to array format
+    const stages = Array.from(stageMap.entries()).map(([type, data]) => ({
+      stage: type,
+      status: data.status,
+      progress: data.progress,
+      error: data.error,
+      startedAt: data.startedAt,
+      completedAt: data.completedAt,
+      totalChunks: data.totalChunks,
+      completedChunks: data.completedChunks,
+    }))
+
+    const currentStage = stages.find(s => s.status === "Running") || null
     const book = await prisma.book.findUnique({ where: { id: bookId } })
 
-    return NextResponse.json({
-      stages,
-      currentStage,
-      book,
-    })
+    return NextResponse.json({ stages, currentStage, book })
   } catch (error) {
     console.error("Setup progress API error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
