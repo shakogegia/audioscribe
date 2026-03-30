@@ -17,8 +17,8 @@ RUN pnpm prune --prod
 FROM python:3.12-slim AS python
 RUN pip install --no-cache-dir \
     "faster-whisper>=1.1.0" \
-    "piper-tts==1.2.0" \
-    "requests>=2.32.0"
+    "requests>=2.32.0" \
+    && pip install --no-cache-dir "piper-tts==1.2.0" || true
 
 # Stage 4: Runtime
 FROM node:24-slim AS runtime
