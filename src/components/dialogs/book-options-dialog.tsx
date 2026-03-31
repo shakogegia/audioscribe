@@ -51,13 +51,15 @@ export function BookOptionsDialog({ title, children, book, tabs, defaultTab }: B
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null)
 
   async function onConfirm() {
-    setIsLoading(true)
-    toast.loading("Sending a request", { id: "setup-book" })
-    await axios.post(`/api/book/${book.id}/setup`, {})
-    toast.success("Request sent", { id: "setup-book" })
-    setIsLoading(false)
     setOpen(false)
     router.push(`/book/${book.id}`)
+    toast.loading("Starting setup...", { id: "setup-book" })
+    try {
+      await axios.post(`/api/book/${book.id}/setup`, {})
+      toast.success("Setup started", { id: "setup-book" })
+    } catch {
+      toast.error("Failed to start setup", { id: "setup-book" })
+    }
   }
 
   async function onExportTranscript() {
