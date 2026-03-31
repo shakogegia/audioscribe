@@ -1,12 +1,22 @@
 import {
+  AudioLinesIcon,
+  BadgeInfo,
+  BarChart3Icon,
+  BellIcon,
   BookOpenCheckIcon,
+  BrainCircuitIcon,
   BrainIcon,
   CircleDashedIcon,
-  CogIcon,
+  DatabaseZapIcon,
   HomeIcon,
+  Layers2Icon,
+  LibraryBigIcon,
+  MicIcon,
   MoonIcon,
+  NavigationIcon,
   StarIcon,
   SunIcon,
+  WebhookIcon,
 } from "lucide-react"
 
 import {
@@ -94,20 +104,61 @@ export function CommandPalette() {
             <BrainIcon />
             <span>Prompts</span>
           </CommandItem>
+          <CommandItem onSelect={() => navigateTo("/prompts/suggestions")}>
+            <NavigationIcon />
+            <span>Suggestions</span>
+          </CommandItem>
         </CommandGroup>
         <CommandSeparator />
-        <CommandGroup heading="Settings">
+        <CommandGroup heading="iOS">
+          <CommandItem onSelect={() => navigateTo("/ios/shortcuts")}>
+            <Layers2Icon />
+            <span>Shortcuts</span>
+          </CommandItem>
+          <CommandItem onSelect={() => navigateTo("/ios/endpoints")}>
+            <WebhookIcon />
+            <span>Endpoints</span>
+          </CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Analytics">
+          <CommandItem onSelect={() => navigateTo("/stats")}>
+            <BarChart3Icon />
+            <span>Stats</span>
+          </CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Configuration">
           <CommandItem onSelect={() => navigateTo("/setup/audiobookshelf")}>
-            <CogIcon />
-            <span>Audiobookshelf Settings</span>
+            <LibraryBigIcon />
+            <span>Audiobookshelf</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/setup/llm")}>
-            <CogIcon />
-            <span>LLM Settings</span>
+            <BrainCircuitIcon />
+            <span>AI Providers</span>
+          </CommandItem>
+          <CommandItem onSelect={() => navigateTo("/setup/transcription")}>
+            <AudioLinesIcon />
+            <span>Transcription</span>
+          </CommandItem>
+          <CommandItem onSelect={() => navigateTo("/setup/tts")}>
+            <MicIcon />
+            <span>Text-to-Speech</span>
+          </CommandItem>
+          <CommandItem onSelect={() => navigateTo("/setup/pushover")}>
+            <BellIcon />
+            <span>Pushover</span>
           </CommandItem>
           <CommandItem onSelect={() => navigateTo("/cache")}>
-            <CogIcon />
+            <DatabaseZapIcon />
             <span>Cache</span>
+          </CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
+        <CommandGroup heading="Other">
+          <CommandItem onSelect={() => navigateTo("/about")}>
+            <BadgeInfo />
+            <span>About</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>

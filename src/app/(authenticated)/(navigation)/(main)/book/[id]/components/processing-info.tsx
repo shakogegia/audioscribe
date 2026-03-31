@@ -10,10 +10,10 @@ import {
   CircleXIcon,
   ClockIcon,
   InfoIcon,
-  Loader2Icon,
   RefreshCcwIcon,
 } from "lucide-react"
 import { Fragment, useEffect, useMemo } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 import useSWR from "swr"
 import { twMerge } from "tailwind-merge"
@@ -120,31 +120,51 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
   return (
     <div className="mx-auto w-full">
       <div className="grid w-full max-w-xl items-start gap-8 mx-auto">
-        {data?.queued ? (
-          <Alert>
-            <ClockIcon />
-            <AlertTitle>Queued</AlertTitle>
-            <AlertDescription>
-              Another book is currently being processed. This book will start automatically once it&apos;s done.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <Alert>
-            <InfoIcon />
-            <AlertTitle>Book is being processed</AlertTitle>
-            <AlertDescription>
-              Book is setting up and will be ready in a few minutes. <br /> You can leave this page and come back later.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="flex flex-col gap-2">
-          {!data ? (
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <Loader2Icon className="w-4 h-4 animate-spin" /> Loading...
+        {!data ? (
+          <>
+            <div className="border rounded-lg p-4 flex gap-3">
+              <Skeleton className="h-5 w-5 rounded-full shrink-0" />
+              <div className="flex flex-col gap-2 flex-1">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-full" />
+              </div>
             </div>
-          ) : (
-            <>
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-4 w-48" />
+              <div className="border rounded-lg overflow-hidden flex flex-col">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="flex items-start gap-3 p-4 border-b last:border-b-0">
+                    <Skeleton className="h-5 w-5 rounded-full shrink-0 mt-0.5" />
+                    <div className="flex flex-col gap-2 flex-1">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {data.queued ? (
+              <Alert>
+                <ClockIcon />
+                <AlertTitle>Queued</AlertTitle>
+                <AlertDescription>
+                  Another book is currently being processed. This book will start automatically once it&apos;s done.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert>
+                <InfoIcon />
+                <AlertTitle>Book is being processed</AlertTitle>
+                <AlertDescription>
+                  Book is setting up and will be ready in a few minutes. <br /> You can leave this page and come back later.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex flex-col gap-2">
               <p className="text-sm font-medium">Steps to process book:</p>
               <div className="[&_div]:border-transparent border rounded-lg overflow-hidden">
                 {stages.map((stage, index) => (
@@ -169,15 +189,15 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
                   </Fragment>
                 ))}
               </div>
-            </>
-          )}
-        </div>
+            </div>
 
-        {hasFailed && (
-          <Button onClick={retry}>
-            <RefreshCcwIcon className="w-4 h-4" />
-            Retry
-          </Button>
+            {hasFailed && (
+              <Button onClick={retry}>
+                <RefreshCcwIcon className="w-4 h-4" />
+                Retry
+              </Button>
+            )}
+          </>
         )}
       </div>
     </div>
