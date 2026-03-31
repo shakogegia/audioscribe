@@ -10,6 +10,9 @@ export interface StatsData {
     medianRtf: number
     successRate: number
   }
+  benchmarks: {
+    averageBookAudioMinutes: number
+  }
   processingBreakdown: Array<{
     bookId: string
     bookTitle: string
@@ -30,6 +33,8 @@ export interface StatsData {
     bookCount: number
     avgRtf: number
     medianRtf: number
+    minutesPerAudioHour: number
+    estimatedAverageBookMinutes: number
     totalHours: number
   }>
   pipelineHealth: {
@@ -60,6 +65,17 @@ function median(values: number[]): number {
 function jobDurationMinutes(job: { startedAt: Date | null; completedAt: Date | null }): number {
   if (!job.startedAt || !job.completedAt) return 0
   return (job.completedAt.getTime() - job.startedAt.getTime()) / 60000
+}
+
+function getJobModel(metadata: string | null): string {
+  if (!metadata) return "unknown"
+
+  try {
+    const meta = JSON.parse(metadata) as { model?: string }
+    return meta.model ?? "unknown"
+  } catch {
+    return "unknown"
+  }
 }
 
 export async function getTranscriptionStats(): Promise<StatsData> {
@@ -99,6 +115,10 @@ export async function getTranscriptionStats(): Promise<StatsData> {
 
   // --- Overview ---
   const booksTranscribed = books.length
+
+  const averageBookAudioMinutes = books.length > 0
+    ? books.reduce((sum, book) => sum + ((durationMap.get(book.id) ?? 0) / 60), 0) / books.length
+    : 0
 
   const audioHoursProcessed =
     books.reduce((sum, book) => {
@@ -178,16 +198,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
       const rtf = audioDurationMinutes / totalTranscribeMinutes
 
       // Get model from first transcribe job metadata
-      let model = "unknown"
-      const firstTranscribeJob = transcribeJobs[0]
-      if (firstTranscribeJob.metadata) {
-        try {
-          const meta = JSON.parse(firstTranscribeJob.metadata) as { model?: string }
-          model = meta.model ?? "unknown"
-        } catch {
-          // ignore parse errors
-        }
-      }
+      const model = getJobModel(transcribeJobs[0]?.metadata ?? null)
 
       return [
         {
@@ -226,16 +237,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
       (durationMap.get(book.id) ?? 0) / 60
     const rtf = audioDurationMinutes / totalTranscribeMinutes
 
-    let model = "unknown"
-    const firstTranscribeJob = transcribeJobs[0]
-    if (firstTranscribeJob.metadata) {
-      try {
-        const meta = JSON.parse(firstTranscribeJob.metadata) as { model?: string }
-        model = meta.model ?? "unknown"
-      } catch {
-        // ignore parse errors
-      }
-    }
+    const model = getJobModel(transcribeJobs[0]?.metadata ?? null)
 
     if (!modelMap.has(model)) {
       modelMap.set(model, { bookCount: 0, rtfs: [], totalAudioMinutes: 0 })
@@ -246,13 +248,24 @@ export async function getTranscriptionStats(): Promise<StatsData> {
     stats.totalAudioMinutes += audioDurationMinutes
   }
 
-  const modelUsage = Array.from(modelMap.entries()).map(([model, stats]) => ({
-    model,
-    bookCount: stats.bookCount,
-    avgRtf: Math.round((stats.rtfs.reduce((s, v) => s + v, 0) / stats.rtfs.length) * 100) / 100,
-    medianRtf: Math.round(median(stats.rtfs) * 100) / 100,
-    totalHours: Math.round((stats.totalAudioMinutes / 60) * 10) / 10,
-  }))
+  const modelUsage = Array.from(modelMap.entries())
+    .map(([model, stats]) => {
+      const avgRtf = stats.rtfs.reduce((sum, value) => sum + value, 0) / stats.rtfs.length
+      const medianRtf = median(stats.rtfs)
+      const minutesPerAudioHour = avgRtf > 0 ? 60 / avgRtf : 0
+      const estimatedAverageBookMinutes = avgRtf > 0 ? averageBookAudioMinutes / avgRtf : 0
+
+      return {
+        model,
+        bookCount: stats.bookCount,
+        avgRtf: Math.round(avgRtf * 100) / 100,
+        medianRtf: Math.round(medianRtf * 100) / 100,
+        minutesPerAudioHour: Math.round(minutesPerAudioHour * 10) / 10,
+        estimatedAverageBookMinutes: Math.round(estimatedAverageBookMinutes * 10) / 10,
+        totalHours: Math.round((stats.totalAudioMinutes / 60) * 10) / 10,
+      }
+    })
+    .sort((a, b) => b.bookCount - a.bookCount || a.model.localeCompare(b.model))
 
   // --- Pipeline Health ---
   const stages = ["Download", "PrepareAudio", "Transcribe"] as const
@@ -331,6 +344,9 @@ export async function getTranscriptionStats(): Promise<StatsData> {
       audioHoursProcessed: Math.round(audioHoursProcessed * 10) / 10,
       medianRtf: Math.round(medianRtf * 100) / 100,
       successRate: Math.round(successRate * 10) / 10,
+    },
+    benchmarks: {
+      averageBookAudioMinutes: Math.round(averageBookAudioMinutes * 10) / 10,
     },
     processingBreakdown,
     transcriptionSpeed,
