@@ -11,7 +11,7 @@ export interface StatsData {
     successRate: number
   }
   benchmarks: {
-    averageBookAudioMinutes: number
+    medianBookAudioMinutes: number
   }
   processingBreakdown: Array<{
     bookId: string
@@ -34,7 +34,7 @@ export interface StatsData {
     avgRtf: number
     medianRtf: number
     minutesPerAudioHour: number
-    estimatedAverageBookMinutes: number
+    estimatedMedianBookMinutes: number
     totalHours: number
   }>
   pipelineHealth: {
@@ -119,6 +119,10 @@ export async function getTranscriptionStats(): Promise<StatsData> {
   const averageBookAudioMinutes = books.length > 0
     ? books.reduce((sum, book) => sum + ((durationMap.get(book.id) ?? 0) / 60), 0) / books.length
     : 0
+  const bookAudioMinutes = books
+    .map(book => (durationMap.get(book.id) ?? 0) / 60)
+    .filter(minutes => minutes > 0)
+  const medianBookAudioMinutes = median(bookAudioMinutes)
 
   const audioHoursProcessed =
     books.reduce((sum, book) => {
@@ -253,7 +257,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
       const avgRtf = stats.rtfs.reduce((sum, value) => sum + value, 0) / stats.rtfs.length
       const medianRtf = median(stats.rtfs)
       const minutesPerAudioHour = avgRtf > 0 ? 60 / avgRtf : 0
-      const estimatedAverageBookMinutes = avgRtf > 0 ? averageBookAudioMinutes / avgRtf : 0
+      const estimatedMedianBookMinutes = avgRtf > 0 ? medianBookAudioMinutes / avgRtf : 0
 
       return {
         model,
@@ -261,7 +265,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
         avgRtf: Math.round(avgRtf * 100) / 100,
         medianRtf: Math.round(medianRtf * 100) / 100,
         minutesPerAudioHour: Math.round(minutesPerAudioHour * 10) / 10,
-        estimatedAverageBookMinutes: Math.round(estimatedAverageBookMinutes * 10) / 10,
+        estimatedMedianBookMinutes: Math.round(estimatedMedianBookMinutes * 10) / 10,
         totalHours: Math.round((stats.totalAudioMinutes / 60) * 10) / 10,
       }
     })
@@ -346,7 +350,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
       successRate: Math.round(successRate * 10) / 10,
     },
     benchmarks: {
-      averageBookAudioMinutes: Math.round(averageBookAudioMinutes * 10) / 10,
+      medianBookAudioMinutes: Math.round(medianBookAudioMinutes * 10) / 10,
     },
     processingBreakdown,
     transcriptionSpeed,

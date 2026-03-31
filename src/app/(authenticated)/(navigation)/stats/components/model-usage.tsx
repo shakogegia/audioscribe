@@ -77,7 +77,7 @@ export function ModelUsage({ data }: { data: StatsData["modelUsage"] }) {
                     {formatDuration(row.minutesPerAudioHour)}
                   </TableCell>
                   <TableCell className="text-right font-mono tabular-nums">
-                    {formatDuration(row.estimatedAverageBookMinutes)}
+                    {formatDuration(row.estimatedMedianBookMinutes)}
                   </TableCell>
                   <TableCell className="text-right font-mono tabular-nums">{row.totalHours}h</TableCell>
                 </TableRow>

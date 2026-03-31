@@ -45,7 +45,7 @@ export default async function StatsPage() {
           <ModelUsage data={stats.modelUsage} />
           <EstimateWithModel
             data={stats.modelUsage}
-            averageBookAudioMinutes={stats.benchmarks.averageBookAudioMinutes}
+            medianBookAudioMinutes={stats.benchmarks.medianBookAudioMinutes}
           />
         </div>
         <div>

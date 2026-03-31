@@ -8,10 +8,10 @@ import { formatDuration } from "./format-duration"
 
 interface EstimateWithModelProps {
   data: StatsData["modelUsage"]
-  averageBookAudioMinutes: number
+  medianBookAudioMinutes: number
 }
 
-export function EstimateWithModel({ data, averageBookAudioMinutes }: EstimateWithModelProps) {
+export function EstimateWithModel({ data, medianBookAudioMinutes }: EstimateWithModelProps) {
   if (data.length === 0) return null
 
   const [selectedModel, setSelectedModel] = useState(data[0]?.model ?? "")
@@ -46,14 +46,14 @@ export function EstimateWithModel({ data, averageBookAudioMinutes }: EstimateWit
 
         <div className="rounded-xl border bg-muted/20 p-4">
           <div className="text-sm text-muted-foreground">
-            Average tracked book length: {formatDuration(averageBookAudioMinutes)}
+            Typical tracked book length: {formatDuration(medianBookAudioMinutes)}
           </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg border bg-background/80 p-4">
-            <div className="text-xs text-muted-foreground">Average book</div>
-            <div className="mt-1 text-2xl font-semibold">{formatDuration(selectedRow.estimatedAverageBookMinutes)}</div>
+            <div className="text-xs text-muted-foreground">Typical book</div>
+            <div className="mt-1 text-2xl font-semibold">{formatDuration(selectedRow.estimatedMedianBookMinutes)}</div>
             <div className="mt-1 text-xs text-muted-foreground">Estimated conversion time</div>
           </div>
           <div className="rounded-lg border bg-background/80 p-4">
