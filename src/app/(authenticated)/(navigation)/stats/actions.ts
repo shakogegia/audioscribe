@@ -68,7 +68,6 @@ export async function getTranscriptionStats(): Promise<StatsData> {
     where: { transcribed: true },
     include: {
       jobs: true,
-      audioChunks: true,
     },
     orderBy: { createdAt: "desc" },
     take: 50,
@@ -76,15 +75,18 @@ export async function getTranscriptionStats(): Promise<StatsData> {
 
   const bookIds = books.map(b => b.id)
 
-  // Fetch book titles from audiobookshelf API
+  // Fetch book titles and durations from Audiobookshelf API
+  // AudioChunk.duration from ffprobe is unreliable for stream-copied segments,
+  // so we use the authoritative duration from Audiobookshelf instead.
   let titleMap = new Map<string, string>()
+  let durationMap = new Map<string, number>() // bookId → duration in seconds
   try {
     const libraryItems = await getBatchLibraryItems(bookIds)
     for (const item of libraryItems) {
       titleMap.set(item.id, item.title)
+      durationMap.set(item.id, item.duration)
     }
   } catch {
-    // Fall back to truncated IDs
     for (const id of bookIds) {
       titleMap.set(id, id.slice(0, 8) + "...")
     }
@@ -100,7 +102,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
 
   const audioHoursProcessed =
     books.reduce((sum, book) => {
-      const totalSeconds = book.audioChunks.reduce((s, c) => s + c.duration, 0)
+      const totalSeconds = (durationMap.get(book.id) ?? 0)
       return sum + totalSeconds
     }, 0) / 3600
 
@@ -116,7 +118,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
     if (totalTranscribeMinutes === 0) continue
 
     const audioDurationMinutes =
-      book.audioChunks.reduce((s, c) => s + c.duration, 0) / 60
+      (durationMap.get(book.id) ?? 0) / 60
     const rtf = audioDurationMinutes / totalTranscribeMinutes
     bookRtfs.push(rtf)
   }
@@ -172,7 +174,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
       if (totalTranscribeMinutes === 0) return []
 
       const audioDurationMinutes =
-        book.audioChunks.reduce((s, c) => s + c.duration, 0) / 60
+        (durationMap.get(book.id) ?? 0) / 60
       const rtf = audioDurationMinutes / totalTranscribeMinutes
 
       // Get model from first transcribe job metadata
@@ -221,7 +223,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
     if (totalTranscribeMinutes === 0) continue
 
     const audioDurationMinutes =
-      book.audioChunks.reduce((s, c) => s + c.duration, 0) / 60
+      (durationMap.get(book.id) ?? 0) / 60
     const rtf = audioDurationMinutes / totalTranscribeMinutes
 
     let model = "unknown"
@@ -312,7 +314,7 @@ export async function getTranscriptionStats(): Promise<StatsData> {
     }
     const entry = activityMap.get(period)!
     entry.booksProcessed += 1
-    entry.audioSeconds += book.audioChunks.reduce((s, c) => s + c.duration, 0)
+    entry.audioSeconds += (durationMap.get(book.id) ?? 0)
   }
 
   const activity = Array.from(activityMap.entries())
