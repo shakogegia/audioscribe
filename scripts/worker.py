@@ -1,5 +1,7 @@
 """AudioScribe Python Worker — polls SQLite Job table and executes pipeline stages."""
 
+import multiprocessing as mp
+import queue
 import signal
 import time
 import traceback
@@ -14,6 +16,10 @@ HANDLERS = {
 }
 
 running = True
+
+
+class JobTimeoutError(Exception):
+    pass
 
 
 def _format_duration(seconds: int) -> str:
@@ -33,6 +39,70 @@ def shutdown(signum, frame):
     running = False
 
 
+def _run_handler_in_subprocess(job_type: str, job: dict, result_queue):
+    """Execute a job handler in an isolated process and return the result via queue."""
+    handler = HANDLERS.get(job_type)
+    if not handler:
+        result_queue.put({
+            "ok": False,
+            "error_type": "RuntimeError",
+            "error": f"Unknown job type: {job_type}",
+            "traceback": "",
+        })
+        return
+
+    try:
+        handler(job)
+        result_queue.put({"ok": True})
+    except Exception as e:
+        result_queue.put({
+            "ok": False,
+            "error_type": type(e).__name__,
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        })
+
+
+def _run_transcribe_job(job: dict):
+    """Run transcription in a child process so hung native calls can be terminated."""
+    timeout_seconds = transcribe.get_timeout_seconds(job)
+    ctx = mp.get_context("spawn")
+    result_queue = ctx.Queue()
+    process = ctx.Process(
+        target=_run_handler_in_subprocess,
+        args=("Transcribe", job, result_queue),
+    )
+
+    process.start()
+    process.join(timeout=timeout_seconds)
+
+    if process.is_alive():
+        print(
+            f"[Worker] Transcribe chunk {job['chunkIndex']} for book {job['bookId']} "
+            f"timed out after {timeout_seconds}s, terminating subprocess..."
+        )
+        process.terminate()
+        process.join(10)
+        if process.is_alive():
+            process.kill()
+            process.join()
+        raise JobTimeoutError(f"Transcription timed out after {timeout_seconds}s")
+
+    try:
+        result = result_queue.get_nowait()
+    except queue.Empty:
+        if process.exitcode == 0:
+            return
+        raise RuntimeError(f"Transcribe subprocess exited with code {process.exitcode}")
+
+    if result["ok"]:
+        return
+
+    if result["traceback"]:
+        print(result["traceback"], end="")
+    raise RuntimeError(f"{result['error_type']}: {result['error']}")
+
+
 def main():
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
@@ -49,7 +119,15 @@ def main():
     db.recover_stale_jobs(timeout_minutes=5)
     print("[Worker] Recovered stale jobs, polling for work...")
 
+    last_recovery = time.time()
+
     while running:
+        # Periodically recover jobs stuck in Running (e.g. after a hang/crash)
+        now = time.time()
+        if now - last_recovery > 60:
+            db.recover_stale_jobs(timeout_minutes=5)
+            last_recovery = now
+
         job = db.get_next_pending_job()
         if not job:
             time.sleep(2)
@@ -70,7 +148,10 @@ def main():
         db.claim_job(job_id)
 
         try:
-            handler(job)
+            if job_type == "Transcribe":
+                _run_transcribe_job(job)
+            else:
+                handler(job)
             db.complete_job(job_id)
             print(f"[Worker] Completed {job_type}{chunk_info} for book {book_id}")
 

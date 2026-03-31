@@ -1,17 +1,8 @@
 """Transcribe audio chunks using faster-whisper."""
 
 import json
-import signal
 from faster_whisper import WhisperModel
 from scripts.lib import config, db
-
-
-class TranscriptionTimeout(Exception):
-    pass
-
-
-def _timeout_handler(signum, frame):
-    raise TranscriptionTimeout("Transcription timed out")
 
 _model_cache: dict[str, WhisperModel] = {}
 
@@ -22,6 +13,16 @@ def get_model(model_name: str, compute_type: str) -> WhisperModel:
     if cache_key not in _model_cache:
         _model_cache[cache_key] = WhisperModel(model_name, device="auto", compute_type=compute_type)
     return _model_cache[cache_key]
+
+
+def get_timeout_seconds(job: dict) -> int:
+    """Calculate a chunk-specific timeout for transcription."""
+    chunk = db.get_audio_chunk(job["bookId"], job["chunkIndex"])
+    if not chunk:
+        raise RuntimeError(f"AudioChunk not found: book={job['bookId']} chunk={job['chunkIndex']}")
+
+    chunk_duration = chunk["duration"]
+    return max(int(chunk_duration * 10), 120)
 
 
 def run(job: dict):
@@ -50,9 +51,6 @@ def run(job: dict):
 
     chunk_duration = chunk["duration"]  # seconds
 
-    # Timeout: allow 10x real-time or 120s minimum, whichever is greater
-    timeout_seconds = max(int(chunk_duration * 10), 120)
-
     segments_iter, info = model.transcribe(
         chunk["filePath"],
         beam_size=5,
@@ -60,32 +58,22 @@ def run(job: dict):
         vad_filter=True,
     )
 
-    # Stream segments from the generator — progress based on timestamp vs chunk duration
-    # Use a timeout to prevent hanging on silent/problematic last chunks
+    # Stream segments from the generator — progress based on timestamp vs chunk duration.
+    # Timeout enforcement lives in the worker process so a hung C call can be terminated.
     transcript_segments = []
-    prev_handler = signal.signal(signal.SIGALRM, _timeout_handler)
-    try:
-        signal.alarm(timeout_seconds)
-        for segment in segments_iter:
-            start_ms = chunk_start_ms + int(segment.start * 1000)
-            end_ms = chunk_start_ms + int(segment.end * 1000)
+    for segment in segments_iter:
+        start_ms = chunk_start_ms + int(segment.start * 1000)
+        end_ms = chunk_start_ms + int(segment.end * 1000)
 
-            transcript_segments.append({
-                "text": segment.text.strip(),
-                "startTime": start_ms,
-                "endTime": end_ms,
-            })
+        transcript_segments.append({
+            "text": segment.text.strip(),
+            "startTime": start_ms,
+            "endTime": end_ms,
+        })
 
-            # Progress based on how far into the chunk we've transcribed
-            if chunk_duration > 0:
-                progress = min(round((segment.end / chunk_duration) * 100, 2), 99)
-                db.update_job_progress(job["id"], progress)
-        signal.alarm(0)
-    except TranscriptionTimeout:
-        signal.alarm(0)
-        print(f"[Transcribe] Timeout on chunk {chunk_index} for book {book_id} after {timeout_seconds}s — saving partial results")
-    finally:
-        signal.signal(signal.SIGALRM, prev_handler)
+        if chunk_duration > 0:
+            progress = min(round((segment.end / chunk_duration) * 100, 2), 99)
+            db.update_job_progress(job["id"], progress)
 
     db.save_transcript_segments(book_id, model_name, transcript_segments)
 

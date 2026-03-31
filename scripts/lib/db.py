@@ -12,13 +12,24 @@ def get_next_pending_job():
     """
     db = get_db()
     try:
-        # Find a book that already has non-pending jobs (in progress)
+        # Continue the currently running book first.
         active = db.execute(
-            """SELECT DISTINCT bookId FROM Job
-               WHERE status IN ('Running', 'Completed')
-               AND bookId IN (SELECT DISTINCT bookId FROM Job WHERE status = 'Pending')
+            """SELECT bookId FROM Job
+               WHERE status = 'Running'
+               ORDER BY startedAt ASC, createdAt ASC
                LIMIT 1""",
         ).fetchone()
+
+        if not active:
+            # If nothing is actively running, continue the oldest partially completed book.
+            active = db.execute(
+                """SELECT bookId FROM Job
+                   WHERE bookId IN (SELECT DISTINCT bookId FROM Job WHERE status = 'Pending')
+                   GROUP BY bookId
+                   HAVING SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) > 0
+                   ORDER BY MIN(createdAt) ASC
+                   LIMIT 1""",
+            ).fetchone()
 
         if active:
             # Continue working on the in-progress book
