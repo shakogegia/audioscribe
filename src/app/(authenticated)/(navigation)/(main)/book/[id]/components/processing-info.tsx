@@ -8,6 +8,7 @@ import {
   CircleCheckIcon,
   CircleDashedIcon,
   CircleXIcon,
+  ClockIcon,
   InfoIcon,
   Loader2Icon,
   RefreshCcwIcon,
@@ -41,6 +42,7 @@ type ProgressResponse = {
   stages: StageInfo[]
   currentStage: StageInfo | null
   book: Book | null
+  queued: boolean
 }
 
 export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
@@ -118,13 +120,23 @@ export function ProcessingInfo({ book, revalidate }: ProcessingInfoProps) {
   return (
     <div className="mx-auto w-full">
       <div className="grid w-full max-w-xl items-start gap-8 mx-auto">
-        <Alert>
-          <InfoIcon />
-          <AlertTitle>Book is being processed</AlertTitle>
-          <AlertDescription>
-            Book is setting up and will be ready in a few minutes. <br /> You can leave this page and come back later.
-          </AlertDescription>
-        </Alert>
+        {data?.queued ? (
+          <Alert>
+            <ClockIcon />
+            <AlertTitle>Queued</AlertTitle>
+            <AlertDescription>
+              Another book is currently being processed. This book will start automatically once it&apos;s done.
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert>
+            <InfoIcon />
+            <AlertTitle>Book is being processed</AlertTitle>
+            <AlertDescription>
+              Book is setting up and will be ready in a few minutes. <br /> You can leave this page and come back later.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <div className="flex flex-col gap-2">
           {!data ? (

@@ -67,9 +67,20 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     }))
 
     const currentStage = stages.find(s => s.status === "Running") || null
+
+    // Check if this book is queued behind another book
+    const allPending = jobs.length > 0 && jobs.every(j => j.status === JobStatus.Pending)
+    let queued = false
+    if (allPending) {
+      const runningJob = await prisma.job.findFirst({
+        where: { status: JobStatus.Running, bookId: { not: bookId } },
+      })
+      queued = !!runningJob
+    }
+
     const book = await prisma.book.findUnique({ where: { id: bookId } })
 
-    return NextResponse.json({ stages, currentStage, book })
+    return NextResponse.json({ stages, currentStage, book, queued })
   } catch (error) {
     console.error("Setup progress API error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
