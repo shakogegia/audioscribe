@@ -44,6 +44,7 @@ COPY --from=build /app/package.json ./
 COPY --from=build /app/public ./public
 
 # Copy runtime source files
+COPY src/prompts ./src/prompts
 COPY prisma ./prisma
 COPY prisma.config.ts ./
 COPY scripts ./scripts
