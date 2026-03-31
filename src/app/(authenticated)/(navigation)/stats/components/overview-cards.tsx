@@ -15,7 +15,7 @@ export function OverviewCards({ data }: OverviewCardsProps) {
           <BookOpenIcon className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data.booksTranscribed}</div>
+          <div className="text-2xl font-bold font-mono tabular-nums">{data.booksTranscribed}</div>
         </CardContent>
       </Card>
 
@@ -25,7 +25,7 @@ export function OverviewCards({ data }: OverviewCardsProps) {
           <ClockIcon className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data.audioHoursProcessed}h</div>
+          <div className="text-2xl font-bold font-mono tabular-nums">{data.audioHoursProcessed}h</div>
         </CardContent>
       </Card>
 
@@ -35,7 +35,7 @@ export function OverviewCards({ data }: OverviewCardsProps) {
           <GaugeIcon className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data.medianRtf}x</div>
+          <div className="text-2xl font-bold font-mono tabular-nums">{data.medianRtf}x</div>
           {data.medianRtf > 0 && (
             <CardDescription>
               1h audio in {Math.round(60 / data.medianRtf)}min
@@ -50,7 +50,7 @@ export function OverviewCards({ data }: OverviewCardsProps) {
           <ShieldCheckIcon className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data.successRate}%</div>
+          <div className="text-2xl font-bold font-mono tabular-nums">{data.successRate}%</div>
         </CardContent>
       </Card>
     </div>

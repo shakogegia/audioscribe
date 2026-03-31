@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { StatsData } from "../actions"
+import { formatDuration } from "./format-duration"
 
 export function TranscriptionSpeedChart({ data }: { data: StatsData["transcriptionSpeed"] }) {
   if (data.length === 0) return null
@@ -22,8 +23,8 @@ export function TranscriptionSpeedChart({ data }: { data: StatsData["transcripti
             <div key={entry.bookId} className="space-y-1.5">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium truncate max-w-[200px]">{entry.bookTitle}</span>
-                <span className="text-muted-foreground text-xs">
-                  {entry.rtf}x — {entry.audioDuration}m in {entry.processingTime}m
+                <span className="text-muted-foreground text-xs font-mono tabular-nums">
+                  {entry.rtf}x — {formatDuration(entry.audioDuration)} in {formatDuration(entry.processingTime)}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -33,7 +34,7 @@ export function TranscriptionSpeedChart({ data }: { data: StatsData["transcripti
                     style={{ width: `${barWidth}%` }}
                   />
                 </div>
-                <span className="text-xs font-medium w-10 text-right">{entry.rtf}x</span>
+                <span className="text-xs font-medium font-mono tabular-nums w-10 text-right">{entry.rtf}x</span>
               </div>
               <div className="text-xs text-muted-foreground">{entry.model}</div>
             </div>

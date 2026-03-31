@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import type { StatsData } from "../actions"
+import { formatDuration } from "./format-duration"
 
 const STAGE_COLORS = {
   download: "bg-[var(--chart-1)]",
@@ -33,7 +34,7 @@ export function ProcessingBreakdownChart({ data }: { data: StatsData["processing
             <div key={book.bookId} className="space-y-1.5">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium truncate max-w-[200px]">{book.bookTitle}</span>
-                <span className="text-muted-foreground text-xs">{total.toFixed(1)}m total</span>
+                <span className="text-muted-foreground text-xs font-mono tabular-nums">{formatDuration(total)} total</span>
               </div>
               <div className="flex h-3 w-full overflow-hidden rounded-full bg-muted">
                 {(["download", "prepare", "transcribe"] as const).map(stage => {
@@ -44,7 +45,7 @@ export function ProcessingBreakdownChart({ data }: { data: StatsData["processing
                       key={stage}
                       className={`${STAGE_COLORS[stage]} h-full transition-all`}
                       style={{ width: `${pct}%` }}
-                      title={`${STAGE_LABELS[stage]}: ${book[stage].toFixed(1)}m`}
+                      title={`${STAGE_LABELS[stage]}: ${formatDuration(book[stage])}`}
                     />
                   )
                 })}

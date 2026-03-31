@@ -66,10 +66,10 @@ export function ModelUsage({ data }: { data: StatsData["modelUsage"] }) {
             {data.map(row => (
               <TableRow key={row.model}>
                 <TableCell className="font-medium">{row.model}</TableCell>
-                <TableCell className="text-right">{row.bookCount}</TableCell>
-                <TableCell className="text-right">{row.avgRtf}x</TableCell>
-                <TableCell className="text-right">{row.medianRtf}x</TableCell>
-                <TableCell className="text-right">{row.totalHours}h</TableCell>
+                <TableCell className="text-right font-mono tabular-nums">{row.bookCount}</TableCell>
+                <TableCell className="text-right font-mono tabular-nums">{row.avgRtf}x</TableCell>
+                <TableCell className="text-right font-mono tabular-nums">{row.medianRtf}x</TableCell>
+                <TableCell className="text-right font-mono tabular-nums">{row.totalHours}h</TableCell>
               </TableRow>
             ))}
           </TableBody>
