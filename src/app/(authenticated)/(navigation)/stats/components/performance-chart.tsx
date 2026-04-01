@@ -30,10 +30,14 @@ export function PerformanceChart({
 
   if (breakdown.length === 0 && speed.length === 0) return null
 
-  const totalProcessingMinutes = breakdown.reduce(
-    (sum, b) => sum + b.download + b.prepare + b.transcribe,
-    0
+  const sortedBreakdown = React.useMemo(
+    () => [...breakdown].sort((a, b) => (b.download + b.prepare + b.transcribe) - (a.download + a.prepare + a.transcribe)),
+    [breakdown]
   )
+
+  const sortedSpeed = React.useMemo(() => [...speed].sort((a, b) => b.rtf - a.rtf), [speed])
+
+  const totalProcessingMinutes = breakdown.reduce((sum, b) => sum + b.download + b.prepare + b.transcribe, 0)
 
   const medianRtf = React.useMemo(() => {
     if (speed.length === 0) return 0
@@ -48,9 +52,7 @@ export function PerformanceChart({
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-4">
           <CardTitle>Performance</CardTitle>
           <CardDescription>
-            {activeChart === "breakdown"
-              ? "Processing time per stage"
-              : "Real-Time Factor (higher = faster)"}
+            {activeChart === "breakdown" ? "Processing time per stage" : "Real-Time Factor (higher = faster)"}
           </CardDescription>
         </div>
         <div className="flex">
@@ -59,7 +61,7 @@ export function PerformanceChart({
               { key: "breakdown", label: "Total Time", value: formatDuration(totalProcessingMinutes) },
               { key: "speed", label: "Median RTF", value: `${medianRtf}x` },
             ] as const
-          ).map((item) => (
+          ).map(item => (
             <button
               key={item.key}
               data-active={activeChart === item.key}
@@ -67,9 +69,7 @@ export function PerformanceChart({
               onClick={() => setActiveChart(item.key)}
             >
               <span className="text-xs text-muted-foreground">{item.label}</span>
-              <span className="text-lg font-bold leading-none sm:text-3xl">
-                {item.value}
-              </span>
+              <span className="text-lg font-bold leading-none sm:text-3xl whitespace-nowrap">{item.value}</span>
             </button>
           ))}
         </div>
@@ -77,7 +77,7 @@ export function PerformanceChart({
       <CardContent className="px-2 sm:p-6">
         {activeChart === "breakdown" ? (
           <ChartContainer config={breakdownConfig} className="!aspect-auto w-full" style={{ height: 250 }}>
-            <BarChart data={breakdown} margin={{ left: 12, right: 12 }}>
+            <BarChart data={sortedBreakdown} margin={{ left: 12, right: 12 }}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="bookTitle"
@@ -85,15 +85,13 @@ export function PerformanceChart({
                 axisLine={false}
                 tickMargin={8}
                 minTickGap={32}
-                tickFormatter={(value: string) =>
-                  value.length > 12 ? value.slice(0, 12) + "..." : value
-                }
+                tickFormatter={(value: string) => (value.length > 12 ? value.slice(0, 12) + "..." : value)}
               />
               <ChartTooltip
                 content={
                   <ChartTooltipContent
                     className="min-w-44"
-                    labelFormatter={(value) => String(value)}
+                    labelFormatter={value => String(value)}
                     formatter={(value, name) => {
                       const config = breakdownConfig[name as keyof typeof breakdownConfig]
                       return (
@@ -119,7 +117,7 @@ export function PerformanceChart({
           </ChartContainer>
         ) : (
           <ChartContainer config={speedConfig} className="!aspect-auto w-full" style={{ height: 250 }}>
-            <BarChart data={speed} margin={{ left: 12, right: 12 }}>
+            <BarChart data={sortedSpeed} margin={{ left: 12, right: 12 }}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="bookTitle"
@@ -127,15 +125,13 @@ export function PerformanceChart({
                 axisLine={false}
                 tickMargin={8}
                 minTickGap={32}
-                tickFormatter={(value: string) =>
-                  value.length > 12 ? value.slice(0, 12) + "..." : value
-                }
+                tickFormatter={(value: string) => (value.length > 12 ? value.slice(0, 12) + "..." : value)}
               />
               <ChartTooltip
                 content={
                   <ChartTooltipContent
                     className="min-w-44"
-                    labelFormatter={(value) => String(value)}
+                    labelFormatter={value => String(value)}
                     formatter={(value, name, item) => {
                       const entry = item.payload as StatsData["transcriptionSpeed"][number]
                       return (
@@ -146,12 +142,11 @@ export function PerformanceChart({
                               style={{ backgroundColor: "var(--chart-1)" }}
                             />
                             <span className="text-muted-foreground">RTF</span>
-                            <span className="ml-auto font-mono font-medium tabular-nums">
-                              {entry.rtf}x
-                            </span>
+                            <span className="ml-auto font-mono font-medium tabular-nums">{entry.rtf}x</span>
                           </div>
                           <div className="text-xs text-muted-foreground pl-[18px]">
-                            {formatDuration(entry.audioDuration)} in {formatDuration(entry.processingTime)} &middot; {entry.model}
+                            {formatDuration(entry.audioDuration)} in {formatDuration(entry.processingTime)} &middot;{" "}
+                            {entry.model}
                           </div>
                         </div>
                       )
