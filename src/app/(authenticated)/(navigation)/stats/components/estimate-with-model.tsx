@@ -25,9 +25,7 @@ export function EstimateWithModel({ data, medianBookAudioMinutes }: EstimateWith
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <div className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            Select model
-          </div>
+          <div className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Select model</div>
           <Select value={selectedRow.model} onValueChange={setSelectedModel}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a model" />
@@ -44,10 +42,8 @@ export function EstimateWithModel({ data, medianBookAudioMinutes }: EstimateWith
           </Select>
         </div>
 
-        <div className="rounded-xl border bg-muted/20 p-4">
-          <div className="text-sm text-muted-foreground">
-            Typical tracked book length: {formatDuration(medianBookAudioMinutes)}
-          </div>
+        <div className="text-sm text-muted-foreground">
+          Typical tracked book length: {formatDuration(medianBookAudioMinutes)}
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -63,7 +59,7 @@ export function EstimateWithModel({ data, medianBookAudioMinutes }: EstimateWith
           </div>
         </div>
 
-        <div className="rounded-lg bg-muted/30 p-3 text-sm text-muted-foreground">
+        <div className="rounded-lg bg-muted/30 px-3 py-1 text-sm text-muted-foreground">
           Based on {selectedRow.bookCount} completed book{selectedRow.bookCount === 1 ? "" : "s"} with this model at an
           average speed of {selectedRow.avgRtf}x.
         </div>

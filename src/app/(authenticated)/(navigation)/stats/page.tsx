@@ -2,12 +2,10 @@ import { Hero } from "@/components/hero"
 import { BarChart3Icon } from "lucide-react"
 import { getTranscriptionStats } from "./actions"
 import { OverviewCards } from "./components/overview-cards"
-import { ProcessingBreakdownChart } from "./components/processing-breakdown-chart"
-import { TranscriptionSpeedChart } from "./components/transcription-speed-chart"
+import { PerformanceChart } from "./components/performance-chart"
 import { ModelUsage } from "./components/model-usage"
 import { EstimateWithModel } from "./components/estimate-with-model"
 import { PipelineHealth } from "./components/pipeline-health"
-import { ActivityChart } from "./components/activity-chart"
 import GradientIcon from "@/components/gradient-icon"
 
 export const dynamic = "force-dynamic"
@@ -38,20 +36,14 @@ export default async function StatsPage() {
       <div className="w-full max-w-7xl flex flex-col gap-6">
         <OverviewCards data={stats.overview} />
         <div className="grid gap-6 lg:grid-cols-2">
-          <ProcessingBreakdownChart data={stats.processingBreakdown} />
-          <TranscriptionSpeedChart data={stats.transcriptionSpeed} />
-        </div>
-        <div className="grid gap-6 lg:grid-cols-2">
           <ModelUsage data={stats.modelUsage} />
           <EstimateWithModel
             data={stats.modelUsage}
             medianBookAudioMinutes={stats.benchmarks.medianBookAudioMinutes}
           />
         </div>
-        <div>
-          <ActivityChart data={stats.activity} />
-        </div>
         <PipelineHealth data={stats.pipelineHealth} />
+        <PerformanceChart breakdown={stats.processingBreakdown} speed={stats.transcriptionSpeed} />
       </div>
     </div>
   )
