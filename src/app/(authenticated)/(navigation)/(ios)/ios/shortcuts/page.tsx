@@ -35,7 +35,7 @@ export default async function ShortcutsPage() {
           title="Summarize current chapter"
           icon={MapIcon}
           colors={["to-yellow-300", "from-yellow-500"]}
-          url="https://www.icloud.com/shortcuts/d6c11590a9044f27b927c6c7b739960e"
+          url="https://www.icloud.com/shortcuts/278dc82728784a658147ec51d013060d"
         />
       </div>
     </div>
