@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   AudioLinesIcon,
-  BarChart3Icon,
+  ChartNoAxesCombinedIcon,
   BellIcon,
   BrainCircuitIcon,
   BrainIcon,
@@ -63,7 +63,7 @@ const menuItems = [
       {
         label: "Stats",
         href: "/stats",
-        icon: BarChart3Icon,
+        icon: ChartNoAxesCombinedIcon,
       },
     ],
   },

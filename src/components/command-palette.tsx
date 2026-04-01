@@ -1,7 +1,7 @@
 import {
   AudioLinesIcon,
   BadgeInfo,
-  BarChart3Icon,
+  ChartNoAxesCombinedIcon,
   BellIcon,
   BookOpenCheckIcon,
   BrainCircuitIcon,
@@ -123,7 +123,7 @@ export function CommandPalette() {
         <CommandSeparator />
         <CommandGroup heading="Analytics">
           <CommandItem onSelect={() => navigateTo("/stats")}>
-            <BarChart3Icon />
+            <ChartNoAxesCombinedIcon />
             <span>Stats</span>
           </CommandItem>
         </CommandGroup>

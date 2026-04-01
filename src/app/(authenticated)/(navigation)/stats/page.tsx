@@ -1,5 +1,5 @@
 import { Hero } from "@/components/hero"
-import { BarChart3Icon } from "lucide-react"
+import { ChartNoAxesCombinedIcon } from "lucide-react"
 import { getTranscriptionStats } from "./actions"
 import { OverviewCards } from "./components/overview-cards"
 import { PerformanceChart } from "./components/performance-chart"
@@ -19,7 +19,7 @@ export default async function StatsPage() {
         <Hero
           title="Stats"
           description={["No transcription data yet.", "Process a book to see analytics here."]}
-          icon={<GradientIcon icon={<BarChart3Icon className="w-10 h-10 text-white" />} />}
+          icon={<GradientIcon icon={<ChartNoAxesCombinedIcon className="w-10 h-10 text-white" />} />}
         />
       </div>
     )
@@ -30,7 +30,7 @@ export default async function StatsPage() {
       <Hero
         title="Stats"
         description={["Transcription analytics and performance metrics."]}
-        icon={<GradientIcon icon={<BarChart3Icon className="w-10 h-10 text-white" />} />}
+        icon={<GradientIcon icon={<ChartNoAxesCombinedIcon className="w-10 h-10 text-white" />} />}
       />
 
       <div className="w-full max-w-7xl flex flex-col gap-6">
